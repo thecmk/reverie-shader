@@ -1,0 +1,41 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Zip the project
+        run: zip -r "Reverie Beta ${{ github.event.release.tag_name }}.zip" shaders/ LICENSE
+
+      - name: Publish to Modrinth
+        uses: Kir-Antipov/mc-publish@v3
+        with:
+          # --- Project Configuration ---
+          modrinth-id: frac8sks
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          
+          # --- Release Metadata (Pulled automatically from GitHub Release) ---
+          name: ${{ github.event.release.name }}
+          version: ${{ github.event.release.tag_name }}
+          changelog: ${{ github.event.release.body }}
+          
+          # --- Mod Configuration ---
+          version-type: alpha
+          loaders: |
+            iris
+            optifine
+          game-versions: |
+            >=1.8
+          
+          # --- File Upload ---
+          # Glob pattern to upload the main jar while excluding dev/sources/javadoc jars
+          files: "Reverie Beta ${{ github.event.release.tag_name }}.zip"
+
+          retry-attempts: 0
