@@ -20,6 +20,9 @@ jobs:
           # --- Project Configuration ---
           modrinth-id: frac8sks
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+          curseforge-id: 1248172
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           
           # --- Release Metadata (Pulled automatically from GitHub Release) ---
           name: ${{ github.event.release.name }}
@@ -27,15 +30,13 @@ jobs:
           changelog: ${{ github.event.release.body }}
           
           # --- Mod Configuration ---
-          version-type: alpha
+          version-type: release
           loaders: |
             iris
-            optifine
           game-versions: |
-            >=1.8
+            >=1.21
           
           # --- File Upload ---
-          # Glob pattern to upload the main jar while excluding dev/sources/javadoc jars
           files: "Reverie Beta ${{ github.event.release.tag_name }}.zip"
 
           retry-attempts: 0
