@@ -1,0 +1,36 @@
+name: Bug report
+description: Create a report to help us improve
+labels: ["bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! Make sure you fill it out carefully in order to have your issue fixed quicker!
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: Issue description
+      placeholder: Describe your issue here.
+    validations:
+      required: true
+  - type: textarea
+    id: mods
+    attributes:
+      label: Mod list
+      placeholder: A list of your mods (besides the ones used to load the shader). Attaching an image of your mods folder is also fine.
+  - type: checkboxes
+    id: shaderloader
+    attributes:
+      label: Shader Loader
+      description: Which loader does this issue happen with?
+      options:
+        - label: Iris
+        - label: Optifine
+  - type: textarea
+    id: f3menu
+    attributes:
+      label: F3 screenshot
+      placeholder: A screenshot with the F3 menu open. Lower your GUI scale if the text is cut off.
+    validations:
+      required: true

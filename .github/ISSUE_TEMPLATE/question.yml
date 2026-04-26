@@ -1,0 +1,16 @@
+name: Question
+description: Ask a question about the shader.
+labels: ["question"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this question!
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      placeholder: Ask your question here.
+    validations:
+      required: true
