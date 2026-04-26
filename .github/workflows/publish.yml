@@ -9,13 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       - name: Zip the project
         run: zip -r "Reverie Beta ${{ github.event.release.tag_name }}.zip" shaders/ LICENSE
 
       - name: Publish to Modrinth
-        uses: Kir-Antipov/mc-publish@v3
+        uses: Kir-Antipov/mc-publish@v3.3
         with:
           # --- Project Configuration ---
           modrinth-id: frac8sks
