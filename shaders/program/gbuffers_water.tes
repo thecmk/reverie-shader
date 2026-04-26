@@ -1,0 +1,45 @@
+in Data {
+    vec2 lmcoord;
+    vec2 texcoord;
+    vec4 glcolor;
+    flat float Id;
+    flat mat3 TBN;
+    vec3 ViewPos;
+} DataIn[];
+
+out Data {
+    vec2 lmcoord;
+    vec2 texcoord;
+    vec4 glcolor;
+    flat float Id;
+    flat mat3 TBN;
+    vec3 ViewPos;
+} DataOut;
+
+layout (triangles, fractional_even_spacing, ccw) in;
+
+#include "/lib/all_the_libs.glsl"
+#include "/generic/water.glsl"
+
+#define interpolate3(a, b, c) ((gl_TessCoord.x * a) + (gl_TessCoord.y * b) + (gl_TessCoord.z * c))
+
+void main()
+{
+    DataOut.lmcoord = interpolate3(DataIn[0].lmcoord, DataIn[1].lmcoord, DataIn[2].lmcoord);
+    DataOut.texcoord = interpolate3(DataIn[0].texcoord, DataIn[1].texcoord, DataIn[2].texcoord);
+    DataOut.glcolor = interpolate3(DataIn[0].glcolor, DataIn[1].glcolor, DataIn[2].glcolor);
+
+    DataOut.Id = (interpolate3(DataIn[0].Id, DataIn[1].Id, DataIn[2].Id));
+    DataOut.TBN = interpolate3(DataIn[0].TBN, DataIn[1].TBN, DataIn[2].TBN);
+    DataOut.ViewPos = interpolate3(DataIn[0].ViewPos, DataIn[1].ViewPos, DataIn[2].ViewPos);
+
+    if(DataOut.Id == 4) {
+        vec3 PlayerPos = view_player(DataOut.ViewPos, false);
+        vec3 WorldPos = PlayerPos + cameraPosition;           // Stops artifacts on edges of blocks... for some reason
+        WorldPos.y += (get_water_height(WorldPos)) * fract(WorldPos.y + 0.05);
+        gl_Position = gl_ProjectionMatrix * vec4(player_view(WorldPos - cameraPosition, false), 1);
+    }
+    else {
+        gl_Position = interpolate3(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_in[2].gl_Position);
+    }
+}

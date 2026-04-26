@@ -1,0 +1,44 @@
+in Data {
+    vec2 lmcoord;
+    vec2 texcoord;
+    vec4 glcolor;
+    flat float Id;
+    flat mat3 TBN;
+    vec3 ViewPos;
+} DataIn[];
+
+out Data {
+    vec2 lmcoord;
+    vec2 texcoord;
+    vec4 glcolor;
+    flat float Id;
+    flat mat3 TBN;
+    vec3 ViewPos;
+} DataOut[];
+
+layout(vertices = 3) out;
+
+#include "/lib/all_the_libs.glsl"
+
+float tessellation_level(float Depth) {
+    const float MIN_DISTANCE = 5.0;
+    const float MAX_DISTANCE = 20.0;
+    return 1+3*(1-smoothstep(MIN_DISTANCE, MAX_DISTANCE, Depth));
+}
+
+void main() {
+    gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+
+    DataOut[gl_InvocationID].lmcoord = DataIn[gl_InvocationID].lmcoord;
+    DataOut[gl_InvocationID].texcoord = DataIn[gl_InvocationID].texcoord;
+    DataOut[gl_InvocationID].glcolor = DataIn[gl_InvocationID].glcolor;
+    DataOut[gl_InvocationID].Id = DataIn[gl_InvocationID].Id;
+    DataOut[gl_InvocationID].TBN = DataIn[gl_InvocationID].TBN;
+    DataOut[gl_InvocationID].ViewPos = DataIn[gl_InvocationID].ViewPos;
+
+        gl_TessLevelOuter[0] = tessellation_level(max(gl_in[1].gl_Position.z, gl_in[2].gl_Position.z));
+        gl_TessLevelOuter[1] = tessellation_level(max(gl_in[2].gl_Position.z, gl_in[0].gl_Position.z));
+        gl_TessLevelOuter[2] = tessellation_level(max(gl_in[0].gl_Position.z, gl_in[1].gl_Position.z));
+
+        gl_TessLevelInner[0] = tessellation_level(max(gl_in[0].gl_Position.z, max(gl_in[1].gl_Position.z, gl_in[2].gl_Position.z)));
+}
