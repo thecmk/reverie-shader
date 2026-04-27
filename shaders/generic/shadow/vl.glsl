@@ -73,6 +73,34 @@ mat2x3 nether_fog(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, vec3 ScreenPos, f
 }
 #endif
 
+float get_vl_shadowing(vec3 ScreenPos, vec3 LightPos, float Dither, bool IsDH, const bool OutsideShadowDist) {
+    if(LightPos.z > 0) return 0.5;
+
+    vec3 LightPosScreen = view_screen(LightPos, IsDH, true);
+    if(LightPosScreen.xy != clamp(LightPosScreen.xy, 0, 1)) return 0.5;
+
+    // Trace
+    float LightFactor = 0;
+    vec3 Step = (LightPosScreen - ScreenPos) / 8;
+    vec3 ExpectedPos = ScreenPos + Step * Dither;
+    for (int i = 1; i <= 8; i++) {
+        float RealDepth = get_depth_solid(ExpectedPos.xy, IsDH);
+        if(OutsideShadowDist) {
+            float RealDepthL = length(screen_view(vec3(ScreenPos.xy, RealDepth), IsDH, true));
+            RealDepth = RealDepthL < shadowDistanceDH - 16 ? 1 : RealDepth;
+        }
+        LightFactor += step(1, RealDepth);
+        
+        ExpectedPos += Step;
+    }
+
+    float Falloff = min_component(abs(step(0.5, LightPosScreen.xy) - LightPosScreen.xy));
+    Falloff = smoothstep(0., 0.25, Falloff);
+
+    return mix(0.5, LightFactor / 8, Falloff);
+}
+
+
 mat2x3 do_water_vl(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, float Dither, vec3 LightColorDirect, vec3 ScreenPos, bool IsDH, const int STEP_COUNT, const bool DoRT) {
     const vec3 WATER_ABSORBTION = WaterAbsorbtion;
     const vec3 WATER_SCATTERING = WaterColor;
@@ -102,6 +130,8 @@ mat2x3 do_water_vl(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, float Dither, ve
 
     if(!DoRT) {
         float Shadow = eyeBrightnessSmooth.y / 240.0;
+        if(isEyeInWater == 1)
+            Shadow *= get_vl_shadowing(ScreenPos, sLightPosN, Dither, IsDH, false);
         if(isEyeInWater == 0)
             Shadow = texture(colortex5, ScreenPos.xy).r;
 
@@ -146,34 +176,7 @@ mat2x3 do_water_vl(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, float Dither, ve
     return mat2x3(TotalScattering, TotalTransmittance);
 }
 
-float get_vl_shadowing(vec3 ScreenPos, vec3 LightPos, float Dither, bool IsDH, const bool OutsideShadowDist) {
-    if(LightPos.z > 0) return 0.5;
-
-    vec3 LightPosScreen = view_screen(LightPos, IsDH, true);
-    if(LightPosScreen.xy != clamp(LightPosScreen.xy, 0, 1)) return 0.5;
-
-    // Trace
-    float LightFactor = 0;
-    vec3 Step = (LightPosScreen - ScreenPos) / 8;
-    vec3 ExpectedPos = ScreenPos + Step * Dither;
-    for (int i = 1; i <= 8; i++) {
-        float RealDepth = get_depth(ExpectedPos.xy, IsDH);
-        if(OutsideShadowDist) {
-            float RealDepthL = length(screen_view(vec3(ScreenPos.xy, RealDepth), IsDH, true));
-            RealDepth = RealDepthL < shadowDistanceDH - 16 ? 1 : RealDepth;
-        }
-        LightFactor += step(1, RealDepth);
-        
-        ExpectedPos += Step;
-    }
-
-    float Falloff = min_component(abs(step(0.5, LightPosScreen.xy) - LightPosScreen.xy));
-    Falloff = smoothstep(0., 0.25, Falloff);
-
-    return mix(0.5, LightFactor / 8, Falloff);
-}
-
-mat2x3 aerial_prespective_ld(vec3 StartPos, vec3 EndPos, vec3 ScreenPos, vec3 PlayerPosN, float Depth, bool IsDH) {
+mat2x3 aerial_prespective_ld(vec3 StartPos, vec3 EndPos, vec3 ScreenPos, vec3 PlayerPosN, float Dither, float Depth, const bool ScreenspaceFallback, bool IsDH) {
     vec3 WorldPos = cameraPosition + StartPos;
     if(!ray_intersect(WorldPos, StartPos, EndPos, PlayerPosN, CLOUD_UPPER_PLANE)) return mat2x3(vec3(0), vec3(1));
 
@@ -228,8 +231,10 @@ mat2x3 aerial_prespective_ld(vec3 StartPos, vec3 EndPos, vec3 ScreenPos, vec3 Pl
     if(StartPos != vec3(0)) {
         Shadowing *= texture(colortex5, ScreenPos.xy).r; // Sample shadowmap at start position when doing vl in reflections
     }
-    if(Shadowing > 1e-3) {
-        Shadowing *= get_vl_shadowing(ScreenPos, sLightPosN, dither(ScreenPos.xy * resolution, true), IsDH, false);
+    if(ScreenspaceFallback) {
+        if(Shadowing > 1e-3) {
+            Shadowing *= get_vl_shadowing(ScreenPos, sLightPosN, dither(ScreenPos.xy * resolution, true), IsDH, false);
+        }
     }
 
     vec3 Transmittance = exp(-MediumExtinction);
@@ -243,7 +248,7 @@ mat2x3 do_vl(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, vec3 ScreenPos, float 
         case 0:
             #ifdef DIMENSION_OVERWORLD
                 if(!DoRT) {
-                    return aerial_prespective_ld(StartPos, EndPos, ScreenPos, PlayerPosN, ScreenPos.z, IsDH);
+                    return aerial_prespective_ld(StartPos, EndPos, ScreenPos, PlayerPosN, Dither, ScreenPos.z, true, IsDH);
                 }
                 break;
             #else

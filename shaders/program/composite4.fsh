@@ -114,8 +114,8 @@ void main() {
             TemporalVl = temporal_upscale_vl(Pos.Screen, IsDH, ivec2(gl_FragCoord.xy), Pos.Player);
 
             // Super silly transmittance approx
-            const float MtoRratio = 0.659 / 0.939; // For len = 500m
-            const vec3 OpticalDepth = BETA_M_E * MtoRratio + BETA_R_E / MtoRratio;
+            const float MtoRratio = (0.659 + 1.156) / 0.939; // For len = 500m
+            vec3 OpticalDepth = BETA_M_E * MtoRratio + BETA_R_E / MtoRratio;
             vec3 T = exp(log(TemporalVl.a) / dot(OpticalDepth, vec3(0.33)) * OpticalDepth);
 
             Color.rgb = blend_vl(Color.rgb, mat2x3(TemporalVl.rgb, T));

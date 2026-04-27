@@ -132,7 +132,7 @@ vec3 ssr(vec3 Normal, Positions Pos, bool IsDH, float LightmapSky, float Dither)
             TerrainColor = SphereColor;
         vec3 StartPos = Pos.Player;
         vec3 EndPos = view_player(screen_view(RayPos, IsDH, true), IsDH);
-        mat2x3 Vl = aerial_prespective_ld(StartPos, EndPos, Pos.Screen, view_player(Dir, IsDH), 0, IsDH);
+        mat2x3 Vl = aerial_prespective_ld(StartPos, EndPos, Pos.Screen, view_player(Dir, IsDH), Dither, 0, false, IsDH);
         TerrainColor = blend_vl(TerrainColor, Vl); 
 
         float Dist = length(EndPos);
@@ -155,7 +155,7 @@ vec3 ssr(vec3 Normal, Positions Pos, bool IsDH, float LightmapSky, float Dither)
         #endif
 
         //SkyColor += get_stars(EndPos); // Not bright enough to be noticed
-        mat2x3 Vl = aerial_prespective_ld(StartPos, view_player(Dir * 1000, IsDH), Pos.Screen, view_player(Dir, IsDH), 0, IsDH);
+        mat2x3 Vl = aerial_prespective_ld(StartPos, view_player(Dir * 1000, IsDH), Pos.Screen, view_player(Dir, IsDH), Dither, 0, false, IsDH);
         SkyColor = blend_vl(SkyColor, Vl);
         return SkyColor * LightmapSky;
     }
