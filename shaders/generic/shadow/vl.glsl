@@ -159,10 +159,10 @@ float get_vl_shadowing(vec3 ScreenPos, vec3 LightPos, float Dither, bool IsDH, c
     for (int i = 1; i <= 8; i++) {
         float RealDepth = get_depth(ExpectedPos.xy, IsDH);
         if(OutsideShadowDist) {
-            float RealDepthL = l_depth(RealDepth, IsDH);
-            RealDepth *= step(shadowDistanceDH, RealDepthL);
+            float RealDepthL = length(screen_view(vec3(ScreenPos.xy, RealDepth), IsDH, true));
+            RealDepth = RealDepthL < shadowDistanceDH - 16 ? 1 : RealDepth;
         }
-        LightFactor += 1 - step(1, RealDepth);
+        LightFactor += step(1, RealDepth);
         
         ExpectedPos += Step;
     }
@@ -170,7 +170,7 @@ float get_vl_shadowing(vec3 ScreenPos, vec3 LightPos, float Dither, bool IsDH, c
     float Falloff = min_component(abs(step(0.5, LightPosScreen.xy) - LightPosScreen.xy));
     Falloff = smoothstep(0., 0.25, Falloff);
 
-    return mix(0.5, 1 - LightFactor / 8, Falloff);
+    return mix(0.5, LightFactor / 8, Falloff);
 }
 
 mat2x3 aerial_prespective_ld(vec3 StartPos, vec3 EndPos, vec3 ScreenPos, vec3 PlayerPosN, float Depth, bool IsDH) {
