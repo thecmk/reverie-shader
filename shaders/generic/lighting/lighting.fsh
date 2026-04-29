@@ -4,7 +4,7 @@ vec3 filter_floodfill(sampler3D Sampler, vec3 PlayerPos, vec3 FragPos, vec3 Norm
     vec3 Pos = FragPos / voxelDistance / vec3(2, 1, 2); 
     vec3 C = texture(Sampler, Pos).rgb; // Center
 
-    return C;
+    return sqrt(C);
 }
 
 vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoord, bool IsHand, out vec4 ShadowBuf) {
@@ -40,18 +40,18 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         NdotL *= Mat.Lightmap.y;
     #endif
 
-    #ifdef DIMENSION_OVERWORLD
-        #ifdef DEFERRED
-            #ifdef SPATIAL_DENOISING
-                vec4 GIDenoise;
-                if(IsHand) {
-                    GIDenoise = vec4(0, 0, 0, 0);
-                } else {
-                    GIDenoise = gi_denoise(colortex3, texcoord, vec2(0, 1), Pos.Screen.z, IsDH);
-                }
-            #endif
+    #ifdef DEFERRED
+        #ifdef SPATIAL_DENOISING
+            vec4 GIDenoise;
+            if(IsHand) {
+                GIDenoise = vec4(0, 0, 0, 0);
+            } else {
+                GIDenoise = gi_denoise(colortex3, texcoord, vec2(0, 1), Pos.Screen.z, IsDH);
+            }
         #endif
+    #endif
 
+    #ifdef DIMENSION_OVERWORLD
         // Ambient lighting
         vec3 BentNormal = 
         #if AO_MODE == 2
@@ -61,13 +61,6 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         float NangUp = dot(gbufferModelView[1].xyz, BentNormal) * 0.5 + 0.5;
         float NangL = -view_player(BentNormal, true).x * 0.5 + 0.5;
         vec3 SunA = texture(image0Sampler, (vec2(NangL, NangUp) * 15 * resolutionInv)).rgb; 
-
-        // Ao
-        #if AO_MODE == 2 && (defined DEFERRED)
-            SunA *= 1 - GIDenoise.a;
-        #elif AO_MODE == 1
-            SunA *= 1 - ssao(Mat.Normal, Pos.View, IsDH);
-        #endif
 
         if(lightningBoltPosition.w > 0) {
             float VdotLi = 1 - min(1, distance(lightningBoltPosition.xz, Pos.Player.xz) * 0.0025);
@@ -87,7 +80,15 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         vec3 SunA = srgb_linear(vec3(0.2, 0.1, 0.15));
     #endif
 
-    vec3 OutColor = Mat.Albedo * (SunA + LMColor * Mat.Lightmap.x);
+    SunA += LMColor * Mat.Lightmap.x;
+    // Ao
+    #if AO_MODE == 2 && (defined DEFERRED)
+        SunA *= 1 - GIDenoise.a;
+    #elif AO_MODE == 1
+        SunA *= 1 - ssao(Mat.Normal, Pos.View, IsDH);
+    #endif
+
+    vec3 OutColor = Mat.Albedo * SunA;
 
     #if (defined RSM) && (defined DIMENSION_OVERWORLD) && (defined DEFERRED)
         OutColor.rgb += GIDenoise.rgb * Mat.Albedo;

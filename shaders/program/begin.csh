@@ -34,7 +34,7 @@ void main() {
         Light += texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, 0, 1));
     }
 
-    Light = max(vec4(0), Light / 6.);
+    Light = max(vec4(0), Light / 6.1);
 
     if(frameCounter % 2 == 1) {
         imageStore(voxelImg_a, Pos, Light);
