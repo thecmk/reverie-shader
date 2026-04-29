@@ -53,7 +53,7 @@ vec3 TAA(vec3 Color, ivec2 FragCoord, vec2 Texcoord) {
     vec3 ClampedColor = neighbourhoodClipping(colortex0, Color, PrevColor, ClippingMaxColor, FragCoord);
 
     #if AA_MODE != 2
-    float blendFactor = 0.6 + 0.2 * exp(-length((PrevCoord - Texcoord) * resolution));
+    float blendFactor = 0.7 + 0.1 * exp(-length((PrevCoord - Texcoord) * resolution));
     #else
     float blendFactor = 0.9;
     #endif

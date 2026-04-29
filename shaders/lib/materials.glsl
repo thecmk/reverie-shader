@@ -112,7 +112,7 @@ vec3 get_normal(vec2 Texcoord, vec2 dCoordx, vec2 dCoordy) {
     #else
         Normal.xy = texture(normals, Texcoord.xy).xy * 2 - 1;
     #endif
-    Normal.z = sqrt(1 - dot(Normal.xy, Normal.xy));
+    Normal.z = sqrt(max(0, 1 - dot(Normal.xy, Normal.xy)));
     return Normal;
 }
 

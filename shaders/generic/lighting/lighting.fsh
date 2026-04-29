@@ -103,7 +103,6 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
     bool DoSSS = SSSS > 0;
 
     vec3 SunDirect = vec3(0);
-    bool IsMetal, IsHardcodedMetal;
     vec3 Shadow = vec3(0);
     if (NdotL > 0 || DoSSS) {
         Shadow = get_shadow(Pos.Player, Pos.View, IsDH, Mat.FlatNormal, Mat.Lightmap.y, DoSSS, ivec2(gl_FragCoord.xy));
@@ -118,7 +117,7 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
             float LHeight = sin(sunAngle * TAU); // to_player_pos(sunPosN).y;
             LightColor *= smoothstep(0.0, 0.05, abs(LHeight));
 
-            SunDirect = Mat.Albedo / PI * max(0.1, float(!IsMetal));
+            SunDirect = Mat.Albedo / PI;
             SunDirect *= LightColor * max(NdotL, 0);
 
             if (DoSSS) {
@@ -135,5 +134,5 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
     ShadowBuf.r = get_luminance(Shadow);
     ShadowBuf.gba = vec3(0);
 
-    return OutColor * max(0., float(!IsMetal));
+    return OutColor * max(0.1, float(Mat.F0 < 230.0 / 255.0));
 }
