@@ -88,19 +88,24 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         SunA *= 1 - ssao(Mat.Normal, Pos.View, IsDH);
     #endif
 
-    vec3 OutColor = Mat.Albedo * SunA;
+    vec3 OutColor = SunA;
 
     #if (defined RSM) && (defined DIMENSION_OVERWORLD) && (defined DEFERRED)
-        OutColor.rgb += GIDenoise.rgb * Mat.Albedo;
+        OutColor.rgb += GIDenoise.rgb;
     #endif
 
     float SSSS = Mat.SSS;
-    if (Mat.SSS < 64.0 / 255.0 && Mat.Lightmap.y > 0.1) {
+    if (Mat.SSS <= 64.0 / 255.0 && Mat.Lightmap.y > 0.1) {
         if (Mat.Id == MATERIAL_SSS_WEAK) SSSS = SSS_STRENGTH_WEAK;
         else if (Mat.Id >= MATERIAL_SSS_STRONG && Mat.Id <= MATERIAL_LEAVES) SSSS = SSS_STRENGTH_STRONG;
         else SSSS = 0;
+
+        float Porosity = Mat.SSS * 255.0 / 64.0;
+        Mat.Albedo *= 1 - Porosity * 0.66 * Mat.Lightmap.y;
     }
     bool DoSSS = SSSS > 0;
+
+    OutColor *= Mat.Albedo;
 
     vec3 SunDirect = vec3(0);
     vec3 Shadow = vec3(0);

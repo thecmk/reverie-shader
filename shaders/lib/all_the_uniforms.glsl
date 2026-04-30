@@ -32,6 +32,7 @@
     uniform int entityId;
     uniform ivec2 atlasSize;
     uniform vec4 lightningBoltPosition;
+    uniform float wetness;
 
     uniform sampler2D colortex0;
     uniform sampler2D colortex1;

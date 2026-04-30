@@ -68,7 +68,8 @@
     "vxRenderDistance",
     "cameraPositionFract",
     "lightningBoltPosition",
-    "windDirection"
+    "windDirection",
+    "wetness"
   ],
 
   "samplers": {
