@@ -5,6 +5,7 @@ out Data {
     flat float Id;
     flat mat3 TBN;
     vec3 ViewPos;
+    float chunkFade;
     #if (defined PBR_POM) && (defined GBUFFERS_TERRAIN)
         flat vec2 AtlasScale;
         flat vec2 AtlasOffset;
@@ -55,6 +56,8 @@ void init_generic() {
     DataOut.TBN[2] = normalize(gl_NormalMatrix * gl_Normal);
 
     DataOut.ViewPos = (gl_ModelViewMatrix * gl_Vertex).xyz;
+
+    DataOut.chunkFade = mc_chunkFade == -1 ? 1 : mc_chunkFade;
 
     #if (defined PBR_POM) && (defined GBUFFERS_TERRAIN)
         vec2 midcoord = (gl_TextureMatrix[0] *  mc_midTexCoord).xy;

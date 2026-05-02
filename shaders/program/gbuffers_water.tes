@@ -5,6 +5,7 @@ in Data {
     flat float Id;
     flat mat3 TBN;
     vec3 ViewPos;
+    float chunkFade;
 } DataIn[];
 
 out Data {
@@ -14,6 +15,7 @@ out Data {
     flat float Id;
     flat mat3 TBN;
     vec3 ViewPos;
+    float chunkFade;
 } DataOut;
 
 layout (triangles, fractional_even_spacing, ccw) in;
@@ -32,6 +34,7 @@ void main()
     DataOut.Id = (interpolate3(DataIn[0].Id, DataIn[1].Id, DataIn[2].Id));
     DataOut.TBN = interpolate3(DataIn[0].TBN, DataIn[1].TBN, DataIn[2].TBN);
     DataOut.ViewPos = interpolate3(DataIn[0].ViewPos, DataIn[1].ViewPos, DataIn[2].ViewPos);
+    DataOut.chunkFade = interpolate3(DataIn[0].chunkFade, DataIn[1].chunkFade, DataIn[2].chunkFade);
 
     if(DataOut.Id == 4) {
         vec3 PlayerPos = view_player(DataOut.ViewPos, false);

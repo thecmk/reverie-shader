@@ -36,8 +36,9 @@ void main() {
 
     float Dither = dither(gl_FragCoord.xy, true);
 
+    vec3 SkyColor = get_sky(Pos.ViewN, true, Pos.PlayerN.y); 
     if (Depth >= 1) {
-        Color.rgb = get_sky(Pos.ViewN, true, Pos.PlayerN.y);
+        Color.rgb = SkyColor;
         
             if(dot(Pos.View, gbufferModelView[1].xyz) > 0) {
                 #ifndef DIMENSION_NETHER
@@ -56,7 +57,8 @@ void main() {
         vec4 ArmorGlintData = texture(colortex10, texcoord);
         Mat.Albedo.rgb += ArmorGlintData.rgb;
 
-        Color.rgb = calc_lighting(Pos, Mat, IsDH, texcoord, IsHand, Shadow);
+        vec3 TerrainColor = calc_lighting(Pos, Mat, IsDH, texcoord, IsHand, Shadow);
+        Color.rgb = mix(SkyColor, TerrainColor, Mat.chunkFade);
         
         #ifdef VOXY
             if(texture(depthtex1, texcoord).r >= 1) {

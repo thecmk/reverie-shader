@@ -8,9 +8,9 @@
 #define MATERIAL_FLOODFILL_PASSTHROUGH 20
 
 struct MaterialProperties {
-    vec3 Albedo, Normal, FlatNormal, BentNormal;
+    vec3 Albedo, Normal, FlatNormal;
     vec2 Lightmap;
-    float SSS, Id, Smoothness, Emissiveness, F0;
+    float SSS, Id, Smoothness, Emissiveness, F0, chunkFade;
 };
 
 float hardcoded_smoothness(float Material) {
@@ -160,8 +160,7 @@ MaterialProperties unpack_material(mat2x4 GbufferData, bool IsDH) {
 
     NewMat.Lightmap = unpackUnorm2x8(Data2.x);
 
-    NewMat.BentNormal = decodeUnitVector(unpackUnorm2x8(Data2.y) * 2 - 1);
-    NewMat.BentNormal = player_view(NewMat.BentNormal, IsDH);
+    NewMat.chunkFade = Data2.y;
 
     vec2 Unpack2Z = unpackUnorm2x8(Data2.z);
     NewMat.SSS = Unpack2Z.x;
@@ -185,7 +184,7 @@ vec4 pack_material_buf1(MaterialProperties Mat, bool IsDH) {
 vec4 pack_material_buf2(MaterialProperties Mat, bool IsDH) {
     vec4 Data;
     Data.x = packUnorm2x8(clamp(Mat.Lightmap, 0, 1));
-    // Data.y contains bent normal, but is written to in deferred.fsh
+    Data.y = Mat.chunkFade;
     Data.z = packUnorm2x8(clamp(vec2(Mat.SSS, Mat.Emissiveness), 0, 1));
     Data.w = packUnorm2x8(clamp(encodeUnitVector(view_player(Mat.FlatNormal, IsDH)) * 0.5 + 0.5, 0, 1));
     return Data;

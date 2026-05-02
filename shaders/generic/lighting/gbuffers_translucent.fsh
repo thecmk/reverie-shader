@@ -6,6 +6,7 @@
         flat float Id;
         flat mat3 TBN;
         vec3 ViewPos;
+        float chunkFade;
     } DataIn;
 #else
     struct Data {
@@ -107,7 +108,8 @@ layout(location = 3) out vec4 Shadow;
     }
 
     Mat.FlatNormal = DataIn.TBN[2];
-    Mat.BentNormal = vec3(0);
+    Mat.chunkFade = DataIn.chunkFade;
+    Albedo.a *= Mat.chunkFade;
 
     Mat.Lightmap = DataIn.lmcoord;
     if(Mat.Lightmap.y > 1 / 255.0)

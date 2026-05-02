@@ -8,6 +8,7 @@ in Data {
     flat float Id;
     flat mat3 TBN;
     vec3 ViewPos;
+    float chunkFade;
     #if (defined PBR_POM) && (defined GBUFFERS_TERRAIN)
         flat vec2 AtlasScale;
         flat vec2 AtlasOffset;
@@ -144,7 +145,7 @@ layout(location = 1) out vec4 buf2;
     Mat.Normal = DataIn.TBN * PackNormal;
 
     Mat.FlatNormal = DataIn.TBN[2];
-    Mat.BentNormal = vec3(0);
+    Mat.chunkFade = DataIn.chunkFade;
 
     Mat.Lightmap = DataIn.lmcoord;
     if(Mat.Lightmap.y > 1 / 255.0)
@@ -163,4 +164,7 @@ layout(location = 1) out vec4 buf2;
 
     buf1 = pack_material_buf1(Mat, false);
     buf2 = pack_material_buf2(Mat, false);
+
+    #ifndef VOXY_TERRAIN
+
 }

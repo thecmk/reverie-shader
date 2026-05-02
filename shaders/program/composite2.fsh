@@ -82,7 +82,7 @@ void main() {
         if (Mat.Id == MATERIAL_WATER && isEyeInWater == 0) {
             vec3 PlayerPos1 = view_player(ViewPos1, IsDH);
             mat2x3 VlResult = do_water_vl(Pos.Player, PlayerPos1, Pos.PlayerN, Dither, LightColorDirect, vec3(Pos.Screen.xy, Depth1), IsDH1, 4, VL_WATER_RT);
-            Color.rgb = blend_vl(Color.rgb, VlResult);
+            Color.rgb = mix(Color.rgb, blend_vl(Color.rgb, VlResult), Mat.chunkFade);
         }
 
         bool IsMetal, IsHardcodedMetal;
@@ -123,7 +123,7 @@ void main() {
                     ReflectionBlendFactor *= Mat.Albedo;
                 }
                 
-                Color.rgb += ssr(RefNormal, Pos, IsDH, Mat.Lightmap.y, Dither) * ReflectionBlendFactor;
+                Color.rgb += ssr(RefNormal, Pos, IsDH, Mat.Lightmap.y, Dither) * ReflectionBlendFactor * Mat.chunkFade;
             }
         }
 
@@ -147,7 +147,7 @@ void main() {
                 Specular *= Mat.Albedo;
             }
             
-            Color.rgb += Specular * LightColorDirect * Shadow;
+            Color.rgb += Specular * LightColorDirect * Shadow * Mat.chunkFade;
         }
     }
     else {

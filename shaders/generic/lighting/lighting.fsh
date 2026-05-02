@@ -55,7 +55,7 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         // Ambient lighting
         vec3 BentNormal = 
         #if AO_MODE == 2
-            !IsHand ? Mat.BentNormal : 
+            !IsHand ? player_view(decodeUnitVector(texture(colortex5, texcoord).zw * 2 - 1), false) : 
         #endif
             Mat.Normal;
         float NangUp = dot(gbufferModelView[1].xyz, BentNormal) * 0.5 + 0.5;

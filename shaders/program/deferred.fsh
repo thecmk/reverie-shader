@@ -11,8 +11,8 @@ flat in vec3 LightColorDirect; // This needs to be initialized in the vertex sta
 #include "/generic/post/taa.glsl"
 
 
-/* RENDERTARGETS:2,3 */
-layout(location = 0) out vec4 GbufferData2;
+/* RENDERTARGETS:5,3 */
+layout(location = 0) out vec4 BentNormalOut;
 layout(location = 1) out vec4 GIDenoise;
 
 
@@ -20,11 +20,11 @@ void main() {
     bool IsDH;
     float Depth = get_depth(texcoord, IsDH);
 
-    GbufferData2 = texture(colortex2, texcoord);
+    BentNormalOut = texture(colortex5, texcoord);
     
     if ((Depth > 0.56) && Depth < 1) {
         Positions Pos = get_positions(texcoord, Depth, IsDH, true);
-        mat2x4 GbufferData = mat2x4(texture(colortex1, texcoord), GbufferData2);
+        mat2x4 GbufferData = mat2x4(texture(colortex1, texcoord), texture(colortex2, texcoord));
         MaterialProperties Mat = unpack_material(GbufferData, IsDH);
 
         float Gtao = 1;
@@ -33,7 +33,7 @@ void main() {
             Gtao = gtao(Pos, IsDH, Mat.Normal, BentNormal);
         #endif
 
-        GbufferData2.y = packUnorm2x8(encodeUnitVector(view_player(BentNormal, IsDH)) * 0.5 + 0.5);
+        BentNormalOut.zw = encodeUnitVector(view_player(BentNormal, IsDH)) * 0.5 + 0.5;
 
         vec3 Rsm = vec3(0);
         #ifdef RSM
