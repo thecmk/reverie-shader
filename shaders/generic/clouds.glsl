@@ -20,11 +20,11 @@ void intersect_with_cloud_plane_light(vec3 WorldPos, inout vec3 EndPos, vec3 Ray
 
 float[MULTIPLE_SCATTERING_ORDERS] calc_mie_phase(float VdotL) {
     float[MULTIPLE_SCATTERING_ORDERS] MiePhase;
-    float g = anisotropy;
-    float gBack = -anisotropy * 0.6;
+    float g = 1;
+    float gBack = -1 * 0.6;
 
     for(int i = 0; i < MULTIPLE_SCATTERING_ORDERS; i++) {
-        MiePhase[i] = cs_phase(VdotL, g) * 0.85 + cs_phase(VdotL, gBack) * 0.15;
+        MiePhase[i] = hg_draine(VdotL, g);
 
         g *= c_BASE;
         gBack *= c_BASE;
@@ -175,6 +175,7 @@ vec4 get_clouds_flat(vec3 PlayerPos, vec3 PlayerPosN, vec3 CameraPos, vec2 Dithe
         float DistToTerrain = len2(PlayerPos);
         if(DistToTerrain < len2(CloudPos)) return vec4(vec3(0), 1);
     }
+    CloudPos += CameraPos;
 
     float Density = noise_clouds_flat(CloudPos);
     if (Density <= 1e-5) {

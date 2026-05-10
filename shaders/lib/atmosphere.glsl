@@ -34,17 +34,21 @@ float hg_phase(float Mu, float g) {
 
 float draine_phase(float Mu, float g, float a) {
     float A = 1 + a * pow2(Mu);
-    float B = 1 + Mu * (1 + 2 * pow2(g)) / 3;
-    return A / B;
+    float B = 1 + a * (1 + 2 * pow2(g)) / 3;
+    return A / B * hg_phase(Mu, g);
 }
 
-float hg_draine(float Mu) {
-    const float d = 40;
+float hg_draine(float Mu, float gMsMul) {
+    const float d = 10;
     const float g_hg = exp(-0.0990567 / (d - 1.67154));
     const float g_draine = exp(-2.20679 / (d + 3.91029) - 0.428934);
     const float a = exp(3.62489 - 8.29288 / (d + 5.52825));
     const float w = exp(-0.599085 / (d - 0.641583) - 0.665888);
-    return hg_phase(Mu, g_hg) * mix(1, draine_phase(Mu, g_draine, a), w);
+    return mix(hg_phase(Mu, gMsMul * g_hg), draine_phase(Mu, gMsMul * g_draine, a), w);
+}
+
+float hg_draine(float Mu) {
+    return hg_draine(Mu, 1);
 }
 
 float density_exp(float h, float scale) {

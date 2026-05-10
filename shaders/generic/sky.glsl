@@ -63,7 +63,7 @@ vec3 get_milky_way(vec3 PlayerPosN) {
     Sample = srgb_linear(Sample);
 
     Sample *= smoothstep(0., 0.5, PlayerPosN.y);
-    return Sample * 0.01;
+    return Sample * 0.02;
 }
 
 float get_moon_texture(vec3 MoonPos, vec3 ViewPosN) {
