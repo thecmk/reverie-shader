@@ -30,6 +30,7 @@ in Data {
             vec2 LocalPos;
             vec3 TangentPos;
         #endif
+        float chunkFade;
     } DataIn;
     void map_voxy_param_to_varying(VoxyFragmentParameters param) {
         DataIn.texcoord = param.uv;
@@ -46,6 +47,7 @@ in Data {
                     ) *
             (float(int(param.face) & 1) * 2.0 - 1.0);
         DataIn.TBN = tbn_normal(player_view(normal, true));
+        DataIn.chunkFade = 1;
     }
 #endif
 vec2 dCoordx = dFdx(DataIn.texcoord), dCoordy = dFdy(DataIn.texcoord);
@@ -164,7 +166,4 @@ layout(location = 1) out vec4 buf2;
 
     buf1 = pack_material_buf1(Mat, false);
     buf2 = pack_material_buf2(Mat, false);
-
-    #ifndef VOXY_TERRAIN
-
 }

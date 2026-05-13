@@ -16,6 +16,7 @@
         float Id;
         mat3 TBN;
         vec3 ViewPos;
+        float chunkFade;
     } DataIn;
     void map_voxy_param_to_varying(VoxyFragmentParameters param) {
         DataIn.texcoord = param.uv;
@@ -32,6 +33,7 @@
                     ) *
             (float(int(param.face) & 1) * 2.0 - 1.0);
         DataIn.TBN = tbn_normal(player_view(normal, true));
+        DataIn.chunkFade = 1;
     }
 #endif
 

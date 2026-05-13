@@ -27,6 +27,10 @@ mat3 get_tbn_matrix() {
 	return tbn;
 }
 
+#ifdef DH_TERRAIN
+float mc_chunkFade = 1;
+#endif
+
 void init_generic() {
     gl_Position = ftransform();
 
