@@ -135,6 +135,10 @@ vec3 ssr(vec3 Normal, Positions Pos, bool IsDH, float LightmapSky, float Dither)
         mat2x3 Vl = aerial_prespective_ld(StartPos, EndPos, Pos.Screen, view_player(Dir, IsDH), Dither, 0, false, IsDH);
         TerrainColor = blend_vl(TerrainColor, Vl); 
 
+        vec3 SkyColor = get_sky(Dir, false, EndPos.y);
+        SkyColor = blend_vl(SkyColor, mat2x3(Vl[0], Vl[1] * 0.85));
+        TerrainColor = get_border_fog(length(EndPos), TerrainColor, SkyColor);
+
         float Dist = length(EndPos);
         #ifdef DISTANT_HORIZONS
             Dist /= dhRenderDistance;

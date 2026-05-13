@@ -65,6 +65,8 @@ option.VL_OVERWORLD_STRENGTH=Overworld Fog Strength
 option.VL_WATER_MODE=Water Fog
 option.VL_SAMPLES=Fog Quality
 
+option.BORDER_FOG=Border Fog
+
 option.AO_MODE=Ambient Occlusion
 option.AO_MODE.comment=Ambient Occlusion: darkens occluded spaces, where light cannot reach as easily. SSAO is a simpler, faster algorithm, while GTAO provides more accurate results.
 option.GTAO_SAMPLES=GTAO Samples

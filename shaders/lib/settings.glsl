@@ -129,6 +129,8 @@ const bool VL_OVERWORLD_RT = bool(VL_OVERWORLD_MODE);
 const bool VL_WATER_RT = bool(VL_WATER_MODE);
 #define VL_SAMPLES 12 // [4 8 12 16 20]
 
+// #define BORDER_FOG
+
 #define AO_MODE 2 // [0 1 2]
 #define GTAO_SAMPLES 4 // [2 3 4 5 6 7 8]
 #define RSM

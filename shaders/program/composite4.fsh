@@ -104,6 +104,7 @@ void main() {
     Positions Pos = get_positions(texcoord, Depth, IsDH, true);
     float Dither = dither(gl_FragCoord.xy, true);
 
+    vec3 SkyColor = get_sky(Pos.ViewN, false, Pos.PlayerN.y); 
     #ifdef DIMENSION_OVERWORLD
         #ifdef CLOUDS
             TemporalClouds = temporal_upscale_clouds(Pos.Screen, IsDH, ivec2(gl_FragCoord.xy), Pos.Player, colortex6);
@@ -117,14 +118,22 @@ void main() {
             const float MtoRratio = (0.659 + 1.156) / 0.939; // For len = 500m
             vec3 OpticalDepth = BETA_M_E * MtoRratio + BETA_R_E / MtoRratio;
             vec3 T = exp(log(TemporalVl.a) / dot(OpticalDepth, vec3(0.33)) * OpticalDepth);
-
             Color.rgb = blend_vl(Color.rgb, mat2x3(TemporalVl.rgb, T));
+
+            float FogAmount = clamp(fogAmount / 5, 0, 1);
+            vec4 VlScaled = vec4(TemporalVl.rgb * mix(1.1, 1.4, FogAmount), TemporalVl.a * mix(0.82, 0.5, FogAmount));
+            T = exp(log(VlScaled.a) / dot(OpticalDepth, vec3(0.33)) * OpticalDepth);
+            SkyColor = blend_vl(SkyColor.rgb, mat2x3(VlScaled.rgb, T));
         #endif
     #endif  
+
     mat2x3 VlResult = do_vl(vec3(0), Pos.Player, Pos.PlayerN, Pos.Screen, Dither, LightColorDirect, IsDH, VL_SAMPLES, VL_OVERWORLD_RT, VL_OVERWORLD_RT);
     Color.rgb = blend_vl(Color.rgb, VlResult);
+    #if VL_OVERWORLD_MODE == 0
+        SkyColor = blend_vl(SkyColor.rgb, VlResult);
+    #endif
 
-    Color.rgb = get_fog_main(Pos.Player, Color.rgb, Pos.Screen.z);
+    Color.rgb = get_fog_main(Pos.Player, Color.rgb, SkyColor, Pos.Screen.z);
 
     
     Color.rgb = purkinje_effect(Color.rgb);
