@@ -41,7 +41,7 @@ uniform sampler2D atlasTexture;
 
 void main() {
     #if AA_MODE != 0
-	Color.rgb = CAS(colortex0, texcoord);
+	Color.rgb = CAS(colortex0, texcoord, 0.0, SHARPENING_AMOUNT);
     #else
     Color.rgb = textureLod(colortex0, texcoord, 0).rgb;
     #endif

@@ -6,17 +6,17 @@
 
 // THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-vec3 CAS(sampler2D Sampler, vec2 Coords) {
+vec3 CAS(sampler2D Sampler, vec2 Coords, float LodOffset, float SharpenStrength) {
     // fetch a 3x3 neighborhood around the pixel 'e',
-    vec3 e = texture(Sampler, Coords).rgb;
-    vec3 a = textureOffset(Sampler, Coords, ivec2(-1, -1)).rgb;
-    vec3 b = textureOffset(Sampler, Coords, ivec2(0, -1)).rgb;
-    vec3 c = textureOffset(Sampler, Coords, ivec2(1, -1)).rgb;
-    vec3 d = textureOffset(Sampler, Coords, ivec2(-1, 0)).rgb;
-    vec3 f = textureOffset(Sampler, Coords, ivec2(1, 0)).rgb;
-    vec3 g = textureOffset(Sampler, Coords, ivec2(-1, 1)).rgb;
-    vec3 h = textureOffset(Sampler, Coords, ivec2(0, 1)).rgb;
-    vec3 i = textureOffset(Sampler, Coords, ivec2(1, 1)).rgb;
+    vec3 e = texture(Sampler, Coords, LodOffset).rgb;
+    vec3 a = textureOffset(Sampler, Coords, ivec2(-1, -1), LodOffset).rgb;
+    vec3 b = textureOffset(Sampler, Coords, ivec2(0, -1), LodOffset).rgb;
+    vec3 c = textureOffset(Sampler, Coords, ivec2(1, -1), LodOffset).rgb;
+    vec3 d = textureOffset(Sampler, Coords, ivec2(-1, 0), LodOffset).rgb;
+    vec3 f = textureOffset(Sampler, Coords, ivec2(1, 0), LodOffset).rgb;
+    vec3 g = textureOffset(Sampler, Coords, ivec2(-1, 1), LodOffset).rgb;
+    vec3 h = textureOffset(Sampler, Coords, ivec2(0, 1), LodOffset).rgb;
+    vec3 i = textureOffset(Sampler, Coords, ivec2(1, 1), LodOffset).rgb;
 
     // Soft min and max.
     vec3 mnRGB = min(min(min(d, e), min(f, b)), h);
@@ -34,7 +34,7 @@ vec3 CAS(sampler2D Sampler, vec2 Coords) {
 
     // Shaping amount of sharpening.
     ampRGB = inversesqrt(ampRGB);
-    float peak = 8.0 - 3.0 * SHARPENING_AMOUNT;
+    float peak = 8.0 - 3.0 * SharpenStrength;
     vec3 wRGB = -vec3(1) / (ampRGB * peak);
     vec3 rcpWeightRGB = vec3(1) / (1.0 + 4.0 * wRGB);
 
