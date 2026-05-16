@@ -2,10 +2,6 @@ float saturate(float x) {
     return clamp(x, 0, 1);
 }
 
-float random(vec2 coords) {
-    return fract(sin(dot(coords.xy, vec2(12.9898, 78.233))) * 43758.5453);
-}
-
 vec2 rotate(vec2 X, float Ang) {
     float s = sin(Ang);
     float c = cos(Ang);

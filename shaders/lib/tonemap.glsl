@@ -66,11 +66,10 @@ vec3 purkinje_effect(vec3 Color) {
 }
 
 vec3 film_grain(vec3 Color, vec2 Pos) {
+    const float SIZE = 1.0 / (512 * FILM_GRAIN_SIZE);
     float framemod60 = floor(frameTimeCounter * 60); // Grain becomes less apparent at high fps without this
-    Pos.x += fract(framemod60 / 4.14159) * 445;
-    Pos.y -= fract(framemod60 / 5.49382) * 567;
-    vec3 GrainColor = (texture(noisetex, Pos.xy / 512).rgb - 0.5) * FILM_GRAIN_STRENGTH * 0.1;
-    float BlendFactor = 1 - smoothstep(0.0, 0.3, get_luminance(Color));
+    vec3 GrainColor = (texture(noisetex, fract(Pos.xy * SIZE + framemod60 * 1.61)).rgb - 0.5) * FILM_GRAIN_STRENGTH * 0.1;
+    float BlendFactor = 1 - smoothstep(0.0, FILM_GRAIN_MAX_BRIGHTNESS, get_luminance(Color));
     return Color + GrainColor * BlendFactor;
 }
 

@@ -88,18 +88,12 @@ float noise_smoke(vec3 p) {
     return Detail * 1.5;
 }
 
-vec3 hash3(vec3 p) {
-    p = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)));
-    return fract(sin(p) * 43758.5453);
-}
+
 vec2 hash2(vec2 p) {
     p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
     return fract(sin(p) * 43758.5453);
 }
-float hash3D(vec3 p) {
-    vec3 h = hash3(p);
-    return fract(h.x + h.y * 1e-1 + h.z * 1e-2);
-}
+
 
 // https://www.shadertoy.com/view/4ssfWM
 float bayer8(vec2 a) {
@@ -132,4 +126,21 @@ vec4 blue_noise(vec2 Pos, const bool Animate) {
 
 float random3D(vec3 p) {
     return fract(sin(dot(p, vec3(12.9898, 78.233, 45.543))) * 43758.5453);
+}
+
+// The following function is licensed under the MIT license
+// Copyright © 2017,2024 Inigo Quilez
+uint hash21( uvec2 p )
+{
+    p *= uvec2(73333,7777);
+    p ^= (uvec2(3333777777)>>(p>>28));
+    uint n = p.x*p.y;
+    return n^(n>>15);
+}
+
+float hash( vec2 p )
+{
+    uint h = hash21( floatBitsToUint(p) );
+    
+    return float(h)*(1.0/float(0xffffffffU));
 }

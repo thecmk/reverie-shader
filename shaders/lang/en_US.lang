@@ -19,12 +19,17 @@ option.BLOOM_STRENGTH=Bloom Strength
 
 option.FILM_GRAIN=Film Grain
 option.FILM_GRAIN_STRENGTH=Film Grain Strength
+option.FILM_GRAIN_SIZE=Film Grain Size
+option.FILM_GRAIN_MAX_BRIGHTNESS=Film Grain Max Brightness
 
 option.LENS_FLARE=Lens Flare
 option.LENS_FLARE_STRENGTH=Lens Flare Strength
 
 option.CHROMATIC_ABERRATION=Chromatic Aberration
 option.CA_STRENGTH=CA Strength
+
+option.PIXELATION=Pixelation
+option.PIXELATION_AMOUNT=Pixelation Amount
 
 option.DOF=Depth of Field
 option.DOF_APERTURE_SIZE=Aperture Size
@@ -139,6 +144,7 @@ screen.screen_VOXELISATION=Voxelisation
 screen.screen_SEASONAL_COLORS=Seasonal Colors
 screen.screen_WIND=Wind
 screen.screen_ATMOSPHERE_PARAMS=Atmosphere
+screen.screen_CAMERA_DEGRADATION=Degradation Effects
 
 profile.TOASTER=Toaster
 profile.LOW=Low

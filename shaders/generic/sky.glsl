@@ -8,7 +8,7 @@ vec3 get_stars(vec3 PlayerPosN) {
     float Visibility = smoothstep(0.0, 0.1, StarCoord.y); // Smoothly fade out stars near the bottom of the sky
     Visibility *= max(0.5 - distance(StarCoordMid.xz, StarCoord.xz) * ACTUAL_STAR_SIZE, 0) * 2;
 
-    float StarNoise = random(StarCoordFloor.xz);
+    float StarNoise = hash(StarCoordFloor.xz);
     #ifdef RAINBOW_STARS
         vec3 StarColor = vec3(hash2(StarCoordFloor.xz), StarNoise);
     #else
@@ -18,7 +18,7 @@ vec3 get_stars(vec3 PlayerPosN) {
             vec3 StarColor = vec3(0.5);
         #endif
     #endif
-    return vec3(max(0, StarNoise - 0.993) * 50 * Visibility * StarColor);
+    return vec3(max(0, StarNoise - 0.995) * 70 * Visibility * StarColor);
 }
 
 vec3 get_aurora(vec3 PlayerPosN, float Dither) {
