@@ -16,7 +16,8 @@ void main() {
 
 	// Lens flare
 	if(LightPosFlare.z <= 1) {
-		float IsSunVisible = float(texture(depthtex1, LightPosFlare.xy).r >= 1);
+		bool _void;
+		float IsSunVisible = float(get_depth_solid(LightPosFlare.xy, _void) >= 1);
 
 		IsSunVisible *= float(all(lessThan(LightPosFlare.xy, vec2(1))));
 		IsSunVisible *= float(all(greaterThan(LightPosFlare.xy, vec2(0))));
