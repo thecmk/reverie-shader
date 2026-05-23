@@ -127,10 +127,12 @@ layout(location = 3) out vec4 Shadow;
     buf1 = pack_material_buf1(Mat, IsDH);
     buf2 = pack_material_buf2(Mat, IsDH);
 
-    if (DataIn.Id != MATERIAL_WATER) {
-        Albedo.rgb = calc_lighting(Pos, Mat, IsDH, DataIn.texcoord, false, Shadow);
-    }
-    else {
-        Shadow.r = get_shadow_unfiltered(Pos.Player, Mat.FlatNormal, Mat.Lightmap.y);
-    }
+    #ifndef GBUFFERS_DAMAGEDBLOCK
+        if (DataIn.Id != MATERIAL_WATER) {
+            Albedo.rgb = calc_lighting(Pos, Mat, IsDH, DataIn.texcoord, false, Shadow);
+        }
+        else {
+            Shadow.r = get_shadow_unfiltered(Pos.Player, Mat.FlatNormal, Mat.Lightmap.y);
+        }
+    #endif
 }

@@ -27,7 +27,7 @@ mat3 get_tbn_matrix() {
 	return tbn;
 }
 
-#ifdef DH_TERRAIN
+#if (defined DH_TERRAIN) || (MC_VERSION < 12111)
 float mc_chunkFade = 1;
 #endif
 
