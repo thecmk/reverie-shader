@@ -102,7 +102,7 @@ void main() {
     #ifdef CLOUDS
         {
             vec2 FragPos = gl_GlobalInvocationID.xy * VOLUMETRICS_RES_INV + ivec2(frameCounter * VOLUMETRICS_RES, frameCounter) % VOLUMETRICS_RES_INV;
-            vec2 texcoord = FragPos * resolutionInv;
+            vec2 texcoord = (FragPos + 0.5) * resolutionInv;
             bool IsDH;
             float Depth = max_depth_4x4(texcoord, IsDH);
             if(Depth > 0.56) {
@@ -111,11 +111,11 @@ void main() {
                 float _DepthCloud = 1e6;
                 vec4 CloudData = get_clouds(Pos.Player, Pos.PlayerN, 32, cameraPosition, true, FragPos, Depth, _DepthCloud);
 
-                // if(_DepthCloud < 1e6) {
-                //     _DepthCloud = min(farLod, _DepthCloud);
-                // }
+                if(_DepthCloud < 1e6) {
+                    _DepthCloud = _DepthCloud / farLod / 4;
+                }
 
-                _DepthCloud = reinhard(_DepthCloud);
+                // _DepthCloud = reinhard(_DepthCloud);
 
                 // Transmittance should default to 1
                 CloudData.a = 1 - CloudData.a;

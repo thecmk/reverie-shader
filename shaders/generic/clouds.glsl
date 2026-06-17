@@ -102,7 +102,7 @@ vec4 get_clouds_volumetric(vec3 PlayerPos, vec3 PlayerPosN, const int STEP_COUNT
             continue;
         }
 
-        if(DistToCloud >= 1e6) DistToCloud = len_sq(PlayerPosC);
+        if(DistToCloud >= 1e6) DistToCloud = length(PlayerPosC);
 
         Density *= DENSITY;
 
@@ -181,7 +181,7 @@ vec4 get_clouds_flat(vec3 PlayerPos, vec3 PlayerPosN, vec3 CameraPos, vec2 Dithe
     if (Density <= 1e-5) {
         return vec4(0, 0, 0, 1);
     }
-    DistToCloud = len_sq(CloudPos);
+    DistToCloud = length(CloudPos);
     Density *= DENSITY;
 
     float Transmittance = exp(-Density * 50 * CLOUD_EXTINCTION);

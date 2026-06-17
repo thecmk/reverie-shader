@@ -164,27 +164,15 @@ vec3 rgb_to_xyz(vec3 rgb) {
 
 const float shadowTexSize = 1.0/shadowMapResolution;
 
-float min_depth_4x4(vec2 texcoord, out bool IsDH) {
-    #ifdef DISTANT_HORIZONS
-        get_depth(texcoord, IsDH);
-    #else
-        IsDH = false;
-    #endif
-    
+float min_depth_4x4(vec2 texcoord, sampler2D Sampler) {
     float a, b, c, d;
-    if(IsDH) {
-        a = max_component(textureGatherOffset(dhDepthTex0, texcoord, ivec2(-1, -1)));
-        b = max_component(textureGatherOffset(dhDepthTex0, texcoord, ivec2(-1,  1)));
-        c = max_component(textureGatherOffset(dhDepthTex0, texcoord, ivec2( 1, -1)));
-        d = max_component(textureGatherOffset(dhDepthTex0, texcoord, ivec2( 1,  1)));
-    } else {
-        a = max_component(textureGatherOffset(depthtex0, texcoord, ivec2(-1, -1)));
-        b = max_component(textureGatherOffset(depthtex0, texcoord, ivec2(-1,  1)));
-        c = max_component(textureGatherOffset(depthtex0, texcoord, ivec2( 1, -1)));
-        d = max_component(textureGatherOffset(depthtex0, texcoord, ivec2( 1,  1)));
-    }
+    
+    a = min_component(textureGatherOffset(Sampler, texcoord, ivec2(-1, -1)));
+    b = min_component(textureGatherOffset(Sampler, texcoord, ivec2(-1,  1)));
+    c = min_component(textureGatherOffset(Sampler, texcoord, ivec2( 1, -1)));
+    d = min_component(textureGatherOffset(Sampler, texcoord, ivec2( 1,  1)));
 
-    return max_component(vec4(a, b, c, d));
+    return min_component(vec4(a, b, c, d));
 }
 
 float max_depth_4x4(vec2 texcoord, out bool IsDH) {

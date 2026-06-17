@@ -28,7 +28,7 @@ void main() {
 		#endif
 		IsSunVisible *= 1 - float(isEyeInWater == 1) * 0.97;
 		
-		dataBuf.SunVisibility = mix(dataBuf.SunVisibility, IsSunVisible, 10*frameTime);
+		dataBuf.SunVisibility = mix(dataBuf.SunVisibility, IsSunVisible, min(1, 10*frameTime));
 	}
 	else {
 		dataBuf.SunVisibility = 0;

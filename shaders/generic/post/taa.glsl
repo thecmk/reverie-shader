@@ -94,20 +94,21 @@ vec3 T2x(vec3 Color, ivec2 FragCoord, vec2 Texcoord) {
     return Color;
 }
 
-vec4 temporal_upscale_clouds(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 PlayerPos, sampler2D Sampler) {
+vec4 temporal_upscale_clouds(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 PlayerPos, vec3 PlayerPosN, sampler2D Sampler) {
     const int VOLUMETRICS_RES_INV = int(1 / VOLUMETRICS_RES);
-    float DistToCloudCurrent = reinhard_inv(texelFetch(image1Sampler, ivec2(FragCoord * VOLUMETRICS_RES), 0).r);
+    float DistToCloudCurrent = texelFetch(image1Sampler, ivec2(FragCoord * VOLUMETRICS_RES), 0).r * farLod * 4;
+    float DepthToCloud = view_screen(player_view(PlayerPosN * DistToCloudCurrent, IsDH), IsDH, false).z;
 
     // Prevent clouds from clipping in front of objects
-    if(DistToCloudCurrent > len_sq(PlayerPos) && ScreenPos.z < 1) return vec4(0, 0, 0, 1);
+    if(DepthToCloud > ScreenPos.z && ScreenPos.z < 1) return vec4(0, 0, 0, 1);
 
-    vec2 PrevCoord = toPrevScreenPos(ScreenPos.xy, ScreenPos.z, IsDH, false).xy;
+    vec2 PrevCoord = toPrevScreenPos(ScreenPos.xy, DepthToCloud, IsDH, false).xy;
     ivec2 LastUpdatePos = FragCoord - FragCoord % VOLUMETRICS_RES_INV + ivec2(frameCounter * VOLUMETRICS_RES, frameCounter) % VOLUMETRICS_RES_INV;
 
     // Sample last updated pos when there's no other data available 
     bool WasOffScreen = clamp(PrevCoord, 0, 1) != PrevCoord;
-    float DepthPrev = min_component(textureGather(colortex8, PrevCoord));
-    bool WasOccluded = DepthPrev < ScreenPos.z && ScreenPos.z == 1;
+    float DepthPrev = min_depth_4x4(PrevCoord, colortex8);
+    bool WasOccluded = DepthPrev < DepthToCloud;
     if (WasOffScreen || WasOccluded || (ScreenPos.z < 0.56)) {
         vec4 Color = texture(image0Sampler, ScreenPos.xy * VOLUMETRICS_RES);
         Color.a = 1 - Color.a;
@@ -124,11 +125,13 @@ vec4 temporal_upscale_clouds(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Pl
     Color.a = 1 - Color.a;
     Color = max(Color, 0);
 
-    float blendFactor = float(IsSampleNotCurrent) * 0.95;
+    float blendFactor = float(IsSampleNotCurrent);
 
     vec2 pixelOffset = 1.0 - abs(2.0 * fract(PrevCoord * resolution) - 1.0);
-    float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.15 + 0.85;
+    float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.2 + 0.8;
     blendFactor *= OffcenterRejection;
+
+    // float ApparentMovement = distance(cameraPosition, previousCameraPosition) / DistToCloudCurrent;
 
     return mix(Color, PrevColor, blendFactor);
 }

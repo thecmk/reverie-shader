@@ -107,7 +107,7 @@ void main() {
     vec3 SkyColor = get_sky(Pos.ViewN, false, Pos.PlayerN.y); 
     #ifdef DIMENSION_OVERWORLD
         #ifdef CLOUDS
-            TemporalClouds = temporal_upscale_clouds(Pos.Screen, IsDH, ivec2(gl_FragCoord.xy), Pos.Player, colortex6);
+            TemporalClouds = temporal_upscale_clouds(Pos.Screen, IsDH, ivec2(gl_FragCoord.xy), Pos.Player, Pos.PlayerN, colortex6);
             Color.rgb = blend_vl(Color.rgb, TemporalClouds);
         #endif
 
