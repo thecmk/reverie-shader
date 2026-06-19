@@ -34,7 +34,6 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         }
     #endif
 
-
     #ifndef GBUFFERS_TERRAIN
         // Prevents a strange rare lightleak
         NdotL *= Mat.Lightmap.y;
@@ -54,7 +53,7 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
     #ifdef DIMENSION_OVERWORLD
         // Ambient lighting
         vec3 BentNormal = 
-        #if AO_MODE == 2
+        #if AO_MODE == 2 && (defined DEFERRED)
             !IsHand ? player_view(decodeUnitVector(texture(colortex5, texcoord).zw * 2 - 1), false) : 
         #endif
             Mat.Normal;
@@ -75,7 +74,8 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         float NdotU = dot(Mat.Normal, gbufferModelView[1].xyz);
         vec3 FakeLavaLight = TorchlightColor * 0.05 * (-NdotU * 0.5 + 0.5);
         vec3 FakeAmbientLight = fogColor.rgb * 0.2 * (NdotU * 0.5 + 0.5);
-        vec3 SunA = MinLight * 2 + FakeAmbientLight + FakeLavaLight;
+        vec3 SunA = MinLight + FakeAmbientLight + FakeLavaLight;
+        SunA *= MinLight.x / get_luminance(SunA) * 6;
     #else
         vec3 SunA = srgb_linear(vec3(0.2, 0.1, 0.15));
     #endif

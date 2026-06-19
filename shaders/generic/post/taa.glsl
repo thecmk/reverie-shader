@@ -94,6 +94,24 @@ vec3 T2x(vec3 Color, ivec2 FragCoord, vec2 Texcoord) {
     return Color;
 }
 
+vec2 denoise_bent_normal(vec2 Color, vec3 ScreenPos, bool IsDH) {
+    vec2 PrevCoord = toPrevScreenPos(ScreenPos.xy, ScreenPos.z, IsDH, false).xy;
+
+    if (clamp(PrevCoord, 0, 1) != PrevCoord)
+        return Color;
+
+    vec2 PrevColor = texture(colortex8, PrevCoord).gb;
+    if (PrevColor == vec2(0)) return Color;
+
+    float DepthPrev = texture(colortex8, PrevCoord).r;
+
+    vec2 velocity = (ScreenPos.xy - PrevCoord.xy) * resolution;
+    float blendFactor = 0.95 * max(0, 1 - abs(l_depth(DepthPrev, IsDH) - l_depth(quantize_16bit(ScreenPos.z)))) * exp(-len2(velocity));
+
+    Color = mix(Color, PrevColor, blendFactor);
+    return Color;
+}
+
 vec4 temporal_upscale_clouds(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 PlayerPos, vec3 PlayerPosN, sampler2D Sampler) {
     const int VOLUMETRICS_RES_INV = int(1 / VOLUMETRICS_RES);
     float DistToCloudCurrent = texelFetch(image1Sampler, ivec2(FragCoord * VOLUMETRICS_RES), 0).r * farLod * 4;

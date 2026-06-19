@@ -21,7 +21,6 @@ void main() {
     float Depth = get_depth(texcoord, IsDH);
 
     BentNormalOut = texture(colortex5, texcoord);
-    
     if ((Depth > 0.56) && Depth < 1) {
         Positions Pos = get_positions(texcoord, Depth, IsDH, true);
         mat2x4 GbufferData = mat2x4(texture(colortex1, texcoord), texture(colortex2, texcoord));

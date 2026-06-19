@@ -17,6 +17,7 @@ void main() {
     #endif
 
     bool IsDH;
+    PrevDepth = texture(colortex8, texcoord);
     PrevDepth.r = get_depth(texcoord, IsDH);
 
     #if AA_MODE == 1

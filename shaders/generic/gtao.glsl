@@ -5,6 +5,7 @@
 #define GTAO_FALLOFF 1.0
 #define GTAO_THICKNESSMIX 0.2
 #define GTAO_MAX_STRIDE 32
+#define GTAO_SLICES 4
 
 float integrate_arc(float h1, float h2, float n) {
     float cosN = cos(n);
@@ -29,39 +30,49 @@ float gtao(Positions Pos, bool IsDH, vec3 Normal, out vec3 BentNormal) {
     vec3 V = -Pos.ViewN;
 
     float Dither = blue_noise(gl_FragCoord.xy, true).r;
-    float dirAngle = (PI / 16) * (((int(gl_FragCoord.x) + int(gl_FragCoord.y) & 3) << 2) + (int(gl_FragCoord.x) & 3)) + Dither * TAU;
-    vec2 aoDir = dirMult * vec2(sin(dirAngle), cos(dirAngle));
+    float AoFinal = 0;
+    BentNormal = vec3(0);
+    for(int i = 0; i < GTAO_SLICES; i++) {
+        float dirAngle = (PI / 16) * (((int(gl_FragCoord.x) + int(gl_FragCoord.y) & 3) << 2) + (int(gl_FragCoord.x) & 3)) + (i + Dither) * TAU / GTAO_SLICES;
+        vec2 aoDir = dirMult * vec2(sin(dirAngle), cos(dirAngle));
 
-    vec3 ProjView = screen_view(vec3(Pos.Screen.xy + aoDir, 1), IsDH, true);
-    vec3 PlaneNormal = normalize(cross(V, -ProjView));
-    vec3 ProjNormal = Normal - PlaneNormal * dot(Normal, PlaneNormal);
-    vec3 ProjDir = normalize(normalize(ProjView) + V);
-    float n = acosf(dot(-ProjDir, normalize(ProjNormal))) - PI / 2;
+        vec3 ProjView = screen_view(vec3(Pos.Screen.xy + aoDir, 1), IsDH, true);
+        vec3 PlaneNormal = normalize(cross(V, -ProjView));
+        vec3 ProjNormal = Normal - PlaneNormal * dot(Normal, PlaneNormal);
+        vec3 ProjDir = normalize(normalize(ProjView) + V);
+        float n = acosf(dot(-ProjDir, normalize(ProjNormal))) - PI / 2;
 
-    vec2 ScreenD = Pos.Screen.xy + aoDir * (0.25 * ((int(gl_FragCoord.y) - int(gl_FragCoord.x)) & 3) - 0.375 + Dither);
+        vec2 ScreenD = Pos.Screen.xy + aoDir * (0.25 * ((int(gl_FragCoord.y) - int(gl_FragCoord.x)) & 3) - 0.375 + Dither);
 
-    float c1 = -1, c2 = -1;
-    for (int i = -1; i >= -GTAO_SAMPLES; i--) {
-        slice_sample(ScreenD, IsDH, aoDir, i, Pos.View, V, c1);
+        float c1 = -1, c2 = -1;
+        for (int i = -1; i >= -GTAO_SAMPLES; i--) {
+            slice_sample(ScreenD, IsDH, aoDir, i, Pos.View, V, c1);
+        }
+        for (int i = 1; i <= GTAO_SAMPLES; i++) {
+            slice_sample(ScreenD, IsDH, aoDir, i, Pos.View, V, c2);
+        }
+
+        float H1a = -acosf(c1);
+        float H2a = acosf(c2);
+
+        float H1 = n + max(H1a - n, -PI / 2);
+        float H2 = n + min(H2a - n, PI / 2);
+
+        float W = integrate_arc(H1, H2, n);
+        W = mix(1, W, length(ProjNormal));
+        AoFinal += W;
+
+        float BentAngle = atan(
+            sin(H2) - sin(H1),
+            cos(H1) - cos(H2)
+        );
+        vec3 SliceTan = normalize(cross(PlaneNormal, ProjDir));
+        BentNormal += ProjDir * cos(BentAngle) + SliceTan * sin(BentAngle);
     }
-    for (int i = 1; i >= GTAO_SAMPLES; i++) {
-        slice_sample(ScreenD, IsDH, aoDir, i, Pos.View, V, c2);
-    }
+    AoFinal /= GTAO_SLICES;
+    BentNormal = normalize(normalize(BentNormal) - 0.5*V);
 
-    float H1a = -acosf(c1);
-    float H2a = acosf(c2);
-
-    float H1 = n + max(H1a - n, -PI / 2);
-    float H2 = n + min(H2a - n, PI / 2);
-
-    float BentAng = (H1 + H2) / 2;
-    vec3 ProjViewN = normalize(ProjView);
-    vec3 OrthoDir = ProjView - dot(ProjView, V) * V;
-    BentNormal = V * cos(BentAng) + normalize(OrthoDir) * sin(BentAng);
-    BentNormal = normalize(normalize(BentNormal) - 0.5 * V);
-
-    float AoFinal = mix(1, integrate_arc(H1, H2, n), length(ProjNormal));
-    return pow2(clamp(AoFinal, 0, 1));
+    return clamp(AoFinal, 0, 1);
 }
 
 float ssao(vec3 Normal, vec3 ViewPos, bool IsDH) {

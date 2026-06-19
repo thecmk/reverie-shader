@@ -74,8 +74,9 @@ void main() {
 
     Color.rgb += (dither(gl_FragCoord.xy, false) - 0.5) / 255;
 
+    // Color.rgb = vec3(0, texture(colortex8, texcoord).gb);
     // Color.rgb = reinhard(texture_rgbm(atm_skyview_sampler, texcoord).rgb / 10);
-    // Color.rgb = texture(colortex3, texcoord).rgb;
+    // Color.rgb = vec3(0, texture(colortex5, texcoord).zw);
     // Color.rgb = texture(atm_multi_scattering_sampler, texcoord).rgb;
     // Color.rgb = texture(atm_skyview_sampler, texcoord).rgb;
     // Color.rgb = vec3(texture(image0Sampler, texcoord / 32).rgb)/5;

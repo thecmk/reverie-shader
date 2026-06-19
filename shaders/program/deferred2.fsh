@@ -73,5 +73,5 @@ void main() {
         #endif
     }
 
-    // Color.rgb = vec3(1);
+    
 }
