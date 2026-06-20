@@ -175,7 +175,7 @@ MaterialProperties unpack_material(mat2x4 GbufferData, bool IsDH) {
 vec4 pack_material_buf1(MaterialProperties Mat, bool IsDH) {
     vec4 Data;
     Data.x = packUnorm2x8(clamp(Mat.Albedo.rg, 0, 1));
-    Data.y = packUnorm2x8(clamp(vec2(Mat.Albedo.b, Mat.Id), 0, 1));
+    Data.y = packUnorm2x8(clamp(vec2(Mat.Albedo.b, Mat.Id / 255), 0, 1));
     Data.z = packUnorm2x8(clamp(vec2(Mat.Smoothness, Mat.F0), 0, 1));
     Data.w = packUnorm2x8(clamp(encodeUnitVector(view_player(Mat.Normal, IsDH)) * 0.5 + 0.5, 0, 1));
     return Data;

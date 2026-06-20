@@ -77,9 +77,9 @@ layout(location = 3) out vec4 Shadow;
     
     #ifndef GBUFFERS_BASIC
         #ifdef VOXY_TERRAIN
-            Albedo = DataIn.glcolor * param.sampledColour;
+            Albedo = vec4(DataIn.glcolor.rgb, 1) * param.sampledColour;
         #else
-            Albedo = DataIn.glcolor * texture(gtexture, DataIn.texcoord);
+            Albedo = vec4(DataIn.glcolor.rgb, 1) * texture(gtexture, DataIn.texcoord);
         #endif
     #else
         Albedo = glcolor_flat;
@@ -122,7 +122,7 @@ layout(location = 3) out vec4 Shadow;
 
     Mat.Smoothness = texture(specular, DataIn.texcoord).r;
     Mat.F0 = texture(specular, DataIn.texcoord).g;
-    Mat.Id = float(DataIn.Id) / 255.0;
+    Mat.Id = DataIn.Id;
 
     buf1 = pack_material_buf1(Mat, IsDH);
     buf2 = pack_material_buf2(Mat, IsDH);

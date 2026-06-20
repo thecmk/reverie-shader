@@ -133,7 +133,7 @@ float random3D(vec3 p) {
 uint hash21( uvec2 p )
 {
     p *= uvec2(73333,7777);
-    p ^= (uvec2(3333777777)>>(p>>28));
+    p ^= (uvec2(3333777777u)>>(p>>28));
     uint n = p.x*p.y;
     return n^(n>>15);
 }

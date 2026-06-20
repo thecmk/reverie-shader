@@ -162,7 +162,7 @@ layout(location = 1) out vec4 buf2;
 
     Mat.Smoothness = texture(specular, texcoord).r;
     Mat.F0 = texture(specular, texcoord).g;
-    Mat.Id = float(DataIn.Id) / 255.0;
+    Mat.Id = DataIn.Id;
 
     buf1 = pack_material_buf1(Mat, false);
     buf2 = pack_material_buf2(Mat, false);
