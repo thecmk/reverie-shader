@@ -33,12 +33,7 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
             LMColor = mix(VoxelData.rgb, LMColor, Fade);
         }
     #endif
-
-    #ifndef GBUFFERS_TERRAIN
-        // Prevents a strange rare lightleak
-        NdotL *= Mat.Lightmap.y;
-    #endif
-
+    
     #ifdef DEFERRED
         #ifdef SPATIAL_DENOISING
             vec4 GIDenoise;

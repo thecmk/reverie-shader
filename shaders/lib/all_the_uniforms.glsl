@@ -50,6 +50,7 @@
     uniform sampler2D shadowtex1;
     uniform sampler2D shadowcolor0;
     uniform sampler2D shadowcolor1;
+    uniform sampler2D shadowcolor2;
     uniform sampler2D gtexture;
     uniform sampler2D lightmap;
     uniform sampler2D depthtex0;
@@ -194,6 +195,7 @@ const bool colortex11Clear = false;
 const bool shadowcolor0Clear = true;
 const vec4 shadowcolor0ClearColor = vec4(0, 0, 0, 1);
 const bool shadowcolor1Clear = true;
+const bool shadowcolor2Clear = false;
 
 const float PI = 3.141592653589793;
 const float TAU = 2 * PI;
@@ -232,4 +234,5 @@ const int colortex16Format = RGBA16F;
 const int colortex17Format = RGBA16;
 const int colortex18Format = RGBA16;
 const int shadowcolor1Format = RG8;
+const int shadowcolor2Format = R8;
 */

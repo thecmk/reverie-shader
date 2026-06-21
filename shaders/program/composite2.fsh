@@ -146,6 +146,10 @@ void main() {
             if(IsMetal) {
                 Specular *= Mat.Albedo;
             }
+
+            if(isEyeInWater == 1) {
+                Specular *= WaterColor;
+            }
             
             Color.rgb += Specular * LightColorDirect * Shadow * Mat.chunkFade;
         }

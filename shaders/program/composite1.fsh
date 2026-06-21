@@ -21,8 +21,8 @@ void main() {
     PlayerPosN /= Denom;
     float Dither = bayer8(gl_FragCoord.xy);
 
-    CloudColor.rgb += get_aurora(PlayerPosN, Dither);
-    
     float _Void = 1e6;
     CloudColor.rgb = get_clouds(vec3(1000), PlayerPosN, 8, cameraPosition, false, gl_FragCoord.xy, 1, _Void).rgb;
+    
+    CloudColor.rgb += get_aurora(PlayerPosN, Dither);
 }

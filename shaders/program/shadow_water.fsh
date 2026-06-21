@@ -9,13 +9,14 @@ flat in float Material;
 in vec3 PlayerPos;
 
 #ifdef RSM
-    /* RENDERTARGETS:0,1 */
+    /* RENDERTARGETS:0,2,1 */
 #else
-    /* RENDERTARGETS:0 */
+    /* RENDERTARGETS:0,2 */
 #endif
 layout(location = 0) out vec4 Color;
+layout(location = 1) out vec4 MaterialBuf;
 #ifdef RSM
-    layout(location = 1) out vec4 ShadowNormal;
+    layout(location = 2) out vec4 ShadowNormal;
 #endif
 
 void main() {
@@ -37,14 +38,12 @@ void main() {
         vec3 ViewPos = project_and_divide(shadowProjectionInverse, NDCPos);
         vec3 ViewPos1 = project_and_divide(shadowProjectionInverse, NDCPos1);
 
-        float WaterFog = min(1, exp(-distance(ViewPos, ViewPos1) * 0.3 + 0.5));
+        float WaterFog = min(1, exp(-distance(ViewPos, ViewPos1) * 0.3));
 
-        Color.rgb = srgb_linear(WaterColor) * 10;
-
-        float Caustics = get_water_caustics(PlayerPos);
-        Color.rgb += Caustics;
+        Color.rgb = 1 - srgb_linear(WaterAbsorbtion);
         
         Color.a = 1 - WaterFog;
+        MaterialBuf.r = 1;
         #ifdef RSM
             ShadowNormal.rg = vec2(0, -1);
         #endif
@@ -53,7 +52,6 @@ void main() {
         #ifdef RSM
             ShadowNormal.rg = encodeUnitVector(Normal) * 0.5 + 0.5;
         #endif
+        MaterialBuf.r = 0;
     }
-
-    
 }

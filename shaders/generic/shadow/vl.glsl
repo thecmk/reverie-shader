@@ -125,11 +125,13 @@ mat2x3 do_water_vl(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, float Dither, ve
 
     float SunPhase = cs_phase(VdotL, 0.8);
 
-    vec3 fms = WATER_SCATTERING / WATER_EXTINCTION * (1 - exp(-5 * WATER_EXTINCTION));
+    vec3 fms = WATER_SCATTERING / WATER_EXTINCTION * (1 - exp(-1 * WATER_EXTINCTION));
     vec3 MS = ISOTROPIC_PHASE * fms / (1 - fms);
 
+    float CloudShadow = cloud_shadows(StartPos + cameraPosition);
+
     if(!DoRT) {
-        float Shadow = eyeBrightnessSmooth.y / 240.0;
+        float Shadow = eyeBrightnessSmooth.y / 240.0 * CloudShadow;
         if(isEyeInWater == 1)
             Shadow *= get_vl_shadowing(ScreenPos, sLightPosN, Dither, IsDH, false);
         if(isEyeInWater == 0)
@@ -158,7 +160,7 @@ mat2x3 do_water_vl(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, float Dither, ve
             vec3 ShadowNDCPosC = player_shadow(PlayerPosC);
             vec3 ShadowPosC = distort(ShadowNDCPosC);
             ShadowPosC = ShadowPosC * 0.5 + 0.5;
-            float ShadowFactor = get_shadow_unfiltered(PlayerPosC, ShadowPosC);
+            float ShadowFactor = get_shadow_unfiltered(PlayerPosC, ShadowPosC) * CloudShadow;
 
             if (ShadowFactor > 0.01) { // Is in sun
                 float DistToSun = DistToSky / max(0.0001, view_player(sLightPosN, false).y);

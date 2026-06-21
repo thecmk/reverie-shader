@@ -73,11 +73,19 @@ vec3 get_water_normal(vec3 Coords, vec3 WorldNormal) {
     return vec3(H.x, H.y, sqrt(1 - (H.x * H.x + H.y * H.y)));
 }
 
+float get_water_height_noise(vec3 WorldPos) {
+    vec2 Coords = WorldPos.xz + WorldPos.y;
+    float color = texture(WATER_NOISE_BUFFER, (Coords - frameTimeCounter * 0.7) / 8).x * 0.4;
+    Coords.y += sin(Coords.x / 12) * 2;
+    color += texture(WATER_NOISE_BUFFER, (Coords + frameTimeCounter * 1.2) / 24).x * 0.6;
+    return (color - 0.5) * 3;
+}
+
 float get_water_caustics(vec3 PlayerPos) {
     vec3 WorldPos = PlayerPos + cameraPosition;
     vec3 slpP = view_player(sLightPosN, false);
-    vec3 PlayerPosS = WorldPos - slpP / slpP.y * WorldPos.y;
-    float WaterHeight = get_water_height(PlayerPosS);
-    float CausticsColor = exp(-abs(WaterHeight) * 15);
+    vec3 PlayerPosS = WorldPos - slpP / max(0.25, slpP.y) * WorldPos.y;
+    float WaterHeight = get_water_height_noise(PlayerPosS);
+    float CausticsColor = exp(-abs(WaterHeight) * 3);
     return CausticsColor;
 }

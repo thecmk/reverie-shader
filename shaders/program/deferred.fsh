@@ -6,6 +6,7 @@ in vec2 texcoord;
 flat in vec3 LightColorDirect; // This needs to be initialized in the vertex stage of the pass
 
 #include "/generic/gtao.glsl"
+#include "/generic/water.glsl"
 #include "/generic/shadow/main.glsl"
 #include "/generic/shadow/rsm.glsl"
 #include "/generic/post/taa.glsl"

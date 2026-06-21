@@ -89,6 +89,7 @@
     "shadowtex1": "sampler2D",
     "shadowcolor0": "sampler2D",
     "shadowcolor1": "sampler2D",
+    "shadowcolor2": "sampler2D",
     "gtexture": "sampler2D",
     "depthtex0": "sampler2D",
     "depthtex1": "sampler2D",

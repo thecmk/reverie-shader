@@ -129,7 +129,7 @@ void main() {
     #endif
 
     #if VL_OVERWORLD_MODE == 1
-    // if(isEyeInWater == 0) {
+    if(isEyeInWater == 0) {
         bool IsDH;
         vec2 FragPos = (gl_GlobalInvocationID.xy + 0.5) * VOLUMETRICS_RES_INV;
         vec2 texcoord = FragPos * resolutionInv;
@@ -146,6 +146,8 @@ void main() {
         } else {
             imageStore(image2, ivec2(gl_GlobalInvocationID.xy), vec4(0,0,0,0));
         }
-    // }
+    } else {
+        imageStore(image2, ivec2(gl_GlobalInvocationID.xy), vec4(0,0,0,0));
+    }
     #endif
 }

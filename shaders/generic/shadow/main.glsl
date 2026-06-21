@@ -22,8 +22,9 @@ float cloud_shadows(vec3 WorldPos) {
     return 1 - CloudCoverage;
 }
 
-vec3 get_shadow_transparent(vec3 SampleCoords, vec3 ShadowPosUndistorted) {
+vec3 get_shadow_transparent(vec3 SampleCoords, vec3 ShadowPosUndistorted, out float IsWater) {
     float Depth1 = texture(shadowtex1HW, SampleCoords).x;
+    IsWater = 0;
     if (Depth1 < 0.001) {
         return vec3(Depth1);
     }
@@ -32,23 +33,28 @@ vec3 get_shadow_transparent(vec3 SampleCoords, vec3 ShadowPosUndistorted) {
         vec4 ShadowCol = texture(shadowcolor0, SampleCoords.xy);
 
         ShadowCol.rgb = mix(vec3(1), ShadowCol.rgb, ShadowCol.a * (1 - Depth));
+        IsWater = texture(shadowcolor2, SampleCoords.xy).r * step(Depth, 0.0001);
         return ShadowCol.rgb * Depth1;
     }
     return vec3(Depth1);
 }
 
-vec3 pcf(float PenumbraSize, mat2 RotationOffset, vec3 ShadowPosUndistorted) {
+vec3 pcf(float PenumbraSize, mat2 RotationOffset, vec3 ShadowPosUndistorted, out float IsWater) {
     const int SAMPLE_COUNT = 12;
 
     vec3 ShadowColorFinal = vec3(0);
+    IsWater = 0;
     for (int i = 0; i < SAMPLE_COUNT; i++) {
         vec2 OffsetP = RotationOffset * vogel_disk[i] * PenumbraSize;
         vec3 ShadowPosD = ShadowPosUndistorted + vec3(OffsetP, 0);
         ShadowPosD = distort(ShadowPosD);
 
         ShadowPosD = ShadowPosD * 0.5 + 0.5; //convert from shadow ndc space to shadow screen space.
-        ShadowColorFinal += get_shadow_transparent(ShadowPosD, ShadowPosUndistorted);
+        float _IsWaterLocal;
+        ShadowColorFinal += get_shadow_transparent(ShadowPosD, ShadowPosUndistorted, _IsWaterLocal);
+        IsWater += _IsWaterLocal;
     }
+    IsWater /= SAMPLE_COUNT;
     return ShadowColorFinal / SAMPLE_COUNT;
 }
 
@@ -180,13 +186,17 @@ vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float 
         PenumbraSize *= 10;
     }
 
-    vec3 ShadowTransparent;
+    vec3 ShadowTransparent; float _IsWater;
     #if SHADOW_FILTER != 0
-        ShadowTransparent = pcf(PenumbraSize, RotationOffset, ShadowPosUndistorted);
+        ShadowTransparent = pcf(PenumbraSize, RotationOffset, ShadowPosUndistorted, _IsWater);
     #else
-        ShadowTransparent = get_shadow_transparent(ShadowPos, ShadowPosUndistorted);
+        ShadowTransparent = get_shadow_transparent(ShadowPos, ShadowPosUndistorted, _IsWater);
     #endif
 
+    if(_IsWater > 0.001) {
+        float Caustics = get_water_caustics(PlayerPos);
+        ShadowTransparent *= mix(1, Caustics, _IsWater);
+    }
 
     ShadowFinal *= mix(ShadowTransparent, vec3(1), Fade);
 
