@@ -31,10 +31,6 @@ vec4 get_seasons_color(vec4 glcolor) {
 }
 
 vec3 get_wavy_plants(vec3 WorldPos, float Id, bool IsBelowMid) {
-    if(Id < MATERIAL_TALL_PLANT_LOWER || Id > MATERIAL_LEAVES) {
-        return WorldPos;
-    }
-
     #ifndef WAVE_LEAVES
         if(Id == MATERIAL_LEAVES)
             return WorldPos;

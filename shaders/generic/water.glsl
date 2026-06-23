@@ -94,12 +94,12 @@ vec3 get_water_parallax(vec3 WorldPos, vec3 PlayerPosN) {
     const int StepCount = 4;
 
     vec3 Offset = PlayerPosN / abs(PlayerPosN.y);
-    float Dither = 0;//dither(FragCoord, true);
-    vec3 CurrentPos = WorldPos + Offset * Dither;
-    float CurrentHeight = 0.875;
+    vec3 CurrentPos = WorldPos;
+    float InitialHeight = fract(WorldPos.y);
+    float CurrentHeight = InitialHeight;
     
     for(int i = 0; i < StepCount; i++) {      
-        float NewHeight = get_water_height(CurrentPos) + 0.875;
+        float NewHeight = get_water_height(CurrentPos) + InitialHeight;
         CurrentPos += Offset * (CurrentHeight - NewHeight);
         CurrentHeight = NewHeight;
     }

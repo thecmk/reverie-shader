@@ -2,6 +2,6 @@
 #include "/generic/lighting/gbuffers.fsh"
 
 void main() {
- init_frag();
+    init_frag();
 }
 
