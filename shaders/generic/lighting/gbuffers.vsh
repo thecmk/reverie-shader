@@ -27,10 +27,6 @@ mat3 get_tbn_matrix() {
 	return tbn;
 }
 
-#if (defined DH_TERRAIN) || (MC_VERSION < 12111)
-float mc_chunkFade = 1;
-#endif
-
 void init_generic() {
     gl_Position = ftransform();
 
@@ -61,7 +57,9 @@ void init_generic() {
 
     DataOut.ViewPos = (gl_ModelViewMatrix * gl_Vertex).xyz;
 
-    DataOut.chunkFade = mc_chunkFade == -1 ? 1 : mc_chunkFade;
+    #ifdef IRIS_FEATURE_FADE_VARIABLE
+        DataOut.chunkFade = mc_chunkFade == -1 ? 1 : mc_chunkFade;
+    #endif
 
     #if (defined PBR_POM) && (defined GBUFFERS_TERRAIN)
         vec2 midcoord = (gl_TextureMatrix[0] *  mc_midTexCoord).xy;

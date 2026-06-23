@@ -51,13 +51,14 @@ void main() {
 
     if(Material >= MATERIAL_TALL_PLANT_LOWER && Material <= MATERIAL_LEAVES) {
         vec3 WorldPos = PlayerPos + cameraPosition;
-
+        
         #ifdef WAVY_PLANTS
             WorldPos = get_wavy_plants(WorldPos, Material, gl_MultiTexCoord0.t < mc_midTexCoord.t);
         #endif
-
-        gl_Position = shadowProjection * vec4((shadowModelView * vec4((WorldPos - cameraPosition), 1)).xyz, 1);
         
-        gl_Position.xyz = distort(gl_Position.xyz);
+        gl_Position = shadowProjection * vec4((shadowModelView * vec4((WorldPos - cameraPosition), 1)).xyz, 1);
+    } else {
+        gl_Position = ftransform();
     }
+    gl_Position.xyz = distort(gl_Position.xyz);
 }

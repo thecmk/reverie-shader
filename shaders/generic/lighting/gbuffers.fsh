@@ -147,7 +147,12 @@ layout(location = 1) out vec4 buf2;
     Mat.Normal = DataIn.TBN * PackNormal;
 
     Mat.FlatNormal = DataIn.TBN[2];
-    Mat.chunkFade = DataIn.chunkFade;
+    
+    #ifdef IRIS_FEATURE_FADE_VARIABLE
+        Mat.chunkFade = DataIn.chunkFade;
+    #else
+        Mat.chunkFade = 1;
+    #endif
 
     Mat.Lightmap = DataIn.lmcoord;
     if(Mat.Lightmap.y > 1 / 255.0)

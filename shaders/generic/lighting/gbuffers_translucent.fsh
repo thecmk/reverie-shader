@@ -79,13 +79,17 @@ layout(location = 3) out vec4 Shadow;
         #ifdef VOXY_TERRAIN
             Albedo = vec4(DataIn.glcolor.rgb, 1) * param.sampledColour;
         #else
-            Albedo = vec4(DataIn.glcolor.rgb, 1) * texture(gtexture, DataIn.texcoord);
+            #ifdef GBUFFERS_WATER
+                Albedo = vec4(DataIn.glcolor.rgb, 1) * texture(gtexture, DataIn.texcoord);
+            #else
+                Albedo = DataIn.glcolor * texture(gtexture, DataIn.texcoord);
+            #endif
         #endif
     #else
         Albedo = glcolor_flat;
     #endif
 
-    if(Albedo.a < 0.0001) {
+    if(Albedo.a < 0.01) {
         discard;
     }
 
@@ -110,8 +114,13 @@ layout(location = 3) out vec4 Shadow;
     }
 
     Mat.FlatNormal = DataIn.TBN[2];
-    Mat.chunkFade = DataIn.chunkFade;
-    Albedo.a *= Mat.chunkFade;
+
+    #ifdef IRIS_FEATURE_FADE_VARIABLE
+        Mat.chunkFade = DataIn.chunkFade;
+        Albedo.a *= Mat.chunkFade;
+    #else
+        Mat.chunkFade = 1;
+    #endif
 
     Mat.Lightmap = DataIn.lmcoord;
     if(Mat.Lightmap.y > 1 / 255.0)

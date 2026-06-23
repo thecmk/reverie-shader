@@ -1,3 +1,5 @@
+#define GBUFFERS_WATER
+
 #include "/lib/all_the_libs.glsl"
 
 #include "/generic/water.glsl"
