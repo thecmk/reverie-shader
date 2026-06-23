@@ -1,7 +1,6 @@
 #include "/lib/all_the_libs.glsl"
-#include "/generic/lighting/gbuffers.vsh"
 
+out vec2 texcoord;
 void main() {
-  init_generic();
-   
+  	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;   
 }

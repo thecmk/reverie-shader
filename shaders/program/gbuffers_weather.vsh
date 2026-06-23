@@ -1,8 +1,11 @@
 #include "/lib/all_the_libs.glsl"
 #include "/generic/lighting/gbuffers.vsh"
 
+out vec4 glcolor;
+out vec2 texcoord;
 void main() {
-	init_generic();
+	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+	glcolor = gl_Color;
 	vec3 ViewPos = (gl_ModelViewMatrix * gl_Vertex).xyz;
 	vec3 WorldPos = mat3(gbufferModelViewInverse) * ViewPos;
 	WorldPos += cameraPosition;

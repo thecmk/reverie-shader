@@ -99,7 +99,8 @@
     "specular": "sampler2D",
     "normals": "sampler2D",
     "shadowtex0HW": "sampler2DShadow",
-    "shadowtex1HW": "sampler2DShadow"
+    "shadowtex1HW": "sampler2DShadow",
+    "waterNoise": "sampler2D"
     #ifdef VOXELISATION
     ,
     "voxelImgSampler_a": "sampler3D",
