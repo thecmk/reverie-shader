@@ -46,7 +46,8 @@ void main() {
         if(Mat.Id == MATERIAL_WATER) {
             Mat.Normal = view_player(Mat.Normal, IsDH);
             mat3 TBN = tbn_normal(Mat.Normal);
-            Mat.Normal = TBN * get_water_normal(Pos.World, Mat.Normal);
+            vec3 WaterPos = get_water_parallax(Pos.World, Pos.PlayerN);
+            Mat.Normal = TBN * get_water_normal(WaterPos, Mat.Normal);
             Mat.Normal = player_view(Mat.Normal, IsDH);
         }
 
