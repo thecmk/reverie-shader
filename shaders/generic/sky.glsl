@@ -91,6 +91,9 @@ vec3 get_sky_overworld(vec3 ViewPosN, const bool DrawSun, float PlayerPosY) {
         SkyColor += step(0.9995, dot(-sunPosN, ViewPosN)) * dataBuf.MoonColor * Fade * get_moon_texture(-sunPosN, ViewPosN);
     }
 
+    // Darkening in caves
+    SkyColor *= 1 - smoothstep(-1, -0.3, -PlayerPosY) * (1 - isOutdoorsSmooth);
+
     return SkyColor;
 }
 

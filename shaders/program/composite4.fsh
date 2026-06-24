@@ -135,6 +135,10 @@ void main() {
 
     Color.rgb = get_fog_main(Pos.Player, Color.rgb, SkyColor, Pos.Screen.z);
 
+    // Darkening in caves
+    if(Depth >= 1) {
+        Color.rgb *= 1 - smoothstep(-1, -0.3, -Pos.PlayerN.y) * (1 - isOutdoorsSmooth);
+    }
     
     Color.rgb = purkinje_effect(Color.rgb);
 

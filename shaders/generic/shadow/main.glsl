@@ -86,10 +86,10 @@ float get_shadow_unfiltered(vec3 PlayerPos, vec3 ShadowPos) {
     #endif
 
     float Fade = shadow_fade(PlayerPos, shadowDistanceDH);
-    if(Fade > 0.99) return 1;
+    if(Fade > 0.99) return eyeBrightnessSmooth.y / 240.0;
 
     float ShadowFinal = step(1e-4, texture(shadowtex1, ShadowPos.xy).x - ShadowPos.z);
-    ShadowFinal = mix(ShadowFinal, 1, Fade);
+    ShadowFinal = mix(ShadowFinal, eyeBrightnessSmooth.y / 240.0, Fade);
     return ShadowFinal;
 }
 
