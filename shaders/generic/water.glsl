@@ -74,7 +74,7 @@ vec3 get_water_normal(vec3 Coords, vec3 WorldNormal) {
 }
 
 float get_water_height_noise(vec3 WorldPos) {
-    vec2 Coords = WorldPos.xz + WorldPos.y;
+    vec2 Coords = WorldPos.zx;
     float color = texture(WATER_NOISE_BUFFER, (Coords - frameTimeCounter * 0.7) / 8).x * 0.4;
     Coords.y += sin(Coords.x / 12) * 2;
     color += texture(WATER_NOISE_BUFFER, (Coords + frameTimeCounter * 1.2) / 24).x * 0.6;

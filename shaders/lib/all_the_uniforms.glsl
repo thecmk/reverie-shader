@@ -192,9 +192,9 @@ const bool colortex8Clear = false;
 const bool colortex9Clear = false;
 const bool colortex10Clear = true;
 const bool colortex11Clear = false;
-const bool shadowcolor0Clear = true;
+const bool shadowcolor0Clear = false;
 const vec4 shadowcolor0ClearColor = vec4(0, 0, 0, 1);
-const bool shadowcolor1Clear = true;
+const bool shadowcolor1Clear = false;
 const bool shadowcolor2Clear = false;
 
 const float PI = 3.141592653589793;
