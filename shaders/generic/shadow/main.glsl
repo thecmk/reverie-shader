@@ -45,7 +45,7 @@ vec3 pcf(float PenumbraSize, mat2 RotationOffset, vec3 ShadowPosUndistorted, out
     vec3 ShadowColorFinal = vec3(0);
     IsWater = 0;
     for (int i = 0; i < SAMPLE_COUNT; i++) {
-        vec2 OffsetP = RotationOffset * vogel_disk[i] * PenumbraSize;
+        vec2 OffsetP = (RotationOffset * vogel_disk[i]) * PenumbraSize;
         vec3 ShadowPosD = ShadowPosUndistorted + vec3(OffsetP, 0);
         ShadowPosD = distort(ShadowPosD);
 
@@ -58,12 +58,12 @@ vec3 pcf(float PenumbraSize, mat2 RotationOffset, vec3 ShadowPosUndistorted, out
     return ShadowColorFinal / SAMPLE_COUNT;
 }
 
-float pcss(vec3 ShadowPos, mat2 RotationOffset) {
+float pcss(vec3 ShadowPos, mat2 RotationOffset, out float BlockerDSSS) {
     float ReceiverD = ShadowPos.z * 0.2 * 0.5 + 0.5;
     float BlockerD = 0;
     float Hits = 0;
     for (int i = 0; i < 8; i++) {
-        vec2 OffsetP = RotationOffset * vogel_disk[i] * 5 * SHADOW_FILTER_SIZE;
+        vec2 OffsetP = (RotationOffset * vogel_disk[i]) * 5 * SHADOW_FILTER_SIZE;
         vec2 ShadowPosD = ShadowPos.xy + OffsetP;
         ShadowPosD = distort(vec3(ShadowPosD, 0)).xy;
         ShadowPosD = ShadowPosD * 0.5 + 0.5;
@@ -74,7 +74,10 @@ float pcss(vec3 ShadowPos, mat2 RotationOffset) {
             Hits++;
         }
     }
-    if (Hits == 0) return SHADOW_FILTER_SIZE; // Prevent funny business
+    BlockerDSSS = BlockerD * far / 8;
+    if (Hits == 0) {
+        return SHADOW_FILTER_SIZE; // Prevent funny business
+    }
     BlockerD /= Hits;
     return min(BlockerD * far + 0.5, 5) * SHADOW_FILTER_SIZE;
 }
@@ -126,7 +129,8 @@ float get_shadow_screenspace(vec3 ViewPos, bool IsDH, vec3 FlatNormal, float Dit
     return Shadow;
 }
 
-vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float Skylight, bool DoSSS, vec2 FragCoord) {
+vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float Skylight, bool DoSSS, out float BlockerDist, out float Fade, vec2 FragCoord) {
+    BlockerDist = 0;
     #ifdef DIMENSION_NETHER
     return vec3(0);
     #endif
@@ -142,6 +146,7 @@ vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float 
     float Dither = dither(FragCoord, true) * TAU;
 
     vec3 bias = compute_bias(PlayerPos + gbufferModelViewInverse[3].xyz, view_player(FlatNormal, false), dot(FlatNormal, sLightPosN), Skylight);
+    
     if (DoSSS) {
         bias *= vec3(0.05);
     }
@@ -157,7 +162,7 @@ vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float 
         }
     #endif
 
-    float Fade = shadow_fade(PlayerPos, shadowDistanceDH);
+    Fade = shadow_fade(PlayerPos, shadowDistanceDH);
     if(Fade > 1 - 1e-6) {
         return ShadowFinal;
     }
@@ -177,14 +182,11 @@ vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float 
     float PenumbraSize;
     
     #if SHADOW_FILTER == 2
-        if (!DoSSS)
-            PenumbraSize = pcss(ShadowPosUndistorted, RotationOffset);
-        else
-    #endif
+        PenumbraSize = pcss(ShadowPosUndistorted, RotationOffset, BlockerDist);
+    #else
         PenumbraSize = SHADOW_FILTER_SIZE;
-    if (DoSSS) {
-        PenumbraSize *= 10;
-    }
+    #endif
+    PenumbraSize *= DoSSS ? 10 : 1;
 
     vec3 ShadowTransparent; float _IsWater;
     #if SHADOW_FILTER != 0

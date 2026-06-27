@@ -105,9 +105,10 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
     vec3 SunDirect = vec3(0);
     vec3 Shadow = vec3(0);
     if (NdotL > 0 || DoSSS) {
-        Shadow = get_shadow(Pos.Player, Pos.View, IsDH, Mat.FlatNormal, Mat.Lightmap.y, DoSSS, ivec2(gl_FragCoord.xy));
+        float _BlockerDist, _ShadowFade;
+        Shadow = get_shadow(Pos.Player, Pos.View, IsDH, Mat.FlatNormal, Mat.Lightmap.y, DoSSS, _BlockerDist, _ShadowFade, ivec2(gl_FragCoord.xy));
 
-        if (Shadow != vec3(0)) {
+        if (Shadow != vec3(0) || DoSSS) {
             vec3 LightColor;
             if (sunAngle < 0.5)
                 LightColor = dataBuf.SunColor;
@@ -118,18 +119,22 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
             LightColor *= smoothstep(0.0, 0.05, abs(LHeight));
 
             SunDirect = Mat.Albedo / PI;
-            SunDirect *= LightColor * max(NdotL, 0);
+            SunDirect *= LightColor * max(NdotL, 0) * Shadow;
 
             if (DoSSS) {
                 SSSS = (1 - SSSS) * 5;
 
-                float SSS = exp(-SSSS * abs(NdotL));
                 float Phase = max(ISOTROPIC_PHASE, cs_phase(dot(Pos.ViewN, sLightPosN), 0.6));
+                vec3 SSS = exp(-SSSS * abs(NdotL)) * Shadow; // Simple SSS, from shadow blur or ss shadows
+                #if SHADOW_FILTER == 2
+                    float SSSFancy = exp(-SSSS * 8 * _BlockerDist); // SSS from PCSS
+                    SSS = mix(vec3(SSSFancy), SSS, _ShadowFade);
+                #endif
                 SunDirect += Mat.Albedo.rgb * LightColor * SSS * Phase;
             }
         }
     }
-    OutColor += SunDirect * Shadow;
+    OutColor += SunDirect;
 
     ShadowBuf.r = get_luminance(Shadow);
     ShadowBuf.gba = vec3(0);
