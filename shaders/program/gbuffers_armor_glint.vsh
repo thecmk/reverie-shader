@@ -2,5 +2,7 @@
 
 out vec2 texcoord;
 void main() {
-  	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;   
+	gl_Position = ftransform();
+	gl_Position.xy += taaJitter * gl_Position.w;
+  	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
 }

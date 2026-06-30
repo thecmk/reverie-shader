@@ -2,8 +2,6 @@
 #include "/generic/post/bloom.glsl"
 
 // Write to bloom buffer
-const bool colortex0MipmapEnabled = true;
-
 in vec2 texcoord;
 
 /* RENDERTARGETS:10 */

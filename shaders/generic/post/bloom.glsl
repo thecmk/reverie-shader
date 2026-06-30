@@ -24,6 +24,7 @@ vec3 blur6x6(sampler2D image, vec2 texcoord) {
     return Color / 4.5;
 }
 
+
 // 5 texture samples instead of 9
 vec4 blur3x3(sampler2D image, vec2 texcoord) {
     vec4 Color = vec4(0);

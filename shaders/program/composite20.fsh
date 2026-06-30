@@ -13,7 +13,7 @@ void main() {
 
     #ifdef BLOOM
     float Offset = 0;
-    vec3 FinalBloom = blur6x6(colortex10, BloomTilePos).rgb;
+    vec3 FinalBloom = blur3x3(colortex10, BloomTilePos).rgb;
 
     float WeatherColor = texture(colortex5, texcoord).g * 0.5;
 

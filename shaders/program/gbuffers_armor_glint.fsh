@@ -10,7 +10,6 @@ void main() {
 
     if (Color.a < 0.1) {
         discard;
-        return;
     }
 
     Color.rgb = srgb_linear(Color.rgb);
