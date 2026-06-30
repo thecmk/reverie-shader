@@ -216,7 +216,9 @@ bool ray_intersect(vec3 WorldPos, inout vec3 StartPos, inout vec3 EndPos, vec3 P
 
 // Nerfs sample count as the ray direction approaches the zenith
 float adaptive_samples(const float BASE_SAMPLES, float VdotU) {
-    return ceil(((1-abs(VdotU)) * 0.5 + 0.5) * BASE_SAMPLES);
+    float c = ceil(((1-abs(VdotU)) * 0.5 + 0.5) * BASE_SAMPLES);
+    if(isnan(c)) return 0.; // This sometimes happens when the game is starting up. It took me 4 hours to find this👺👺👺.
+    return c;
 }
 
 vec3 blend_vl(vec3 Color, mat2x3 VlData) {

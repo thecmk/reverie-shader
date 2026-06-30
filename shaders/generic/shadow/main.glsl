@@ -63,7 +63,7 @@ float pcss(vec3 ShadowPos, mat2 RotationOffset, out float BlockerDSSS) {
     float BlockerD = 0;
     float Hits = 0;
     for (int i = 0; i < 8; i++) {
-        vec2 OffsetP = (RotationOffset * vogel_disk[i]) * 5 * SHADOW_FILTER_SIZE;
+        vec2 OffsetP = (RotationOffset * vogel_disk[i]) * 10 * SHADOW_FILTER_SIZE;
         vec2 ShadowPosD = ShadowPos.xy + OffsetP;
         ShadowPosD = distort(vec3(ShadowPosD, 0)).xy;
         ShadowPosD = ShadowPosD * 0.5 + 0.5;
@@ -79,7 +79,7 @@ float pcss(vec3 ShadowPos, mat2 RotationOffset, out float BlockerDSSS) {
         return SHADOW_FILTER_SIZE; // Prevent funny business
     }
     BlockerD /= Hits;
-    return min(BlockerD * far + 0.5, 5) * SHADOW_FILTER_SIZE;
+    return min(BlockerD * far + 0.5, 10) * SHADOW_FILTER_SIZE;
 }
 
 // Used in vl

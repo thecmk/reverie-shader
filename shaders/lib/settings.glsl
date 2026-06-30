@@ -244,5 +244,8 @@ const float voxelDistance = VOXEL_DISTANCE;
 #ifdef FILM_GRAIN_MAX_BRIGHTNESS
 #endif
 
+#ifdef INFO_PARAMS
+#endif
+
 const float CLOUD_LOWER_PLANE = 200.0;
 const float CLOUD_UPPER_PLANE = 330.0;
