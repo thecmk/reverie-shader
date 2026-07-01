@@ -42,6 +42,8 @@ vec3 get_shadow_transparent(vec3 SampleCoords, vec3 ShadowPosUndistorted, out fl
 vec3 pcf(float PenumbraSize, mat2 RotationOffset, vec3 ShadowPosUndistorted, out float IsWater) {
     const int SAMPLE_COUNT = 12;
 
+    PenumbraSize *= shadowTexSize;
+
     vec3 ShadowColorFinal = vec3(0);
     IsWater = 0;
     for (int i = 0; i < SAMPLE_COUNT; i++) {
@@ -58,13 +60,16 @@ vec3 pcf(float PenumbraSize, mat2 RotationOffset, vec3 ShadowPosUndistorted, out
     return ShadowColorFinal / SAMPLE_COUNT;
 }
 
-float pcss(vec3 ShadowPos, mat2 RotationOffset, out float BlockerDSSS) {
-    float ReceiverD = ShadowPos.z * 0.2 * 0.5 + 0.5;
-    float BlockerD = 0;
-    float Hits = 0;
+float pcss(vec3 ShadowPosUndistorted, mat2 RotationOffset, bool DoSSS, out float BlockerDSSS) {
+    float ReceiverD = ShadowPosUndistorted.z * 0.2 * 0.5 + 0.5;
+    float BlockerD = 0, Hits = 0;
+
+    float MaxRadius = 5 * SHADOW_FILTER_SIZE;
+    MaxRadius *= DoSSS ? 7 : 1;
+
     for (int i = 0; i < 8; i++) {
-        vec2 OffsetP = (RotationOffset * vogel_disk[i]) * 10 * SHADOW_FILTER_SIZE;
-        vec2 ShadowPosD = ShadowPos.xy + OffsetP;
+        vec2 OffsetP = (RotationOffset * vogel_disk[i]) * MaxRadius * shadowTexSize;
+        vec2 ShadowPosD = ShadowPosUndistorted.xy + OffsetP;
         ShadowPosD = distort(vec3(ShadowPosD, 0)).xy;
         ShadowPosD = ShadowPosD * 0.5 + 0.5;
 
@@ -76,10 +81,10 @@ float pcss(vec3 ShadowPos, mat2 RotationOffset, out float BlockerDSSS) {
     }
     BlockerDSSS = BlockerD * far / 8;
     if (Hits == 0) {
-        return SHADOW_FILTER_SIZE; // Prevent funny business
+        return MaxRadius; // Prevent funny business
     }
     BlockerD /= Hits;
-    return min(BlockerD * far + 0.5, 10) * SHADOW_FILTER_SIZE;
+    return min(BlockerD * far + 0.5, MaxRadius);
 }
 
 // Used in vl
@@ -146,15 +151,12 @@ vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float 
     float Dither = dither(FragCoord, true) * TAU;
 
     vec3 bias = compute_bias(PlayerPos + gbufferModelViewInverse[3].xyz, view_player(FlatNormal, false), dot(FlatNormal, sLightPosN), Skylight);
-    
-    if (DoSSS) {
-        bias *= vec3(0.05);
-    }
+    vec3 SSSbias = DoSSS ? bias * 0.05 : bias;
 
     #ifdef SCREENSPACE_SHADOWS_FALLBACK
     float FadeSS = shadow_fade(PlayerPos, shadowDistanceDH - 16);
         if(FadeSS > 1e-6) {
-            float ShadowScreen = get_shadow_screenspace(player_view(PlayerPos + bias, IsDH), IsDH, FlatNormal, Dither);
+            float ShadowScreen = get_shadow_screenspace(player_view(PlayerPos + SSSbias, IsDH), IsDH, FlatNormal, Dither);
             #ifdef DIMENSION_OVERWORLD
                 ShadowScreen *= Skylight; // Fix light leaks outside the shadow map
             #endif
@@ -167,31 +169,32 @@ vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float 
         return ShadowFinal;
     }
 
-    vec3 ShadowPosUndistorted = player_shadow(PlayerPos + bias);
     
-    vec2 Offset = vec2(cos(Dither), sin(Dither)) * shadowTexSize;
+    vec2 Offset = vec2(cos(Dither), sin(Dither));
     mat2 RotationOffset = mat2(
             Offset.x, Offset.y,
             -Offset.y, Offset.x
         );
 
-   
-    vec3 ShadowPos = distort(ShadowPosUndistorted);
-    ShadowPos = ShadowPos * 0.5 + 0.5;
-
     float PenumbraSize;
-    
     #if SHADOW_FILTER == 2
-        PenumbraSize = pcss(ShadowPosUndistorted, RotationOffset, BlockerDist);
+        PenumbraSize = pcss(player_shadow(PlayerPos), RotationOffset, DoSSS, BlockerDist);
     #else
         PenumbraSize = SHADOW_FILTER_SIZE;
     #endif
-    PenumbraSize *= DoSSS ? 10 : 1;
+
+    #if SHADOW_FILTER != 2
+        PenumbraSize *= DoSSS ? 10 : 1;
+        bias = SSSbias;
+    #endif
+    vec3 ShadowPosUndistorted = player_shadow(PlayerPos + bias);
 
     vec3 ShadowTransparent; float _IsWater;
     #if SHADOW_FILTER != 0
         ShadowTransparent = pcf(PenumbraSize, RotationOffset, ShadowPosUndistorted, _IsWater);
     #else
+        vec3 ShadowPos = distort(ShadowPosUndistorted);
+        ShadowPos = ShadowPos * 0.5 + 0.5;
         ShadowTransparent = get_shadow_transparent(ShadowPos, ShadowPosUndistorted, _IsWater);
     #endif
 

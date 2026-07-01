@@ -27,7 +27,11 @@
 // #define DOF_SHOW_FOCUS
 
 // #define PIXELATION
-#define PIXELATION_AMOUNT 2.0 // [0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0 2.25 2.5 2.75 3.0 3.25 3.5 3.75 4.0 4.25 4.5 4.74 5.0]
+#ifdef PIXELATION
+#define PIXELATION_AMOUNT 1.5 // [0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0 2.25 2.5 2.75 3.0 3.25 3.5 3.75 4.0 4.25 4.5 4.74 5.0]
+#else
+#define PIXELATION_AMOUNT 0
+#endif
 
 // Post Processing
 #define TONEMAP_OPERATOR 2 //[0 1 2 3 4]

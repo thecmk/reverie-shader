@@ -9,5 +9,5 @@ in vec2 texcoord;
 const bool colortex0MipmapEnabled = true;
 
 void main() {
-    Color = vec4(CAS(colortex0, texcoord, PIXELATION_AMOUNT, 0.2), 1);
+    Color = vec4(texture(colortex0, texcoord * exp2(PIXELATION_AMOUNT)).rgb, 1);
 }
