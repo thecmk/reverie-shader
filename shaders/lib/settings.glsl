@@ -182,6 +182,23 @@ const float sunPathRotation = -35; // [-40 -35 -30 -25 -20 -15 -10 -5 0 5 10 15 
 
 #define ROUGH_REFLECTIONS_STEPS 3 // [1 2 3 4 5]
 
+#define RAYLEIGH_RED 1.0 // [0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.6 1.7 1.8 1.9 2.0 2.2 2.4 2.6 2.8 3.0 3.2 3.4 3.6 3.8 4.0]
+#define RAYLEIGH_GREEN 1.0 // [0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.6 1.7 1.8 1.9 2.0 2.2 2.4 2.6 2.8 3.0 3.2 3.4 3.6 3.8 4.0]
+#define RAYLEIGH_BLUE 1.0 // [0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.6 1.7 1.8 1.9 2.0 2.2 2.4 2.6 2.8 3.0 3.2 3.4 3.6 3.8 4.0]
+#define MIE_MULT 1.0 // [0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.6 1.7 1.8 1.9 2.0 2.2 2.4 2.6 2.8 3.0 3.2 3.4 3.6 3.8 4.0]
+#define OZONE_RED 1.0 // [0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.6 1.7 1.8 1.9 2.0 2.2 2.4 2.6 2.8 3.0 3.2 3.4 3.6 3.8 4.0]
+#define OZONE_GREEN 1.0 // [0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.6 1.7 1.8 1.9 2.0 2.2 2.4 2.6 2.8 3.0 3.2 3.4 3.6 3.8 4.0]
+#define OZONE_BLUE 1.0 // [0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.3 1.35 1.4 1.45 1.5 1.6 1.7 1.8 1.9 2.0 2.2 2.4 2.6 2.8 3.0 3.2 3.4 3.6 3.8 4.0]
+
+#define VL_CLOUDS_BASE 0.0 // [-0.5 -0.4 -0.3 -0.2 -0.1 0.0 0.1 0.2 0.3 0.4 0.5]
+#define FLAT_CLOUDS_BASE 0.0 // [-0.5 -0.4 -0.3 -0.2 -0.1 0.0 0.1 0.2 0.3 0.4 0.5]
+#define MIE_DENSITY_BASE 0.0 // [-1.0 -0.9 -0.8 -0.7 -0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define RAYLEIGH_DENSITY_BASE 0.0 // [-1.0 -0.9 -0.8 -0.7 -0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define VL_CLOUDS_VARIANCE 1.0 // [0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+#define FLAT_CLOUDS_VARIANCE 1.0 // [0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+#define MIE_DENSITY_VARIANCE 1.0 // [0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+#define RAYLEIGH_DENSITY_VARIANCE 1.0 // [0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+
 // #define VOXELISATION
 #ifdef VOXELISATION
     #define COLORED_LIGHTS
@@ -250,6 +267,30 @@ const float voxelDistance = VOXEL_DISTANCE;
 
 #ifdef INFO_PARAMS
 #endif
+
+#ifdef VL_CLOUDS_BASE
+#endif
+
+#ifdef VL_CLOUDS_VARIANCE
+#endif
+
+#ifdef FLAT_CLOUDS_BASE
+#endif
+
+#ifdef FLAT_CLOUDS_VARIANCE
+#endif
+
+#ifdef MIE_DENSITY_BASE
+#endif
+
+#ifdef MIE_DENSITY_VARIANCE 
+#endif
+
+#ifdef RAYLEIGH_DENSITY_BASE
+#endif
+
+#ifdef RAYLEIGH_DENSITY_VARIANCE
+#endif-1.0 -0.9 -0.8 -0.7 -0.6 
 
 const float CLOUD_LOWER_PLANE = 200.0;
 const float CLOUD_UPPER_PLANE = 330.0;

@@ -38,9 +38,9 @@ void main() {
         vec3 ViewPos = project_and_divide(shadowProjectionInverse, NDCPos);
         vec3 ViewPos1 = project_and_divide(shadowProjectionInverse, NDCPos1);
 
-        float WaterFog = min(1, exp(-distance(ViewPos, ViewPos1) * 0.3));
+        float WaterFog = min(1, exp(-distance(ViewPos, ViewPos1) * 0.2));
 
-        Color.rgb = 1 - srgb_linear(WaterAbsorbtion);
+        Color.rgb = srgb_linear(vec3(0.1, 0.3, 0.5));
         
         Color.a = 1 - WaterFog;
         MaterialBuf.r = 1;

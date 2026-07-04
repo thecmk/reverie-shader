@@ -79,7 +79,7 @@ float pcss(vec3 ShadowPosUndistorted, mat2 RotationOffset, bool DoSSS, out float
             Hits++;
         }
     }
-    BlockerDSSS = BlockerD * far / 8;
+    BlockerDSSS = BlockerD * far;
     if (Hits == 0) {
         return MaxRadius; // Prevent funny business
     }
@@ -134,7 +134,7 @@ float get_shadow_screenspace(vec3 ViewPos, bool IsDH, vec3 FlatNormal, float Dit
     return Shadow;
 }
 
-vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float Skylight, bool DoSSS, out float BlockerDist, out float Fade, vec2 FragCoord) {
+vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float Skylight, bool DoSSS, out float BlockerDist, out float Fade, out float CloudShadow, vec2 FragCoord) {
     BlockerDist = 0;
     #ifdef DIMENSION_NETHER
     return vec3(0);
@@ -144,8 +144,8 @@ vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float 
 
     vec3 ShadowFinal = vec3(1);
     #ifdef CLOUDS
-        float CloudCoverage = cloud_shadows(PlayerPos + cameraPosition);
-        ShadowFinal *= pow4(CloudCoverage);
+        CloudShadow = pow4(cloud_shadows(PlayerPos + cameraPosition));
+        ShadowFinal *= CloudShadow;
     #endif
 
     float Dither = dither(FragCoord, true) * TAU;
