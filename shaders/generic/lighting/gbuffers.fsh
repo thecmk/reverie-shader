@@ -148,7 +148,7 @@ layout(location = 1) out vec4 buf2;
 
     Mat.FlatNormal = DataIn.TBN[2];
     
-    #ifdef IRIS_FEATURE_FADE_VARIABLE
+    #if (defined IRIS_FEATURE_FADE_VARIABLE) && !(defined DH_TERRAIN)
         Mat.chunkFade = DataIn.chunkFade;
     #else
         Mat.chunkFade = 1;

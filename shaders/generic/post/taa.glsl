@@ -180,7 +180,7 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
             DepthUsedInPrevPass = l_depth(DepthUsedInPrevPass, IsDHInPrevPass);
             // Reduces pixelation
             float D = 1 - distance(FragCoordInPrevPass + (fract(ScreenPos.xy * resolution * VOLUMETRICS_RES) - 0.5) * VOLUMETRICS_RES_INV, OffsetFragPos) * VOLUMETRICS_RES / sqrt(2) * 0.66;
-            float Factor = max(1e-6, D - min(1, abs(DepthL - DepthUsedInPrevPass) * 0.1));
+            float Factor = max(1e-6, D - min(1, abs(DepthL - DepthUsedInPrevPass) * 0.33));
             Color += texelFetch(image2Sampler, ivec2(OffsetFragPos * VOLUMETRICS_RES), 0) * Factor;
             TotalFactor += Factor;
         }

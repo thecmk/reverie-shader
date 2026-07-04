@@ -73,7 +73,7 @@ mat2x3 nether_fog(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, vec3 ScreenPos, f
 }
 #endif
 
-float get_vl_shadowing(vec3 ScreenPos, vec3 LightPos, float Dither, bool IsDH, const bool OutsideShadowDist) {
+float get_vl_shadowing(vec3 ScreenPos, vec3 LightPos, float Dither, bool IsDH, const bool OnlyOutsideShadowDist) {
     if(LightPos.z > 0) return 0.5;
 
     vec3 LightPosScreen = view_screen(LightPos, IsDH, true);
@@ -83,12 +83,17 @@ float get_vl_shadowing(vec3 ScreenPos, vec3 LightPos, float Dither, bool IsDH, c
     float LightFactor = 0;
     vec3 Step = (LightPosScreen - ScreenPos) / 8;
     vec3 ExpectedPos = ScreenPos + Step * Dither;
+    float Hits = 0;
     for (int i = 1; i <= 8; i++) {
         float RealDepth = get_depth_solid(ExpectedPos.xy, IsDH);
-        if(OutsideShadowDist) {
-            float RealDepthL = length(screen_view(vec3(ScreenPos.xy, RealDepth), IsDH, true));
-            RealDepth = RealDepthL < shadowDistanceDH - 16 ? 1 : RealDepth;
+        if(OnlyOutsideShadowDist) {
+            float RealDepthL = length(screen_view(vec3(ExpectedPos.xy, RealDepth), IsDH, true));
+            if(RealDepthL < shadowDistanceDH - 16) {
+                ExpectedPos += Step;
+                continue;
+            }
         }
+        Hits++;
         LightFactor += step(1, RealDepth);
         
         ExpectedPos += Step;
@@ -97,7 +102,7 @@ float get_vl_shadowing(vec3 ScreenPos, vec3 LightPos, float Dither, bool IsDH, c
     float Falloff = min_component(abs(step(0.5, LightPosScreen.xy) - LightPosScreen.xy));
     Falloff = smoothstep(0., 0.25, Falloff);
 
-    return mix(0.5, LightFactor / 8, Falloff);
+    return mix(0.5, Hits == 0 ? 0.5 : LightFactor / Hits, Falloff);
 }
 
 
