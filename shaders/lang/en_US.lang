@@ -114,6 +114,13 @@ option.WAVE_AMPLITUDE=Wave Amplitude
 option.WAVE_SPEED=Wave Speed
 option.WAVE_SIZE=Wave Size
 option.WAVE_LEAVES=Wave Leaves
+
+option.CLOUDS=Clouds
+option.AURORA=Aurora Borealis
+option.AURORA.comment=Adds an aurora borealis effect at night, in cold biomes
+
+
+
 value.AA_MODE.0=None (TA only)
 value.AA_MODE.1=SMAA T2x
 value.AA_MODE.2=TAA

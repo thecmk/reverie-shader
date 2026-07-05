@@ -199,6 +199,10 @@ const float sunPathRotation = -35; // [-40 -35 -30 -25 -20 -15 -10 -5 0 5 10 15 
 #define MIE_DENSITY_VARIANCE 1.0 // [0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5]
 #define RAYLEIGH_DENSITY_VARIANCE 1.0 // [0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5]
 
+#define c_NETHER_LAVA_ILLUMINATION 0.05 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33]
+#define c_NETHER_AMBIENT_ILLUMINATION 0.20 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33]
+#define c_NETHER_BRIGHTNESS 6 // [2 3 4 5 6 7 8 9 10]
+
 // #define VOXELISATION
 #ifdef VOXELISATION
     #define COLORED_LIGHTS
@@ -238,8 +242,6 @@ const float voxelDistance = VOXEL_DISTANCE;
 #ifdef UNDER_CONSTRUCTION
 #endif
 
-#ifdef SHADOW_FILTER_SIZE
-#endif
 
 #ifdef DOF
 #endif
@@ -247,50 +249,14 @@ const float voxelDistance = VOXEL_DISTANCE;
 #ifdef PBR_POM
 #endif
 
-#ifdef GTAO_SAMPLES
-#endif
-
-#ifdef RSM_SAMPLE_COUNT
-#endif
-
 #ifdef PIXELATION
-#endif
-
-#ifdef PIXELATION_AMOUNT
-#endif
-
-#ifdef FILM_GRAIN_SIZE
-#endif
-
-#ifdef FILM_GRAIN_MAX_BRIGHTNESS
 #endif
 
 #ifdef INFO_PARAMS
 #endif
 
-#ifdef VL_CLOUDS_BASE
+#ifdef CHROMATIC_ABERRATION
 #endif
-
-#ifdef VL_CLOUDS_VARIANCE
-#endif
-
-#ifdef FLAT_CLOUDS_BASE
-#endif
-
-#ifdef FLAT_CLOUDS_VARIANCE
-#endif
-
-#ifdef MIE_DENSITY_BASE
-#endif
-
-#ifdef MIE_DENSITY_VARIANCE 
-#endif
-
-#ifdef RAYLEIGH_DENSITY_BASE
-#endif
-
-#ifdef RAYLEIGH_DENSITY_VARIANCE
-#endif-1.0 -0.9 -0.8 -0.7 -0.6 
 
 const float CLOUD_LOWER_PLANE = 200.0;
 const float CLOUD_UPPER_PLANE = 330.0;

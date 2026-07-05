@@ -65,12 +65,12 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         
         SunA = mix(MinLight, SunA, Mat.Lightmap.y);
     #elif defined DIMENSION_NETHER
-    // Fake lighting, to make things look less flat
+        // Fake lighting, to make things look less flat
         float NdotU = dot(Mat.Normal, gbufferModelView[1].xyz);
-        vec3 FakeLavaLight = TorchlightColor * 0.05 * (-NdotU * 0.5 + 0.5);
-        vec3 FakeAmbientLight = fogColor.rgb * 0.2 * (NdotU * 0.5 + 0.5);
+        vec3 FakeLavaLight = TorchlightColor * c_NETHER_LAVA_ILLUMINATION * (-NdotU * 0.5 + 0.5);
+        vec3 FakeAmbientLight = fogColor.rgb * c_NETHER_AMBIENT_ILLUMINATION * (NdotU * 0.5 + 0.5);
         vec3 SunA = MinLight + FakeAmbientLight + FakeLavaLight;
-        SunA *= MinLight.x / get_luminance(SunA) * 6;
+        SunA *= MinLight.x / get_luminance(SunA) * c_NETHER_BRIGHTNESS;
     #else
         vec3 SunA = srgb_linear(vec3(0.2, 0.1, 0.15));
     #endif
