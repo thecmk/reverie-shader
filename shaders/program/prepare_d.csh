@@ -66,6 +66,6 @@ void main() {
     // wasted trying to get this to work
     FinalColor *= 4;
 
-    imageStore(image0, ivec2(FragCoord), vec4(FinalColor, 0));
+    imageStore(atm_ambient, ivec2(FragCoord), vec4(FinalColor, 0));
 
 }

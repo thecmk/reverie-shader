@@ -106,6 +106,7 @@
     uniform sampler2D atm_transmittance_sampler;
     uniform sampler2D atm_skyview_sampler;
     uniform sampler2D atm_multi_scattering_sampler;
+    uniform sampler2D atm_ambient_sampler;
     uniform sampler3D worleyNoiseTexture;
     uniform sampler2D smaaAreaTexture;
     uniform sampler2D smaaSearchTexture;
@@ -158,6 +159,7 @@ layout(rgba16f) uniform restrict image2D image2;
 layout(rgba8) uniform restrict image2D atm_transmittance;
 layout(rgba8) uniform restrict image2D atm_skyview;
 layout(rgba16f) uniform restrict image2D atm_multi_scattering;
+layout(rgba16f) uniform restrict image2D atm_ambient;
 
 #ifdef VOXY
     #define DISTANT_HORIZONS
@@ -228,7 +230,7 @@ const int colortex4Format = RGBA8;
 const int colortex5Format = RGBA8;
 const int colortex6Format = RGBA16F;
 const int colortex7Format = RGBA16F;
-const int colortex8Format = R16;
+const int colortex8Format = RG16;
 const int colortex9Format = RGBA8;
 const int colortex10Format = R11F_G11F_B10F;
 const int colortex11Format = RGBA16F;

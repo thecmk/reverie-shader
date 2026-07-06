@@ -81,6 +81,7 @@
     "atm_transmittance_sampler": "sampler2D",
     "atm_skyview_sampler": "sampler2D",
     "atm_multi_scattering_sampler": "sampler2D",
+    "atm_ambient_sampler": "sampler2D",
     "worleyNoiseTexture": "sampler3D",
     "smaaAreaTexture": "sampler2D",
     "smaaSearchTexture": "sampler2D",

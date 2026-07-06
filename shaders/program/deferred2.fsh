@@ -5,14 +5,15 @@ in vec2 texcoord;
 flat in vec3 LightColorDirect;
 
 #ifdef VOXY
-/* RENDERTARGETS:0,5,1,2 */
-layout(location = 2) out vec4 vxData1;
-layout(location = 3) out vec4 vxData2;
+/* RENDERTARGETS:0,5,6,1,2 */
+layout(location = 3) out vec4 vxData1;
+layout(location = 4) out vec4 vxData2;
 #else
-/* RENDERTARGETS:0,5 */
+/* RENDERTARGETS:0,5,6 */
 #endif
 layout(location = 0) out vec4 Color;
 layout(location = 1) out vec4 Shadow;
+layout(location = 2) out vec4 TemporalClouds;
 
 
 #include "/lib/all_the_libs.glsl"
@@ -73,5 +74,8 @@ void main() {
         #endif
     }
 
-    
+    #ifdef CLOUDS
+        TemporalClouds = temporal_upscale_clouds(Pos.Screen, IsDH, ivec2(gl_FragCoord.xy), Pos.Player, Pos.PlayerN, colortex6);
+        Color.rgb = blend_vl(Color.rgb, TemporalClouds);
+    #endif    
 }

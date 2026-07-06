@@ -164,13 +164,14 @@ vec3 rgb_to_xyz(vec3 rgb) {
 
 const float shadowTexSize = 1.0/shadowMapResolution;
 
+// Gets solid depth for nhow
 float min_depth_4x4(vec2 texcoord, sampler2D Sampler) {
     float a, b, c, d;
     
-    a = min_component(textureGatherOffset(Sampler, texcoord, ivec2(-1, -1)));
-    b = min_component(textureGatherOffset(Sampler, texcoord, ivec2(-1,  1)));
-    c = min_component(textureGatherOffset(Sampler, texcoord, ivec2( 1, -1)));
-    d = min_component(textureGatherOffset(Sampler, texcoord, ivec2( 1,  1)));
+    a = min_component(textureGatherOffset(Sampler, texcoord, ivec2(-1, -1), 1));
+    b = min_component(textureGatherOffset(Sampler, texcoord, ivec2(-1,  1), 1));
+    c = min_component(textureGatherOffset(Sampler, texcoord, ivec2( 1, -1), 1));
+    d = min_component(textureGatherOffset(Sampler, texcoord, ivec2( 1,  1), 1));
 
     return min_component(vec4(a, b, c, d));
 }

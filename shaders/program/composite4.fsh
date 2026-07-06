@@ -7,7 +7,6 @@ flat in vec3 LightColorDirect; // This needs to be initialized in the vertex sta
 #include "/generic/shadow/vl.glsl"
 #include "/generic/sky.glsl"
 #include "/generic/fog.glsl"
-#include "/generic/clouds.glsl"
 #include "/generic/post/taa.glsl"
 
 in vec2 texcoord;
@@ -91,11 +90,10 @@ vec3 lens_flare() {
     return Color * dataBuf.SunVisibility * LightColorDirect;
 }
 
-/* RENDERTARGETS:0,6,7,10 */
+/* RENDERTARGETS:0,7,10 */
 layout(location = 0) out vec4 Color;
-layout(location = 1) out vec4 TemporalClouds;
-layout(location = 2) out vec4 TemporalVl;
-layout(location = 3) out vec4 ArmorGlint;
+layout(location = 1) out vec4 TemporalVl;
+layout(location = 2) out vec4 ArmorGlint;
 
 void main() {
     Color = texture(colortex0, texcoord);
@@ -106,10 +104,6 @@ void main() {
 
     vec3 SkyColor = get_sky(Pos.ViewN, false, Pos.PlayerN.y); 
     #ifdef DIMENSION_OVERWORLD
-        #ifdef CLOUDS
-            TemporalClouds = temporal_upscale_clouds(Pos.Screen, IsDH, ivec2(gl_FragCoord.xy), Pos.Player, Pos.PlayerN, colortex6);
-            Color.rgb = blend_vl(Color.rgb, TemporalClouds);
-        #endif
 
         #if VL_OVERWORLD_MODE == 1
             TemporalVl = temporal_upscale_vl(Pos.Screen, IsDH, ivec2(gl_FragCoord.xy), Pos.Player);
