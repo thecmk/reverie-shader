@@ -237,10 +237,9 @@ mat2x3 aerial_prespective_ld(vec3 StartPos, vec3 EndPos, vec3 ScreenPos, vec3 Pl
     #ifdef CLOUDS
         Shadowing *= 1-exp2(1-cloudCoverageVl);
     #endif
-    if(StartPos != vec3(0)) {
+    if(!ScreenspaceFallback) {
         Shadowing *= texture(colortex5, ScreenPos.xy).r; // Sample shadowmap at start position when doing vl in reflections
-    }
-    if(ScreenspaceFallback) {
+    } else {
         if(Shadowing > 1e-3) {
             Shadowing *= get_vl_shadowing(ScreenPos, sLightPosN, dither(ScreenPos.xy * resolution, true), IsDH, false);
         }

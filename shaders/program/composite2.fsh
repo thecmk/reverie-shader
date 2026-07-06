@@ -51,6 +51,7 @@ void main() {
             Mat.Normal = player_view(Mat.Normal, IsDH);
         }
 
+        // Refraction
         bool IsDH1;
         float Depth1 = get_depth_solid(texcoord, IsDH1);
         vec3 ViewPos1 = screen_view(vec3(Pos.Screen.xy, Depth1), IsDH1, true);
@@ -80,6 +81,17 @@ void main() {
             Color = texture(colortex0, Pos.Screen.xy);
         }
 
+        // Translucent blending
+        if(Depth != Depth1) {
+            Positions Pos1 = get_positions(texcoord, Depth1, IsDH1, true);
+            mat2x3 VlResult = do_vl(Pos.Player, Pos1.Player, Pos1.PlayerN, Pos1.Screen, Dither, LightColorDirect, IsDH1, VL_SAMPLES, false, false);
+            Color.rgb = blend_vl(Color.rgb, VlResult);
+
+            vec4 TranslucentData = texture(colortex12, texcoord);
+            Color.rgb = Color.rgb * (1-TranslucentData.a) + TranslucentData.rgb;
+        }
+
+        // Water
         if (Mat.Id == MATERIAL_WATER && isEyeInWater == 0) {
             vec3 PlayerPos1 = view_player(ViewPos1, IsDH);
             mat2x3 VlResult = do_water_vl(Pos.Player, PlayerPos1, Pos.PlayerN, Dither, LightColorDirect, vec3(Pos.Screen.xy, Depth1), IsDH1, 4, VL_WATER_RT);

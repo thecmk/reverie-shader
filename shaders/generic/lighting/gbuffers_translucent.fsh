@@ -37,7 +37,7 @@
     }
 #endif
 
-/* RENDERTARGETS:0,1,2,5 */
+/* RENDERTARGETS:12,1,2,5 */
 
 layout(location = 0) out vec4 Albedo;
 layout(location = 1) out vec4 buf1;
