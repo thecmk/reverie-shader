@@ -14,8 +14,10 @@ flat in vec3 LightColorDirect; // This needs to be initialized in the vertex sta
 #include "/generic/post/taa.glsl"
 
 
-/* RENDERTARGETS:0 */
+/* RENDERTARGETS:0,6 */
 layout(location = 0) out vec4 Color;
+layout(location = 1) out vec4 TemporalClouds;
+
 
 
 // Taken from spectrum: https://github.com/zombye/spectrum
@@ -31,6 +33,27 @@ vec3 refract2(vec3 I, vec3 N, vec3 NF, float eta) {
     }
 }
 
+void blend_clouds(inout vec4 Color, vec4 TemporalClouds, float Dist) {
+    if(Dist < 1e6) {
+        Color.rgb = blend_vl(Color.rgb, TemporalClouds);
+    }
+}
+
+void blend_translucents(inout vec4 Color, vec4 TranslucentData, mat2x3 TranslucentsVlResult, float Dist) {
+    if(Dist < 1e6) {
+        Color.rgb = blend_vl(Color.rgb, TranslucentsVlResult);
+        Color.rgb = Color.rgb * (1-TranslucentData.a) + TranslucentData.rgb;
+    }
+}
+
+
+void blend_water(inout vec4 Color, mat2x3 WaterVlResult, float Dist, float Fade) {
+    if(Dist < 1e6) {
+        Color.rgb = mix(Color.rgb, blend_vl(Color.rgb, WaterVlResult), Fade);
+    }
+}
+
+
 void main() {
     bool IsDH;
     float Depth = get_depth(texcoord, IsDH);
@@ -39,6 +62,8 @@ void main() {
     Depth = correct_hand_depth(Depth, IsDH, IsHand);
 
     float Dither = dither(gl_FragCoord.xy, true);
+
+    
 
     if (Depth < 1) {
         mat2x4 GbufferData = mat2x4(texture(colortex1, texcoord), texture(colortex2, texcoord));
@@ -54,11 +79,11 @@ void main() {
         // Refraction
         bool IsDH1;
         float Depth1 = get_depth_solid(texcoord, IsDH1);
-        vec3 ViewPos1 = screen_view(vec3(Pos.Screen.xy, Depth1), IsDH1, true);
+        Positions Pos1 = get_positions(texcoord, Depth1, IsDH1, true);
         if (Depth != Depth1 && Depth1 < 1) {
             vec3 RefractedDir = refract2(Pos.ViewN, Mat.Normal, Mat.FlatNormal, 0.7518);
 
-            vec3 RefractedPos = ViewPos1 + RefractedDir * distance(Pos.View, ViewPos1);
+            vec3 RefractedPos = Pos1.View + RefractedDir * distance(Pos.View, Pos1.View);
             vec3 ScreenPosRef = view_screen(RefractedPos, IsDH1, true);
 
             vec4 NewDepths;
@@ -72,7 +97,6 @@ void main() {
                 ScreenPosRef = Pos.Screen;
             else {
                 Depth1 = lerp(NewDepths.x, NewDepths.y, NewDepths.z, NewDepths.w, ScreenPosRef.xy);
-                ViewPos1 = screen_view(vec3(Pos.Screen.xy, Depth1), IsDH1, true);
             }
 
             Color = texture(colortex0, ScreenPosRef.xy);
@@ -82,20 +106,67 @@ void main() {
         }
 
         // Translucent blending
-        if(Depth != Depth1) {
-            Positions Pos1 = get_positions(texcoord, Depth1, IsDH1, true);
-            mat2x3 VlResult = do_vl(Pos.Player, Pos1.Player, Pos1.PlayerN, Pos1.Screen, Dither, LightColorDirect, IsDH1, VL_SAMPLES, false, false);
-            Color.rgb = blend_vl(Color.rgb, VlResult);
 
-            vec4 TranslucentData = texture(colortex12, texcoord);
-            Color.rgb = Color.rgb * (1-TranslucentData.a) + TranslucentData.rgb;
+        float _DistToClouds = 1e6, DistToWater = 1e6, DistToTranslucents = 1e6;
+        vec4 TranslucentData;
+        mat2x3 TranslucentsVlResult = mat2x3(0,0,0,1,1,1), WaterVlResult;
+
+        // Clouds
+        #ifdef CLOUDS
+            TemporalClouds = temporal_upscale_clouds(Pos1.Screen, IsDH, ivec2(gl_FragCoord.xy), Pos1.Player, Pos1.PlayerN, colortex6, _DistToClouds);
+        #endif   
+
+        // Translucents
+        if(Depth != Depth1) {
+            DistToTranslucents = length(Pos.Player) + 0.01; // bias fixes translucents underwater
+            TranslucentData = texture(colortex12, texcoord);
+            if(Mat.Id != MATERIAL_WATER && isEyeInWater == 1)
+                TranslucentsVlResult = do_vl(Pos.Player, Pos1.Player, Pos1.PlayerN, Pos1.Screen, Dither, LightColorDirect, IsDH1, VL_SAMPLES, false, false);
         }
 
         // Water
-        if (Mat.Id == MATERIAL_WATER && isEyeInWater == 0) {
-            vec3 PlayerPos1 = view_player(ViewPos1, IsDH);
-            mat2x3 VlResult = do_water_vl(Pos.Player, PlayerPos1, Pos.PlayerN, Dither, LightColorDirect, vec3(Pos.Screen.xy, Depth1), IsDH1, 4, VL_WATER_RT);
-            Color.rgb = mix(Color.rgb, blend_vl(Color.rgb, VlResult), Mat.chunkFade);
+        if (isEyeInWater == 0) {
+            float WaterDepthMax = min(length(Pos1.Player), uintBitsToFloat(texture(water_depth_maxSampler, texcoord).r));
+            if(WaterDepthMax > 0.0001) {
+                float WaterDepthMin = uintBitsToFloat(texture(water_depth_minSampler, texcoord).r);
+                if(length(Pos1.Player) > WaterDepthMin - 0.1) {
+                    DistToWater = WaterDepthMin;
+                    if(WaterDepthMax - WaterDepthMin < 0.1) WaterDepthMax = length(Pos1.Player);
+                    WaterVlResult = do_water_vl(Pos.PlayerN * WaterDepthMin, Pos.PlayerN * WaterDepthMax, Pos.PlayerN, Dither, LightColorDirect, vec3(Pos.Screen.xy, Depth1), IsDH1, 4, VL_WATER_RT);
+                }
+            }
+        }
+
+        // Actually blend
+        if (_DistToClouds >= DistToWater && _DistToClouds >= DistToTranslucents) {
+            blend_clouds(Color, TemporalClouds, _DistToClouds);
+            if (DistToWater >= DistToTranslucents) {
+                blend_water(Color, WaterVlResult, DistToWater, Mat.chunkFade);
+                blend_translucents(Color, TranslucentData, TranslucentsVlResult, DistToTranslucents);
+            } else {
+                blend_translucents(Color, TranslucentData, TranslucentsVlResult, DistToTranslucents);
+                blend_water(Color, WaterVlResult, DistToWater, Mat.chunkFade);
+            }
+        }
+        else if (DistToWater >= _DistToClouds && DistToWater >= DistToTranslucents) {
+            blend_water(Color, WaterVlResult, DistToWater, Mat.chunkFade);
+            if (_DistToClouds >= DistToTranslucents) {
+                blend_clouds(Color, TemporalClouds, _DistToClouds);
+                blend_translucents(Color, TranslucentData, TranslucentsVlResult, DistToTranslucents);
+            } else {
+                blend_translucents(Color, TranslucentData, TranslucentsVlResult, DistToTranslucents);
+                blend_clouds(Color, TemporalClouds, _DistToClouds);
+            }
+        }
+        else {
+            blend_translucents(Color, TranslucentData, TranslucentsVlResult, DistToTranslucents);
+            if (_DistToClouds >= DistToWater) {
+                blend_clouds(Color, TemporalClouds, _DistToClouds);
+                blend_water(Color, WaterVlResult, DistToWater, Mat.chunkFade);
+            } else {
+                blend_water(Color, WaterVlResult, DistToWater, Mat.chunkFade);
+                blend_clouds(Color, TemporalClouds, _DistToClouds);
+            }
         }
 
         bool IsMetal, IsHardcodedMetal;
@@ -168,6 +239,17 @@ void main() {
         }
     }
     else {
+        // If Depth is 1 then we just do clouds & sky
         Color = texture(colortex0, texcoord);
+
+        #ifdef CLOUDS
+            float _DistToClouds;
+            TemporalClouds = temporal_upscale_clouds(Pos.Screen, IsDH, ivec2(gl_FragCoord.xy), Pos.Player, Pos.PlayerN, colortex6, _DistToClouds);
+            Color.rgb = blend_vl(Color.rgb, TemporalClouds);
+        #endif   
     }
+
+    // Clear
+    // imageStore(water_depth_max, ivec2(gl_FragCoord.xy), uvec4(0));
+    // imageStore(water_depth_min, ivec2(gl_FragCoord.xy), uvec4(1e9));
 }

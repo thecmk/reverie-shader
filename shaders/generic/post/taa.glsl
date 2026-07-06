@@ -112,9 +112,9 @@ vec2 denoise_bent_normal(vec2 Color, vec3 ScreenPos, bool IsDH) {
     return Color;
 }
 
-vec4 temporal_upscale_clouds(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 PlayerPos, vec3 PlayerPosN, sampler2D Sampler) {
+vec4 temporal_upscale_clouds(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 PlayerPos, vec3 PlayerPosN, sampler2D Sampler, out float DistToCloudCurrent) {
     const int VOLUMETRICS_RES_INV = int(1 / VOLUMETRICS_RES);
-    float DistToCloudCurrent = texelFetch(image1Sampler, ivec2(FragCoord * VOLUMETRICS_RES), 0).r * farLod * 4;
+    DistToCloudCurrent = texelFetch(image1Sampler, ivec2(FragCoord * VOLUMETRICS_RES), 0).r * farLod * 4;
     float DepthToCloud = view_screen(player_view(PlayerPosN * DistToCloudCurrent, IsDH), IsDH, false).z;
 
     // Prevent clouds from clipping in front of objects
@@ -148,8 +148,6 @@ vec4 temporal_upscale_clouds(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Pl
     vec2 pixelOffset = 1.0 - abs(2.0 * fract(PrevCoord * resolution) - 1.0);
     float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.2 + 0.8;
     blendFactor *= OffcenterRejection;
-
-    // float ApparentMovement = distance(cameraPosition, previousCameraPosition) / DistToCloudCurrent;
 
     return mix(Color, PrevColor, blendFactor);
 }

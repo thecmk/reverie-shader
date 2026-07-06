@@ -103,6 +103,8 @@
     uniform sampler2D image0Sampler;
     uniform sampler2D image1Sampler;
     uniform sampler2D image2Sampler;
+    uniform usampler2D water_depth_minSampler;
+    uniform usampler2D water_depth_maxSampler;
     uniform sampler2D atm_transmittance_sampler;
     uniform sampler2D atm_skyview_sampler;
     uniform sampler2D atm_multi_scattering_sampler;
@@ -156,6 +158,8 @@
 layout(rgba16f) uniform restrict image2D image0;
 layout(rg8) uniform restrict image2D image1;
 layout(rgba16f) uniform restrict image2D image2;
+layout(r32ui) uniform restrict uimage2D water_depth_min;
+layout(r32ui) uniform restrict uimage2D water_depth_max;
 layout(rgba8) uniform restrict image2D atm_transmittance;
 layout(rgba8) uniform restrict image2D atm_skyview;
 layout(rgba16f) uniform restrict image2D atm_multi_scattering;

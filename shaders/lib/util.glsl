@@ -180,20 +180,20 @@ float max_depth_4x4(vec2 texcoord, out bool IsDH) {
  
     float a, b, c, d;
 
-    a = max_component(textureGatherOffset(depthtex0, texcoord, ivec2(-1, -1)));
-    b = max_component(textureGatherOffset(depthtex0, texcoord, ivec2(-1,  1)));
-    c = max_component(textureGatherOffset(depthtex0, texcoord, ivec2( 1, -1)));
-    d = max_component(textureGatherOffset(depthtex0, texcoord, ivec2( 1,  1)));
+    a = max_component(textureGatherOffset(depthtex1, texcoord, ivec2(-1, -1)));
+    b = max_component(textureGatherOffset(depthtex1, texcoord, ivec2(-1,  1)));
+    c = max_component(textureGatherOffset(depthtex1, texcoord, ivec2( 1, -1)));
+    d = max_component(textureGatherOffset(depthtex1, texcoord, ivec2( 1,  1)));
     IsDH = false;
 
     float D = max_component(vec4(a, b, c, d));
     #ifdef DISTANT_HORIZONS
         if(D >= 1) {
             IsDH = true;
-            a = max_component(textureGatherOffset(dhDepthTex0, texcoord, ivec2(-1, -1)));
-            b = max_component(textureGatherOffset(dhDepthTex0, texcoord, ivec2(-1,  1)));
-            c = max_component(textureGatherOffset(dhDepthTex0, texcoord, ivec2( 1, -1)));
-            d = max_component(textureGatherOffset(dhDepthTex0, texcoord, ivec2( 1,  1)));
+            a = max_component(textureGatherOffset(dhDepthTex1, texcoord, ivec2(-1, -1)));
+            b = max_component(textureGatherOffset(dhDepthTex1, texcoord, ivec2(-1,  1)));
+            c = max_component(textureGatherOffset(dhDepthTex1, texcoord, ivec2( 1, -1)));
+            d = max_component(textureGatherOffset(dhDepthTex1, texcoord, ivec2( 1,  1)));
             return max_component(vec4(a, b, c, d));
         }
     #endif

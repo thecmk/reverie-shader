@@ -101,6 +101,11 @@ layout(location = 3) out vec4 Shadow;
 
     if (DataIn.Id == MATERIAL_WATER) {
         Albedo = vec4(0);
+
+        // Water min & max depth
+        uint Len = floatBitsToUint(length(DataIn.ViewPos));
+        imageAtomicMin(water_depth_min, ivec2(gl_FragCoord.xy), Len);
+        imageAtomicMax(water_depth_max, ivec2(gl_FragCoord.xy), Len);
     }
 
     MaterialProperties Mat;
