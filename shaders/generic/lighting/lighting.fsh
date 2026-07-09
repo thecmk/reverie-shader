@@ -98,7 +98,11 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         float Porosity = Mat.SSS * 255.0 / 64.0;
         Mat.Albedo *= 1 - Porosity * 0.66 * Mat.Lightmap.y * wetness;
     }
-    bool DoSSS = SSSS > 0;
+    #ifdef DIMENSION_OVERWORLD
+        bool DoSSS = SSSS > 0;
+    #else
+        bool DoSSS = false;
+    #endif
 
     OutColor *= Mat.Albedo;
 

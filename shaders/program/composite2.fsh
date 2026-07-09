@@ -112,7 +112,7 @@ void main() {
         mat2x3 TranslucentsVlResult = mat2x3(0,0,0,1,1,1), WaterVlResult;
 
         // Clouds
-        #ifdef CLOUDS
+        #if (defined CLOUDS) && (defined DIMENSION_OVERWORLD)
             TemporalClouds = temporal_upscale_clouds(Pos1.Screen, IsDH, ivec2(gl_FragCoord.xy), Pos1.Player, Pos1.PlayerN, colortex6, _DistToClouds);
         #endif   
 
@@ -120,7 +120,7 @@ void main() {
         if(Depth != Depth1) {
             DistToTranslucents = length(Pos.Player) + 0.01; // bias fixes translucents underwater
             TranslucentData = texture(colortex12, texcoord);
-            if(Mat.Id != MATERIAL_WATER && isEyeInWater == 1)
+            if(Mat.Id != MATERIAL_WATER || isEyeInWater != 1)
                 TranslucentsVlResult = do_vl(Pos.Player, Pos1.Player, Pos1.PlayerN, Pos1.Screen, Dither, LightColorDirect, IsDH1, VL_SAMPLES, false, false);
         }
 
