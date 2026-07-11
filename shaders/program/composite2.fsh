@@ -120,20 +120,16 @@ void main() {
         if(Depth != Depth1) {
             DistToTranslucents = length(Pos.Player) + 0.01; // bias fixes translucents underwater
             TranslucentData = texture(colortex12, texcoord);
-            if(Mat.Id != MATERIAL_WATER || isEyeInWater != 1)
+            if(Mat.Id != MATERIAL_WATER)
                 TranslucentsVlResult = do_vl(Pos.Player, Pos1.Player, Pos1.PlayerN, Pos1.Screen, Dither, LightColorDirect, IsDH1, VL_SAMPLES, false, false);
         }
 
         // Water
         if (isEyeInWater == 0) {
-            float WaterDepthMax = min(length(Pos1.Player), uintBitsToFloat(texture(water_depth_maxSampler, texcoord).r));
-            if(WaterDepthMax > 0.0001) {
-                float WaterDepthMin = uintBitsToFloat(texture(water_depth_minSampler, texcoord).r);
-                if(length(Pos1.Player) > WaterDepthMin - 0.1) {
-                    DistToWater = WaterDepthMin;
-                    if(WaterDepthMax - WaterDepthMin < 0.1) WaterDepthMax = length(Pos1.Player);
-                    WaterVlResult = do_water_vl(Pos.PlayerN * WaterDepthMin, Pos.PlayerN * WaterDepthMax, Pos.PlayerN, Dither, LightColorDirect, vec3(Pos.Screen.xy, Depth1), IsDH1, 4, VL_WATER_RT);
-                }
+            float WaterDepthMin = uintBitsToFloat(texture(water_depth_minSampler, texcoord).r);
+            if(WaterDepthMin < length(Pos1.Player)) {
+                DistToWater = WaterDepthMin - 0.1;
+                WaterVlResult = do_water_vl(Pos.PlayerN * WaterDepthMin, Pos1.Player, Pos.PlayerN, Dither, LightColorDirect, vec3(Pos.Screen.xy, Depth1), IsDH1, 4, VL_WATER_RT);
             }
         }
 

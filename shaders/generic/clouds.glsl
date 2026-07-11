@@ -5,8 +5,8 @@ const float CLOUD_SCATTERING = CLOUD_EXTINCTION;
 
 // Multiple scattering approximation constants
 const float a_BASE = 0.5; // attenuation 
-const float b_BASE = 0.5; // contribution
-const float c_BASE = 0.5; // eccentricity attenuation
+const float b_BASE = 0.6; // contribution
+const float c_BASE = 0.4; // eccentricity attenuation
 const int MULTIPLE_SCATTERING_ORDERS = 4;
 
 void intersect_with_cloud_plane_light(vec3 WorldPos, inout vec3 EndPos, vec3 RayDir) {
@@ -21,13 +21,11 @@ void intersect_with_cloud_plane_light(vec3 WorldPos, inout vec3 EndPos, vec3 Ray
 float[MULTIPLE_SCATTERING_ORDERS] calc_mie_phase(float VdotL) {
     float[MULTIPLE_SCATTERING_ORDERS] MiePhase;
     float g = 1;
-    float gBack = -1 * 0.6;
 
     for(int i = 0; i < MULTIPLE_SCATTERING_ORDERS; i++) {
         MiePhase[i] = hg_draine(VdotL, g);
 
         g *= c_BASE;
-        gBack *= c_BASE;
     }
     
     return MiePhase;

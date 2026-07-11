@@ -37,14 +37,18 @@ mat2x3 nether_fog(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, vec3 ScreenPos, f
     vec3 PlayerPosC = StartPos + Dither * Step;
 
     float VdotL = dot(view_player(sLightPosN, false), PlayerPosN);
-    float MiePhase = cs_phase(VdotL, anisotropy * 0.4) * 0.75 + cs_phase(VdotL, -anisotropy * 0.3) * 0.25;
+    float MiePhase = cs_phase(VdotL, anisotropy * 0.7) * 0.75 + cs_phase(VdotL, -anisotropy * 0.3) * 0.25;
 
     float DensityConstant = DENSITY * StepSize;
 
     for (int i = 1; i <= StepCount; i++) {
         vec3 WorldPosC = PlayerPosC + cameraPosition;
 
-        float Density = noise_smoke(WorldPosC);
+        #ifdef DIMENSION_NETHER
+            float Density = noise_smoke(WorldPosC);
+        #else
+            float Density = noise_end(WorldPosC);
+        #endif
         Density *= height_falloff(WorldPosC.y, MAX_HEIGHT);
         Density *= DensityConstant;
         if (Density <= 0) {

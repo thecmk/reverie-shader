@@ -78,7 +78,7 @@ layout(location = 1) out vec4 buf2;
         float Dither = dither(gl_FragCoord.xy, true);
         vec3 CurrentPos = vec3(DataIn.LocalPos + Offset.xy * Dither, 0); 
         
-        for(int i = 0; i < StepCount && Height - CurrentPos.z > 1/255.0; i++) {
+        for(int i = 0; i < StepCount && Height - CurrentPos.z > 1./255.0; i++) {
             vec2 NewPos = from_local_pos(CurrentPos.xy);            
             Height = 1 - textureGrad(normals, NewPos, dCoordx, dCoordy).a;
             CurrentPos += Offset;
@@ -132,9 +132,7 @@ layout(location = 1) out vec4 buf2;
         #endif
     #endif
 
-    Albedo.rgb = pow(Albedo.rgb, vec3(2.2));
-    Albedo.rgb *= glcolor.a;
-    Albedo.rgb = pow(Albedo.rgb, vec3(1 / 2.2));
+    Albedo.rgb *= pow(glcolor.a, 1 / 2.2);
 
     #ifdef GBUFFERS_ENTITIES
     Albedo.rgb = mix(Albedo.rgb, entityColor.rgb, entityColor.a);

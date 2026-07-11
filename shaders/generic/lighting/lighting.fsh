@@ -126,7 +126,7 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
             SunDirect *= LightColor * max(NdotL, 0) * Shadow;
 
             if (DoSSS) {
-                SSSS = (1 - SSSS) * 5;
+                SSSS = max(1, (1 - SSSS) * 5);
 
                 float Phase = max(ISOTROPIC_PHASE, cs_phase(dot(Pos.ViewN, sLightPosN), 0.6));
                 vec3 SSS = exp(-SSSS * abs(NdotL)) * Shadow; // Simple SSS, from shadow blur or ss shadows

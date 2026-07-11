@@ -90,6 +90,5 @@ void main() {
     //     Color.rgb = vec3(pow(Color.rgb, vec3(1 / 2.2)));
     // }
     // Color.rgb = vec3(texture(colortex11, texcoord).rgb);
-    imageStore(water_depth_max, ivec2(gl_FragCoord.xy), uvec4(0));
     imageStore(water_depth_min, ivec2(gl_FragCoord.xy), uvec4(floatBitsToUint(1e6)));
 }

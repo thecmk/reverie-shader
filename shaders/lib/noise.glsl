@@ -88,6 +88,12 @@ float noise_smoke(vec3 p) {
     return Detail * 1.5;
 }
 
+float noise_end(vec3 p) {
+    float Noise = texture(worleyNoiseTexture, (p - frameTimeCounter * 2) / 64).r;
+    Noise *= texture(worleyNoiseTexture, (p + frameTimeCounter) / 128).r;
+    return Noise;
+}
+
 
 vec2 hash2(vec2 p) {
     p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
