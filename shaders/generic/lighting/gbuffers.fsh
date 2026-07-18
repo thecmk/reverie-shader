@@ -154,7 +154,7 @@ layout(location = 1) out vec4 buf2;
 
     Mat.Lightmap = DataIn.lmcoord;
     if(Mat.Lightmap.y > 1 / 255.0)
-        Mat.Lightmap += bayer8(gl_FragCoord.xy) / 255.0;
+        Mat.Lightmap.y += bayer8(gl_FragCoord.xy) / 255.0;
 
     #ifdef GBUFFERS_SPIDEREYES
         Mat.Lightmap.y = 0; // Make spider eyes not affected by skylight

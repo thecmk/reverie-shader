@@ -9,14 +9,13 @@ flat in float Material;
 in vec3 PlayerPos;
 
 #ifdef RSM
-    /* RENDERTARGETS:0,2,1 */
+    /* RENDERTARGETS:0,1 */
 #else
-    /* RENDERTARGETS:0,2 */
+    /* RENDERTARGETS:0 */
 #endif
 layout(location = 0) out vec4 Color;
-layout(location = 1) out vec4 MaterialBuf;
 #ifdef RSM
-    layout(location = 2) out vec4 ShadowNormal;
+    layout(location = 1) out vec4 ShadowNormal;
 #endif
 
 void main() {
@@ -35,5 +34,4 @@ void main() {
     #ifdef RSM
         ShadowNormal.rg = encodeUnitVector(Normal) * 0.5 + 0.5;
     #endif
-    MaterialBuf.r = 0;
 }

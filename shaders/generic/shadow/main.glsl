@@ -170,11 +170,7 @@ vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float 
     }
 
     
-    vec2 Offset = vec2(cos(Dither), sin(Dither));
-    mat2 RotationOffset = mat2(
-            Offset.x, Offset.y,
-            -Offset.y, Offset.x
-        );
+    mat2 RotationOffset = rotation_mat(Dither);
 
     float PenumbraSize;
     #if SHADOW_FILTER == 2

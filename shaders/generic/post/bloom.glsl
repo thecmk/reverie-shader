@@ -27,15 +27,12 @@ vec3 blur6x6(sampler2D image, vec2 texcoord) {
 
 // 5 texture samples instead of 9
 vec4 blur3x3(sampler2D image, vec2 texcoord) {
-    vec4 Color = vec4(0);
-    vec2 Off1 = vec2(-0.3333, 1.0) * resolutionInv;
-    vec2 Off2 = vec2(1.0, 0.3333) * resolutionInv;
-    Color += textureLod(image, texcoord, 0) * 0.25;
-    Color += textureLod(image, texcoord + Off1, 0) * 0.1875;
-    Color += textureLod(image, texcoord - Off1, 0) * 0.1875;
-    Color += textureLod(image, texcoord + Off2, 0) * 0.1875;
-    Color += textureLod(image, texcoord - Off2, 0) * 0.1875;
-    return Color;
+    vec2 d = 0.66 * resolutionInv;
+    vec4 Color = texture(image, texcoord + vec2(-d.x, -d.y));
+    Color +=     texture(image, texcoord + vec2( d.x, -d.y));
+    Color +=     texture(image, texcoord + vec2(-d.x,  d.y));
+    Color +=     texture(image, texcoord + vec2( d.x,  d.y));
+    return Color * 0.25;
 }
 
 

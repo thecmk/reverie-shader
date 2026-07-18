@@ -15,9 +15,10 @@ vec3 rsm(vec3 PlayerPos, vec3 Normal, vec3 LightColor) {
 
     vec2 Pos = gl_FragCoord.xy;
     float Dither = blue_noise(Pos, true).r * TAU;
+    mat2 RotationMat = rotation_mat(Dither);
     
     for (int i = 1; i <= RSM_SAMPLE_COUNT; i++) {
-        vec2 Offset = rotate(vogel_disk[i], Dither) * shadowTexSize * 96;
+        vec2 Offset = (RotationMat * vogel_disk[i]) * shadowTexSize * 96;
         
         Offset *= sign(dot(Offset, ShadowNormal.xy));
 

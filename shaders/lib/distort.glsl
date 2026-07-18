@@ -9,6 +9,10 @@ vec3 distort(vec3 pos) {
     return vec3(pos.xy / factor, pos.z * 0.2);
 }
 
+vec3 distort(vec3 pos, float factorInv) {
+    return vec3(pos.xy * factorInv, pos.z * 0.2);
+}
+
 vec3 undistort(vec3 pos) {
     float factor = get_distort_factor(pos.xy);
     return vec3(pos.xy * factor, pos.z / 0.2);

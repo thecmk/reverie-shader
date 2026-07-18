@@ -2,14 +2,17 @@ float saturate(float x) {
     return clamp(x, 0, 1);
 }
 
-vec2 rotate(vec2 X, float Ang) {
+mat2 rotation_mat(float Ang) {
     float s = sin(Ang);
     float c = cos(Ang);
-    mat2 RotationMat = mat2(
+    return mat2(
             c, s,
             -s, c
         );
-    return RotationMat * X;
+}
+
+vec2 rotate(vec2 X, float Ang) {
+    return rotation_mat(Ang) * X;
 }
 
 float get_depth_solid(vec2 ScreenPos, out bool IsDH) {
