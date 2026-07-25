@@ -35,7 +35,7 @@ bool raytrace(vec3 ScreenPos, vec3 ViewPos, vec3 Dir, bool IsDH, float Dither, o
     Offset *= MinLen;
 
     RayPos = ScreenPos + Offset * Dither;
-    for (int i = 1; i <= Steps; i++) {
+    for(int i = 1; i <= Steps; i++) {
         float RealDepth = get_depth_solid(RayPos.xy, IsDH);
         if (RealDepth < 0.56) {
             break;

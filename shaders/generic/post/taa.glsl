@@ -116,6 +116,7 @@ vec4 temporal_upscale_clouds(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Pl
     const int VOLUMETRICS_RES_INV = int(1 / VOLUMETRICS_RES);
     DistToCloudCurrent = texelFetch(image1Sampler, ivec2(FragCoord * VOLUMETRICS_RES), 0).r * farLod * 4;
     float DepthToCloud = view_screen(player_view(PlayerPosN * DistToCloudCurrent, IsDH), IsDH, false).z;
+    DepthToCloud = min(1, DepthToCloud); // It can sometimes go over 1 with DH (maybe float imprecision?)
 
     // Prevent clouds from clipping in front of objects
     if(DepthToCloud > ScreenPos.z && ScreenPos.z < 1) return vec4(0, 0, 0, 1);
@@ -177,8 +178,10 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
             float DepthUsedInPrevPass = get_depth(OffsetFragPos * resolutionInv, IsDHInPrevPass);
             DepthUsedInPrevPass = l_depth(DepthUsedInPrevPass, IsDHInPrevPass);
             // Reduces pixelation
-            float D = 1 - distance(FragCoordInPrevPass + (fract(ScreenPos.xy * resolution * VOLUMETRICS_RES) - 0.5) * VOLUMETRICS_RES_INV, OffsetFragPos) * VOLUMETRICS_RES / sqrt(2) * 0.66;
-            float Factor = max(1e-6, D - min(1, abs(DepthL - DepthUsedInPrevPass) * 0.33));
+            float DistFromCenter = 1 - distance(FragCoordInPrevPass + (fract(ScreenPos.xy * resolution * VOLUMETRICS_RES) - 0.5) * VOLUMETRICS_RES_INV, OffsetFragPos) * VOLUMETRICS_RES / sqrt(2) * 0.66;
+            float DepthDiff = abs(DepthL - DepthUsedInPrevPass) * 0.33;
+            DepthDiff *= IsDHInPrevPass ? 10 : 1; // I should use dhNearPlane to linearize depth, but it seems to be broken
+            float Factor = max(1e-6, DistFromCenter - min(1, DepthDiff));
             Color += texelFetch(image2Sampler, ivec2(OffsetFragPos * VOLUMETRICS_RES), 0) * Factor;
             TotalFactor += Factor;
         }
