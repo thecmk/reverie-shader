@@ -9,8 +9,6 @@ out Data {
     #if (defined PBR_POM) && (defined GBUFFERS_TERRAIN)
         flat vec2 AtlasScale;
         flat vec2 AtlasOffset;
-        vec2 LocalPos;
-        vec3 TangentPos;
     #endif
 } DataOut;
 
@@ -65,7 +63,5 @@ void init_generic() {
         vec2 midcoord = (gl_TextureMatrix[0] *  mc_midTexCoord).xy;
         DataOut.AtlasScale = abs(DataOut.texcoord - midcoord) * 2;
         DataOut.AtlasOffset = min(DataOut.texcoord, 2 * midcoord - DataOut.texcoord);
-        DataOut.LocalPos = sign(DataOut.texcoord - midcoord) * 0.5 + 0.5;
-        DataOut.TangentPos = view_player(DataOut.ViewPos, false) * get_tbn_matrix();
     #endif
 }

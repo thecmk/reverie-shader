@@ -194,7 +194,12 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
     float PrevDepth = texture(colortex8, PrevCoord).r;
 
     float DepthQuantized = l_depth(quantize_16bit(ScreenPos.z), IsDH);
-    float blendFactor = 0.88 * exp(-abs(l_depth(PrevDepth, IsDH) - DepthQuantized) * 0.5);
+    float blendFactor = 0.92 * exp(-abs(l_depth(PrevDepth, IsDH) - DepthQuantized) * 0.5);
+
+    vec2 pixelOffset = 1.0 - abs(2.0 * fract(PrevCoord * resolution) - 1.0);
+    float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.15 + 0.85;
+    blendFactor *= OffcenterRejection;
+
     
     return mix(Color, PrevColor, blendFactor);
 }

@@ -12,8 +12,6 @@ in Data {
     #if (defined PBR_POM) && (defined GBUFFERS_TERRAIN)
         flat vec2 AtlasScale;
         flat vec2 AtlasOffset;
-        vec2 LocalPos;
-        vec3 TangentPos;
     #endif
 } DataIn;
 #else
@@ -27,8 +25,6 @@ in Data {
         #if (defined PBR_POM) && (defined GBUFFERS_TERRAIN)
             vec2 AtlasScale;
             vec2 AtlasOffset;
-            vec2 LocalPos;
-            vec3 TangentPos;
         #endif
         float chunkFade;
     } DataIn;
@@ -57,11 +53,42 @@ layout(location = 0) out vec4 buf1;
 layout(location = 1) out vec4 buf2;
 
 #if (defined PBR_POM) && (defined GBUFFERS_TERRAIN)
+    vec2 to_local_pos(vec2 texcoord) {
+        return (texcoord - DataIn.AtlasOffset) / DataIn.AtlasScale; 
+    }
+
     vec2 from_local_pos(vec2 LocalPos) {
         return fract(LocalPos) * DataIn.AtlasScale + DataIn.AtlasOffset;
     }
 
+    // Code by @geforcelegend in #snippets
+    mat3 get_tbn(out vec2 TexScale) {
+        vec2 dCoordDX = dCoordx;
+        vec2 dCoordDY = dCoordy;
+
+        vec3 dPosDX = dFdx(DataIn.ViewPos);
+        vec3 dPosDY = dFdy(DataIn.ViewPos);
+
+        vec3 normal = cross(dPosDX, dPosDY);
+
+        vec3 tangentHelper = dPosDY * dCoordDX.x - dPosDX * dCoordDY.x;
+        vec3 tangent = cross(tangentHelper, normal) / dot(tangentHelper, tangentHelper);
+
+        vec3 bitangentHelper = dPosDY * dCoordDX.y - dPosDX * dCoordDY.y;
+        vec3 bitangent = cross(bitangentHelper, normal) / dot(bitangentHelper, bitangentHelper);
+
+        float tangentLen = inversesqrt(dot(tangent, tangent));
+        float bitangentLen = inversesqrt(dot(bitangent, bitangent));
+
+        mat3 tbnMatrix = mat3(tangent * tangentLen, bitangent * bitangentLen, normalize(normal));
+        TexScale = vec2(tangentLen, bitangentLen);
+        return tbnMatrix;
+    }
+
     vec2 pom() {
+        vec2 _TexScale;
+        mat3 TBN = get_tbn(_TexScale);
+        
         // Distance fade
         float Dist = len2(DataIn.ViewPos);
         if(Dist > pow2(12)) return DataIn.texcoord;
@@ -71,23 +98,24 @@ layout(location = 1) out vec4 buf2;
             return DataIn.texcoord;
         }
 
-        int StepCount = POM_STEP_COUNT;//int(POM_STEP_COUNT * (1 - dot(DataIn.TBN[2], -normalize(DataIn.ViewPos)) * 0.66));
+        int StepCount = POM_STEP_COUNT;
 
-        vec3 TangentPos = normalize(DataIn.TangentPos);
+
+        vec3 TangentPos = normalize(DataIn.ViewPos * TBN);
         vec3 Offset = vec3(TangentPos.xy / -TangentPos.z * POM_MAX_DEPTH, 1) / StepCount;
+        Offset.xy *= _TexScale / DataIn.AtlasScale;
         float Dither = dither(gl_FragCoord.xy, true);
-        vec3 CurrentPos = vec3(DataIn.LocalPos + Offset.xy * Dither, 0); 
+        vec3 CurrentPos = vec3(to_local_pos(DataIn.texcoord) + Offset.xy * Dither, 0); 
         
         for(int i = 0; i < StepCount && Height - CurrentPos.z > 1./255.0; i++) {
             vec2 NewPos = from_local_pos(CurrentPos.xy);            
             Height = 1 - textureGrad(normals, NewPos, dCoordx, dCoordy).a;
             CurrentPos += Offset;
         }
-
+        
         // Need to move back one here
-        vec2 Final = from_local_pos(CurrentPos.xy - Offset.xy);
-
-        return Final;
+        CurrentPos -= Offset;
+        return from_local_pos(CurrentPos.xy);
     }
 #endif
 
