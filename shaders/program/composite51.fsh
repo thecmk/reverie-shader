@@ -23,7 +23,7 @@ vec3 blur_dof(vec2 texcoord, float CoC) {
 	vec2 Radius = resolutionInv * CoC;
 
     for(int i = 0; i < 32; i++) {
-        vec2 Offset = vogel_disk[i] * Radius;
+        vec2 Offset = vogel_sample(i, n) * Radius;
 		float lod = log2(CoC * 0.3333);
         Sum += textureLod(colortex0, texcoord + Offset, lod).rgb;
     }

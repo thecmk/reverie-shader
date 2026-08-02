@@ -1,6 +1,6 @@
 #include "/generic/gtao.glsl"
 
-vec3 filter_floodfill(sampler3D Sampler, vec3 PlayerPos, vec3 FragPos, vec3 Normal) {
+vec3 filter_floodfill(sampler3D Sampler, vec3 FragPos) {
     vec3 Pos = FragPos / voxelDistance / vec3(2, 1, 2); 
     vec3 C = texture(Sampler, Pos).rgb; // Center
 
@@ -23,9 +23,9 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         if(is_in_voxel_range(PlayerPosAbs)) {
             vec3 VoxelData;
             if(frameCounter % 2 == 1) {
-                VoxelData = filter_floodfill(voxelImgSampler_a, Pos.Player, PlayerPosAbs, Mat.Normal);
+                VoxelData = filter_floodfill(voxelImgSampler_a, PlayerPosAbs);
             } else {
-                VoxelData = filter_floodfill(voxelImgSampler_b, Pos.Player, PlayerPosAbs, Mat.Normal);
+                VoxelData = filter_floodfill(voxelImgSampler_b, PlayerPosAbs);
             }
             VoxelData *= 12;
 

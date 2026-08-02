@@ -40,7 +40,5 @@ vec3 hardcoded_light_colors(float Id, vec3 FallbackColor) {
             Color = vec3(FallbackColor.r, min(1, FallbackColor.g + 0.3), 1);
     }
 
-    Color.rgb = mix(Color, FallbackColor, vec3(0.3, 0.25, 0));
-    
     return srgb_linear(hsv_to_rgb(Color));
 }

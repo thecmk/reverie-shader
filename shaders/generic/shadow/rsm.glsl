@@ -18,7 +18,7 @@ vec3 rsm(vec3 PlayerPos, vec3 Normal, vec3 LightColor) {
     mat2 RotationMat = rotation_mat(Dither);
     
     for (int i = 1; i <= RSM_SAMPLE_COUNT; i++) {
-        vec2 Offset = (RotationMat * vogel_disk[i]) * shadowTexSize * 96;
+        vec2 Offset = (RotationMat * vogel_sample(i, RSM_SAMPLE_COUNT)) * shadowTexSize * 64;
         
         Offset *= sign(dot(Offset, ShadowNormal.xy));
 

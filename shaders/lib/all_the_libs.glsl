@@ -9,7 +9,6 @@
 #include "lods.glsl"
 #include "atmosphere.glsl"
 #include "distort.glsl"
-#include "kernels.glsl"
 #include "packing.glsl"
 #include "tonemap.glsl"
 #include "materials.glsl"

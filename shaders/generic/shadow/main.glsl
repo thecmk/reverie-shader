@@ -47,7 +47,7 @@ vec3 pcf(float PenumbraSize, mat2 RotationOffset, vec3 ShadowPosUndistorted, out
     vec3 ShadowColorFinal = vec3(0);
     IsWater = 0;
     for (int i = 0; i < SAMPLE_COUNT; i++) {
-        vec2 OffsetP = (RotationOffset * vogel_disk[i]) * PenumbraSize;
+        vec2 OffsetP = (RotationOffset * vogel_sample(i, SAMPLE_COUNT)) * PenumbraSize;
         vec3 ShadowPosD = ShadowPosUndistorted + vec3(OffsetP, 0);
         ShadowPosD = distort(ShadowPosD);
 
@@ -68,7 +68,7 @@ float pcss(vec3 ShadowPosUndistorted, mat2 RotationOffset, bool DoSSS, out float
     MaxRadius *= DoSSS ? 7 : 1;
 
     for (int i = 0; i < 8; i++) {
-        vec2 OffsetP = (RotationOffset * vogel_disk[i]) * MaxRadius * shadowTexSize;
+        vec2 OffsetP = (RotationOffset * vogel_sample(i, 8)) * MaxRadius * shadowTexSize;
         vec2 ShadowPosD = ShadowPosUndistorted.xy + OffsetP;
         ShadowPosD = distort(vec3(ShadowPosD, 0)).xy;
         ShadowPosD = ShadowPosD * 0.5 + 0.5;

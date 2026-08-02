@@ -1,7 +1,7 @@
 // Implementation pretty much entirely from /u/Kvaleya: https://pastebin.com/bKxFnN5i
 
 #define GTAO_LIMIT 100
-#define GTAO_RADIUS 3.0
+#define GTAO_RADIUS 2.0
 #define GTAO_FALLOFF 1.0
 #define GTAO_THICKNESSMIX 0.2
 #define GTAO_MAX_STRIDE 32
@@ -83,7 +83,7 @@ float ssao(vec3 Normal, vec3 ViewPos, bool IsDH) {
     Dither *= 2 * PI;
 
     for (int i = 0; i < 8; i++) {
-        vec3 Sample = vec3(rotate(vogel_disk[i], Dither) * (1 + float(IsDH)), 0);
+        vec3 Sample = vec3(rotate(vogel_sample(i, 8), Dither) * (1 + float(IsDH)), 0);
         Sample *= sign(dot(Normal, Sample));
         Sample += Normal * 0.05;
         Sample += ViewPos;

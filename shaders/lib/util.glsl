@@ -265,6 +265,16 @@ vec3 from_spherical(vec2 uv) {
     return dir;
 }
 
+// https://www.4rknova.com/blog/2017/01/01/vogel
+vec2 vogel_sample(float i, float SampleCount) {
+    const float GOLDEN_ANGLE = 2.39996322972865332;
+
+    float r = sqrt((i+.5) / SampleCount);
+    float t = i * GOLDEN_ANGLE;
+
+    return r * vec2(cos(t), sin(t));
+}
+
 float quantize_16bit(float X) {
     return floor(X * 65535.0 + 0.5) / 65535.0;
 }
