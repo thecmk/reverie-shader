@@ -12,9 +12,9 @@ flat in vec3 LightColorDirect; // This needs to be initialized in the vertex sta
 #include "/generic/post/taa.glsl"
 
 
-/* RENDERTARGETS:5,3 */
-layout(location = 0) out vec4 BentNormalOut;
-layout(location = 1) out vec4 GIDenoise;
+/* RENDERTARGETS:3,5 */
+layout(location = 0) out vec4 GIDenoise;
+layout(location = 1) out vec4 BentNormalOut;
 
 
 void main() {
@@ -31,9 +31,8 @@ void main() {
         vec3 BentNormal;
         #if AO_MODE == 2
             Gtao = gtao(Pos, IsDH, Mat.Normal, BentNormal);
+            BentNormalOut.zw = encodeUnitVector(view_player(BentNormal, IsDH)) * 0.5 + 0.5;
         #endif
-
-        BentNormalOut.zw = encodeUnitVector(view_player(BentNormal, IsDH)) * 0.5 + 0.5;
 
         vec3 Rsm = vec3(0);
         #ifdef RSM
@@ -45,6 +44,6 @@ void main() {
         GIDenoise = vec4(Rsm.rgb, 1 - Gtao);
     }
     else {
-        GIDenoise = vec4(0, 0, 0, 1);
+        GIDenoise = vec4(0, 0, 0, 0);
     }
 }

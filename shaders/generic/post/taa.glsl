@@ -1,23 +1,23 @@
 // https://discord.com/channels/237199950235041794/525510804494221312/955458285367066654
-vec3 clipAABB(vec3 prevColor, vec3 minColor, vec3 maxColor) {
-    vec3 pClip = 0.5 * (maxColor + minColor); // Center
-    vec3 eClip = 0.5 * (maxColor - minColor); // Size
+vec4 clipAABB(vec4 prevColor, vec4 minColor, vec4 maxColor) {
+    vec4 pClip = 0.5 * (maxColor + minColor); // Center
+    vec4 eClip = 0.5 * (maxColor - minColor); // Size
 
-    vec3 vClip = prevColor - pClip;
-    vec3 aUnit = abs(vClip / eClip);
+    vec4 vClip = prevColor - pClip;
+    vec4 aUnit = abs(vClip / eClip);
     float denom = max(aUnit.x, max(aUnit.y, aUnit.z));
 
     return denom > 1.0 ? pClip + vClip / denom : prevColor;
 }
 
-vec3 neighbourhoodClipping(sampler2D currTex, vec3 CurrentColor, vec3 prevColor, out vec3 maxColor, ivec2 FragCoord) {
-    vec3 minColor = CurrentColor;
+vec4 neighbourhoodClipping(sampler2D currTex, vec4 CurrentColor, vec4 prevColor, out vec4 maxColor, ivec2 FragCoord) {
+    vec4 minColor = CurrentColor;
     maxColor = CurrentColor;
 
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
             if (x == y && x == 0) continue;
-            vec3 color = texelFetch2D(currTex, ivec2(FragCoord + vec2(x, y)), 0).rgb;
+            vec4 color = texelFetch2D(currTex, ivec2(FragCoord + vec2(x, y)), 0);
             minColor = min(minColor, color);
             maxColor = max(maxColor, color);
         }
@@ -49,8 +49,8 @@ vec3 TAA(vec3 Color, ivec2 FragCoord, vec2 Texcoord) {
     vec3 PrevColor = texture_catmullrom_fast(colortex4, PrevCoord).rgb;
     if (PrevColor == vec3(0) || any(isnan(PrevColor))) return Color;
 
-    vec3 ClippingMaxColor;
-    vec3 ClampedColor = neighbourhoodClipping(colortex0, Color, PrevColor, ClippingMaxColor, FragCoord);
+    vec4 ClippingMaxColor;
+    vec3 ClampedColor = neighbourhoodClipping(colortex0, vec4(Color, 1), vec4(PrevColor, 1), ClippingMaxColor, FragCoord).rgb;
 
     #if AA_MODE != 2
     float blendFactor = 0.7 + 0.1 * exp(-length((PrevCoord - Texcoord) * resolution));
@@ -65,7 +65,7 @@ vec3 TAA(vec3 Color, ivec2 FragCoord, vec2 Texcoord) {
 
     #if AA_MODE == 2
     // Flicker reduction
-    blendFactor = clamp(blendFactor + pow2(get_luminance((PrevColor - Color) / ClippingMaxColor)) * 0.15, 0, 1);
+    blendFactor = clamp(blendFactor + pow2(get_luminance((PrevColor - Color) / ClippingMaxColor.rgb)) * 0.15, 0, 1);
     #endif
 
     Color = mix(Color, ClampedColor, blendFactor);
@@ -89,24 +89,6 @@ vec3 T2x(vec3 Color, ivec2 FragCoord, vec2 Texcoord) {
 
     vec2 velocity = (Texcoord - PrevCoord.xy) * resolution;
     float blendFactor = 0.5 * max(0, 1 - abs(l_depth(DepthPrev, IsDH) - l_depth(quantize_16bit(Depth)))) * exp(-len2(velocity));
-
-    Color = mix(Color, PrevColor, blendFactor);
-    return Color;
-}
-
-vec2 denoise_bent_normal(vec2 Color, vec3 ScreenPos, bool IsDH) {
-    vec2 PrevCoord = toPrevScreenPos(ScreenPos.xy, ScreenPos.z, IsDH, false).xy;
-
-    if (clamp(PrevCoord, 0, 1) != PrevCoord)
-        return Color;
-
-    vec2 PrevColor = texture(colortex8, PrevCoord).gb;
-    if (PrevColor == vec2(0)) return Color;
-
-    float DepthPrev = texture(colortex8, PrevCoord).r;
-
-    vec2 velocity = (ScreenPos.xy - PrevCoord.xy) * resolution;
-    float blendFactor = 0.95 * max(0, 1 - abs(l_depth(DepthPrev, IsDH) - l_depth(quantize_16bit(ScreenPos.z)))) * exp(-len2(velocity));
 
     Color = mix(Color, PrevColor, blendFactor);
     return Color;
@@ -202,4 +184,36 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
 
     
     return mix(Color, PrevColor, blendFactor);
+}
+
+vec4 temporal_denoise_gi(vec4 Color, vec3 ScreenPos, vec2 FragCoord, bool IsDH, vec2 BentNormalCurrent, out vec4 GIUpscaleData) {
+    vec2 PrevCoord = toPrevScreenPos(ScreenPos.xy, ScreenPos.z, IsDH, true).xy;
+
+    float PrevDepth = texture(colortex8, PrevCoord).r;
+    float DepthQuantized = l_depth(quantize_16bit(ScreenPos.z), IsDH);
+    if(clamp(PrevCoord, 0, 1) != PrevCoord || abs(l_depth(PrevDepth, IsDH) - DepthQuantized) > 0.5) {
+        GIUpscaleData.y = 1;
+        return Color;
+    }
+
+    vec4 PrevColor = texture(colortex13, PrevCoord * INDIRECT_RES_SCALE);
+
+    vec4 ClippingMaxColor;
+    vec4 ClampedColor = neighbourhoodClipping(colortex3, Color, PrevColor, ClippingMaxColor, ivec2(FragCoord));
+
+    vec4 GIData = texture(colortex14, PrevCoord * INDIRECT_RES_SCALE);
+    vec2 PrevBentNormal = GIData.zw;
+    uint PixelAge = min(64, floatBitsToUint(GIData.y)+1);
+    GIData.y = uintBitsToFloat(PixelAge);
+
+    float blendFactor = 1 - 1.0 / PixelAge;
+
+    vec2 velocity = (ScreenPos.xy - PrevCoord.xy) * resolution * INDIRECT_RES_SCALE;
+
+    vec2 pixelOffset = 1.0 - abs(2.0 * fract(PrevCoord * resolution) - 1.0);
+    float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.1 + 0.9;
+    blendFactor *= mix(OffcenterRejection, 1, exp(-len2(velocity)));
+
+    GIUpscaleData.zw = mix(BentNormalCurrent, PrevBentNormal, blendFactor);
+    return mix(Color, ClampedColor, blendFactor);
 }

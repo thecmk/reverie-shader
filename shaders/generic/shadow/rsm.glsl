@@ -18,7 +18,8 @@ vec3 rsm(vec3 PlayerPos, vec3 Normal, vec3 LightColor) {
     mat2 RotationMat = rotation_mat(Dither);
     
     for (int i = 1; i <= RSM_SAMPLE_COUNT; i++) {
-        vec2 Offset = (RotationMat * vogel_sample(i, RSM_SAMPLE_COUNT)) * shadowTexSize * 64;
+        vec2 Offset = (RotationMat * vogel_sample(i, RSM_SAMPLE_COUNT));
+        Offset = Offset * shadowTexSize * 64;
         
         Offset *= sign(dot(Offset, ShadowNormal.xy));
 
@@ -31,7 +32,7 @@ vec3 rsm(vec3 PlayerPos, vec3 Normal, vec3 LightColor) {
         OffsetPos.z = RealDepth;
 
         float Dist = distance(OffsetPos, ShadowPos);
-        float Flux = pow1_33_f(max(1 - Dist / (shadowTexSize * 96), 0));
+        float Flux = pow1_33_f(max(1 - Dist / (shadowTexSize * 64), 0));
 
         if (Flux < 0.0001) continue;
 
@@ -67,7 +68,7 @@ vec4 gi_denoise(sampler2D Sampler, vec2 Texcoord, vec2 direction, float CurrentD
 
     for (int i = -BLUR_SIZE; i <= BLUR_SIZE; i++) {
         vec2 OffsetUV = Texcoord + i * direction * MAGIC_NUMBER * resolutionInv;
-        vec4 OffsetColor = texture(Sampler, OffsetUV, 0);
+        vec4 OffsetColor = texture(Sampler, OffsetUV * INDIRECT_RES_SCALE, 0);
 
         float OffsetWeight = 1; //weights[abs(i)];
         
@@ -84,4 +85,37 @@ vec4 gi_denoise(sampler2D Sampler, vec2 Texcoord, vec2 direction, float CurrentD
         TotalWeight += OffsetWeight;
     }
     return color / TotalWeight;
+}
+
+vec3 sample_normal(vec2 FragCoord) {
+    return decodeUnitVector(unpackUnorm2x8(texelFetch(colortex1, ivec2(FragCoord), 0).w) * 2 - 1);
+}
+
+vec4 gi_bilateral_upscale(vec2 FragCoord, vec3 CurrentNormal, float CurrentDepth, bool IsDH) {
+    // return texelFetch(colortex13, ivec2(FragCoord * INDIRECT_RES_SCALE), 0);
+    vec2 PrevCoord = ((floor(FragCoord * INDIRECT_RES_SCALE) + 0.5) / INDIRECT_RES_SCALE);
+    CurrentNormal = view_player(CurrentNormal, IsDH);
+    CurrentDepth = l_depth(CurrentDepth, IsDH);
+
+    float TotalWeight = 0;
+    vec4 GI = vec4(0);
+    for(int i = -1; i <= 1; i++) {
+        for(int j = -1; j <= 1; j++) {
+            vec2 PrevCoordOffset = PrevCoord + vec2(i, j) / INDIRECT_RES_SCALE;
+
+            float PrevDepth = texture(depthtex0, PrevCoordOffset * resolutionInv).r;
+            PrevDepth = l_depth(PrevDepth, IsDH);
+            float Weight = pow4(clamp(1 - abs(CurrentDepth - PrevDepth), 0, 1));
+            
+            vec3 PrevNormal = sample_normal(PrevCoordOffset);
+            Weight *= pow4(max(0,dot(PrevNormal, CurrentNormal)));
+
+            Weight *= exp2(-(abs(i)+abs(j)));
+
+            GI += texelFetch(colortex13, ivec2(FragCoord * INDIRECT_RES_SCALE + vec2(i, j)), 0) * Weight;
+            TotalWeight += Weight;
+        }
+    }
+    if(TotalWeight < 0.001) return vec4(0,0,0,0);
+    return GI / TotalWeight;
 }
