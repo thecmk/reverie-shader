@@ -143,7 +143,7 @@ const bool VL_WATER_RT = bool(VL_WATER_MODE);
 #define AO_MODE 2 // [0 1 2]
 #define GTAO_SAMPLES 4 // [2 3 4 5 6 7 8]
 #define RSM
-#define RSM_SAMPLE_COUNT 64 // [8 12 16 20 24 28 32]
+#define RSM_SAMPLE_COUNT 48 // [16 24 32 48 64 72 80 88 96]
 #define INDIRECT_RES_SCALE 0.25 // [0.25 0.333333 0.5 0.75 1]
 
 #define PBR_NORMAL
@@ -213,7 +213,7 @@ const float voxelDistance = VOXEL_DISTANCE;
 
 
 #if (AO_MODE==2) || (defined RSM)
-    #define SPATIAL_DENOISING
+    #define INDIRECT_LIGHTING
 #endif
 
 #define SEASONAL_COLORS

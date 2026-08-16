@@ -112,6 +112,10 @@
     -1: "
       struct dataBuffer {
         vec3 SunColor;
+        vec3 SunColorVlClouds;
+        vec3 SunColorFlatClouds;
+        vec3 MoonColorVlClouds;
+        vec3 MoonColorFlatClouds;
         float DofFocus;
         vec3 MoonColor;
         float AvgLum;

@@ -1,3 +1,5 @@
+#define VOXY_TERRAIN
+
 #include "/lib/all_the_libs.glsl"
 
 #include "/generic/water.glsl"

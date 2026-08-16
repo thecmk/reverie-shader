@@ -19,12 +19,13 @@ layout(location = 1) out vec4 BentNormalOut;
 
 void main() {
     bool IsDH;
-    float Depth = get_depth(texcoord, IsDH);
+    vec2 Texcoord = ((floor(gl_FragCoord.xy) + 0.5) / INDIRECT_RES_SCALE - 0.5) * resolutionInv; // Lower left texel
+    float Depth = get_depth(Texcoord, IsDH);
 
-    BentNormalOut = texture(colortex5, texcoord);
+    BentNormalOut = texture(colortex5, Texcoord);
     if ((Depth > 0.56) && Depth < 1) {
-        Positions Pos = get_positions(texcoord, Depth, IsDH, true);
-        mat2x4 GbufferData = mat2x4(texture(colortex1, texcoord), texture(colortex2, texcoord));
+        Positions Pos = get_positions(Texcoord, Depth, IsDH, true);
+        mat2x4 GbufferData = mat2x4(texture(colortex1, Texcoord), texture(colortex2, Texcoord));
         MaterialProperties Mat = unpack_material(GbufferData, IsDH);
 
         float Gtao = 1;

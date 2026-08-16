@@ -31,14 +31,17 @@
                         uint((param.face >> 1) == 0),
                         uint((param.face >> 1) == 1)
                     ) *
-            (float(int(param.face) & 1) * 2.0 - 1.0);
+            (float(uint(param.face) & 1u) * 2.0 - 1.0);
         DataIn.TBN = tbn_normal(player_view(normal, true));
         DataIn.chunkFade = 1;
     }
 #endif
 
+#if (defined GBUFFERS_SPIDEREYES) || (defined GBUFFERS_DAMAGEDBLOCK) // No translucency sorting for these programs
+/* RENDERTARGETS:0,1,2,5 */
+#else
 /* RENDERTARGETS:12,1,2,5 */
-
+#endif
 layout(location = 0) out vec4 Albedo;
 layout(location = 1) out vec4 buf1;
 layout(location = 2) out vec4 buf2;
@@ -99,13 +102,15 @@ layout(location = 3) out vec4 Shadow;
     Albedo.rgb = mix(Albedo.rgb, entityColor.rgb, entityColor.a);
     #endif
 
-    if (DataIn.Id == MATERIAL_WATER) {
-        Albedo = vec4(0);
+    #ifndef VOXY_TERRAIN
+        if (DataIn.Id == MATERIAL_WATER) {
+            Albedo = vec4(0);
 
-        // Water min depth
-        uint Len = floatBitsToUint(length(DataIn.ViewPos));
-        imageAtomicMin(water_depth_min, ivec2(gl_FragCoord.xy), Len);
-    }
+            // Water min depth
+            uint Len = floatBitsToUint(length(DataIn.ViewPos));
+            imageAtomicMin(water_depth_min, ivec2(gl_FragCoord.xy), Len);
+        }
+    #endif
 
     MaterialProperties Mat;
     Mat.Albedo = Albedo.rgb;

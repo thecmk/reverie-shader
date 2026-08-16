@@ -4,6 +4,10 @@ in vec2 texcoord;
 
 #include "/generic/post/taa.glsl"
 
+vec3 sample_normal(vec2 FragCoord) {
+    return decodeUnitVector(texture(colortex14, FragCoord, 0).zw * 2 - 1) * 0.5 + 0.5;
+}
+
 vec3 apply_vignette(vec3 Color, vec2 Pos) {
     Pos = Pos - 0.5;
     float Strength = len2(Pos);
@@ -46,6 +50,11 @@ void main() {
     Color.rgb = textureLod(colortex0, texcoord / exp2(PIXELATION_AMOUNT), 0).rgb;
     #endif
 
+    vec2 PrevCoord = ((floor(gl_FragCoord.xy * INDIRECT_RES_SCALE)) / INDIRECT_RES_SCALE);
+    if(floor(gl_FragCoord.x) == floor(PrevCoord.x) || floor(gl_FragCoord.y) == floor(PrevCoord.y)) {
+        // Color.r *= 1.5;
+    }
+
     #ifdef COLOR_BALANCING
         Color.rgb = color_balance(Color.rgb);
     #endif
@@ -82,6 +91,7 @@ void main() {
     // Color.rgb = reinhard(texture_rgbm(atm_skyview_sampler, texcoord).rgb / 10);
     // Color.rgb = vec3(0, texture(colortex5, texcoord).zw);
     // Color.rgb = texture(atm_multi_scattering_sampler, texcoord).rgb;
+    // Color.rgb = sample_normal(texcoord * INDIRECT_RES_SCALE);
     // Color.rgb = texture(atm_skyview_sampler, texcoord).rgb;
     // Color.rgb = vec3(texture(image0Sampler, texcoord / 32).rgb)/5;
     // Color.rgb = vec3(isnan(Color.rgb));

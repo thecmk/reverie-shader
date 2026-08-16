@@ -227,6 +227,10 @@ const float shadowDistanceRenderMul = 1.0;
     float shadowDistanceDH = shadowDistance;
 #endif
 
+#if MC_VERSION < 12105 || MC_VERSION >= 12601
+    #define SEPARATE_ENTITY_DRAWS
+#endif
+
 /*
 const int colortex0Format = RGB16F;
 const int colortex1Format = RGBA16;

@@ -179,11 +179,28 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
     float blendFactor = 0.92 * exp(-abs(l_depth(PrevDepth, IsDH) - DepthQuantized) * 0.5);
 
     vec2 pixelOffset = 1.0 - abs(2.0 * fract(PrevCoord * resolution) - 1.0);
-    float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.15 + 0.85;
+    float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.1 + 0.9;
     blendFactor *= OffcenterRejection;
 
     
     return mix(Color, PrevColor, blendFactor);
+}
+
+// https://blog.demofox.org/2016/02/19/normalized-vector-interpolation-tldr/
+vec3 slerp(vec3 start, vec3 end, float percent) {
+     // Dot product - the cosine of the angle between 2 vectors.
+     float dot = dot(start, end);     
+     // Clamp it to be in the range of Acos()
+     // This may be unnecessary, but floating point
+     // precision can be a fickle mistress.
+     dot = clamp(dot, -1.0, 1.0);
+     // Acos(dot) returns the angle between start and end,
+     // And multiplying that by percent returns the angle between
+     // start and the final result.
+     float theta = acos(dot)*percent;
+     vec3 RelativeVec = normalize(end - start*dot); // Orthonormal basis
+     // The final result.
+     return ((start*cos(theta)) + (RelativeVec*sin(theta)));
 }
 
 vec4 temporal_denoise_gi(vec4 Color, vec3 ScreenPos, vec2 FragCoord, bool IsDH, vec2 BentNormalCurrent, out vec4 GIUpscaleData) {
@@ -191,7 +208,7 @@ vec4 temporal_denoise_gi(vec4 Color, vec3 ScreenPos, vec2 FragCoord, bool IsDH, 
 
     float PrevDepth = texture(colortex8, PrevCoord).r;
     float DepthQuantized = l_depth(quantize_16bit(ScreenPos.z), IsDH);
-    if(clamp(PrevCoord, 0, 1) != PrevCoord || abs(l_depth(PrevDepth, IsDH) - DepthQuantized) > 0.5) {
+    if(clamp(PrevCoord, 0, 1) != PrevCoord) {
         GIUpscaleData.y = 1;
         return Color;
     }
@@ -203,17 +220,25 @@ vec4 temporal_denoise_gi(vec4 Color, vec3 ScreenPos, vec2 FragCoord, bool IsDH, 
 
     vec4 GIData = texture(colortex14, PrevCoord * INDIRECT_RES_SCALE);
     vec2 PrevBentNormal = GIData.zw;
-    uint PixelAge = min(64, floatBitsToUint(GIData.y)+1);
-    GIData.y = uintBitsToFloat(PixelAge);
+
+    float PixelAge = min(64, float(floatBitsToUint(GIData.y)));
+
+    PixelAge *= max(0, 1 - abs(l_depth(PrevDepth, IsDH) - DepthQuantized));
+
+    vec2 pixelOffset = 1.0 - abs(2.0 * fract(PrevCoord * resolution) - 1.0);
+    float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.15 + 0.85;
+    PixelAge *= OffcenterRejection;
+    
+    PixelAge += 1;
+    GIData.y = uintBitsToFloat(uint(PixelAge));
 
     float blendFactor = 1 - 1.0 / PixelAge;
 
-    vec2 velocity = (ScreenPos.xy - PrevCoord.xy) * resolution * INDIRECT_RES_SCALE;
+    vec3 BNC = decodeUnitVector(BentNormalCurrent * 2 - 1);
+    vec3 BNP = decodeUnitVector(PrevBentNormal * 2 - 1);
 
-    vec2 pixelOffset = 1.0 - abs(2.0 * fract(PrevCoord * resolution) - 1.0);
-    float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.1 + 0.9;
-    blendFactor *= mix(OffcenterRejection, 1, exp(-len2(velocity)));
+    vec3 BNF = slerp(BNC, BNP, 0.9);
+    GIUpscaleData.zw = encodeUnitVector(BNF) * 0.5 + 0.5;
 
-    GIUpscaleData.zw = mix(BentNormalCurrent, PrevBentNormal, blendFactor);
     return mix(Color, ClampedColor, blendFactor);
 }

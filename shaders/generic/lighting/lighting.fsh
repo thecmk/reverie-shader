@@ -35,16 +35,12 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
     #endif
     
     #ifdef DEFERRED
-        #ifdef SPATIAL_DENOISING
-            vec4 GIDenoise;
+        #ifdef INDIRECT_LIGHTING
+            vec4 GIDenoise; vec2 _BentNormalEncoded;
             if(IsHand) {
                 GIDenoise = vec4(0, 0, 0, 0);
             } else {
-                #if INDIRECT_RES_SCALE != 1
-                    GIDenoise = gi_bilateral_upscale(gl_FragCoord.xy, Mat.Normal, Pos.Screen.z, IsDH);
-                #else
-                    GIDenoise = texture(colortex13, texcoord * INDIRECT_RES_SCALE);
-                #endif
+                GIDenoise = gi_bilateral_upscale(gl_FragCoord.xy, Mat.Normal, Pos.Screen.z, _BentNormalEncoded, IsDH);
             }
         #endif
     #endif
@@ -53,7 +49,7 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         // Ambient lighting
         vec3 BentNormal = 
         // #if AO_MODE == 2 && (defined DEFERRED)
-        //     !IsHand ? player_view(decodeUnitVector(texture(colortex5, texcoord * INDIRECT_RES_SCALE).zw * 2 - 1), false) : 
+        //     !IsHand ? player_view(decodeUnitVector(_BentNormalEncoded * 2 - 1), false) : 
         // #endif
             Mat.Normal;
         float NangUp = dot(gbufferModelView[1].xyz, BentNormal) * 0.5 + 0.5;

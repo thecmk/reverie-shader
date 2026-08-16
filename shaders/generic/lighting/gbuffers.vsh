@@ -19,7 +19,7 @@ attribute vec4 mc_midTexCoord;
 
 mat3 get_tbn_matrix() {
 	mat3 tbn;
-	tbn[0] = mat3(gbufferModelViewInverse) * normalize(gl_NormalMatrix * at_tangent.xyz);
+	tbn[0] = mat3(gbufferModelViewInverse) * normalize(gl_NormalMatrix * (at_tangent.xyz + vec3(1e-9, 0, 0)));
 	tbn[2] = mat3(gbufferModelViewInverse) * normalize(gl_NormalMatrix * gl_Normal);
 	tbn[1] = cross(tbn[0], tbn[2]) * sign(at_tangent.w);
 	return tbn;

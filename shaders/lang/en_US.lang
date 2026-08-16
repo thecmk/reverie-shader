@@ -118,7 +118,7 @@ option.WAVE_LEAVES=Wave Leaves
 option.CLOUDS=Clouds
 option.AURORA=Aurora Borealis
 option.AURORA.comment=Adds an aurora borealis effect at night, in cold biomes
-
+option.sunPathRotation=Sun Angle
 
 
 value.AA_MODE.0=None (TA only)

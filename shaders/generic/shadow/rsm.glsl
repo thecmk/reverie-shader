@@ -91,31 +91,34 @@ vec3 sample_normal(vec2 FragCoord) {
     return decodeUnitVector(unpackUnorm2x8(texelFetch(colortex1, ivec2(FragCoord), 0).w) * 2 - 1);
 }
 
-vec4 gi_bilateral_upscale(vec2 FragCoord, vec3 CurrentNormal, float CurrentDepth, bool IsDH) {
+vec4 gi_bilateral_upscale(vec2 FragCoord, vec3 CurrentNormal, float CurrentDepth, out vec2 BentNormal, bool IsDH) {
+    FragCoord = floor(FragCoord);
     // return texelFetch(colortex13, ivec2(FragCoord * INDIRECT_RES_SCALE), 0);
-    vec2 PrevCoord = ((floor(FragCoord * INDIRECT_RES_SCALE) + 0.5) / INDIRECT_RES_SCALE);
+    vec2 PrevCoord = ((floor(FragCoord * INDIRECT_RES_SCALE) + 0.25) / INDIRECT_RES_SCALE);
     CurrentNormal = view_player(CurrentNormal, IsDH);
     CurrentDepth = l_depth(CurrentDepth, IsDH);
 
     float TotalWeight = 0;
-    vec4 GI = vec4(0);
+    vec4 GI = vec4(0); BentNormal = vec2(0);
     for(int i = -1; i <= 1; i++) {
         for(int j = -1; j <= 1; j++) {
             vec2 PrevCoordOffset = PrevCoord + vec2(i, j) / INDIRECT_RES_SCALE;
 
-            float PrevDepth = texture(depthtex0, PrevCoordOffset * resolutionInv).r;
+            float PrevDepth = texelFetch(depthtex0, ivec2(PrevCoordOffset), 0).r;
             PrevDepth = l_depth(PrevDepth, IsDH);
-            float Weight = pow4(clamp(1 - abs(CurrentDepth - PrevDepth), 0, 1));
+            float Weight = pow4(clamp(2 - abs(CurrentDepth - PrevDepth), 0, 1));
             
             vec3 PrevNormal = sample_normal(PrevCoordOffset);
             Weight *= pow4(max(0,dot(PrevNormal, CurrentNormal)));
 
-            Weight *= exp2(-(abs(i)+abs(j)));
+            Weight *= max(0, 1 - distance(PrevCoordOffset, FragCoord) * INDIRECT_RES_SCALE * 0.66); // Reduce pixelation
 
             GI += texelFetch(colortex13, ivec2(FragCoord * INDIRECT_RES_SCALE + vec2(i, j)), 0) * Weight;
+            BentNormal += texelFetch(colortex5, ivec2(FragCoord * INDIRECT_RES_SCALE), 0).zw * Weight;
             TotalWeight += Weight;
         }
     }
+    BentNormal = texelFetch(colortex5, ivec2(FragCoord * INDIRECT_RES_SCALE), 0).zw;
     if(TotalWeight < 0.001) return vec4(0,0,0,0);
     return GI / TotalWeight;
 }

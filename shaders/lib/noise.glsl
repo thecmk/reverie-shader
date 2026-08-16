@@ -34,7 +34,7 @@ float noise_clouds_flat(vec3 p) {
     vec2 Displacement = D * 0.33;
 
     float Detail = texture(cloudNoise, p.xz * 0.001 + Displacement).r;
-    Detail = pow(Detail, cloudCoverageVl);
+    Detail = pow(Detail, cloudCoverageFlat);
 
     return Base * Detail;
 }
