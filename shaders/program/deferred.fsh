@@ -21,7 +21,7 @@ void main() {
     bool IsDH;
     vec2 Texcoord = ((floor(gl_FragCoord.xy) + 0.5) / INDIRECT_RES_SCALE - 0.5) * resolutionInv; // Lower left texel
     float Depth = get_depth(Texcoord, IsDH);
-
+    
     BentNormalOut = texture(colortex5, Texcoord);
     if ((Depth > 0.56) && Depth < 1) {
         Positions Pos = get_positions(Texcoord, Depth, IsDH, true);

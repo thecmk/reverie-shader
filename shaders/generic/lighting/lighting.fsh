@@ -9,10 +9,12 @@ vec3 filter_floodfill(sampler3D Sampler, vec3 FragPos) {
 
 vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoord, bool IsHand, out vec4 ShadowBuf) {
 
+    float NdotL;
     if (Mat.Id >= MATERIAL_TALL_PLANT_LOWER && Mat.Id <= MATERIAL_SHORT_PLANT) {
-        Mat.Normal = gbufferModelView[1].xyz; // upDirection
+        NdotL = dot(sLightPosN, gbufferModelView[1].xyz);
+    } else {
+        NdotL = dot(sLightPosN, Mat.Normal);
     }
-    float NdotL = dot(sLightPosN, Mat.Normal);
 
     Mat.Lightmap = pow4(Mat.Lightmap);
     Mat.Lightmap.x += Mat.Emissiveness * float(Mat.Emissiveness < 1);
@@ -36,7 +38,7 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
     
     #ifdef DEFERRED
         #ifdef INDIRECT_LIGHTING
-            vec4 GIDenoise; vec2 _BentNormalEncoded;
+            vec4 GIDenoise; vec3 _BentNormalEncoded;
             if(IsHand) {
                 GIDenoise = vec4(0, 0, 0, 0);
             } else {
@@ -48,9 +50,9 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
     #ifdef DIMENSION_OVERWORLD
         // Ambient lighting
         vec3 BentNormal = 
-        // #if AO_MODE == 2 && (defined DEFERRED)
-        //     !IsHand ? player_view(decodeUnitVector(_BentNormalEncoded * 2 - 1), false) : 
-        // #endif
+        #if AO_MODE == 2 && (defined DEFERRED)
+            !IsHand ? _BentNormalEncoded: 
+        #endif
             Mat.Normal;
         float NangUp = dot(gbufferModelView[1].xyz, BentNormal) * 0.5 + 0.5;
         float NangL = -view_player(BentNormal, true).x * 0.5 + 0.5;
