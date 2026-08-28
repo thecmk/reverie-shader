@@ -69,7 +69,8 @@
     "cameraPositionFract",
     "lightningBoltPosition",
     "windDirection",
-    "wetness"
+    "wetness",
+    "hideGUI"
   ],
 
   "samplers": {

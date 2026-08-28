@@ -22,7 +22,7 @@ void main() {
         sin(VangUp) * sin(VangL)
     );
 
-    float LdotU = view_player(sunPosN, false).y;
+    float LdotU = min(1, view_player(sunPosN, false).y);
     vec3 SunDir = vec3(sqrt(1 - pow2(LdotU)), LdotU, 0);
 
     vec3 Scattering = calc_atm_scatt(Origin, Dir, SunDir, 32, false, true).L;

@@ -146,6 +146,8 @@ vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float 
     #ifdef CLOUDS
         CloudShadow = pow4(cloud_shadows(PlayerPos + cameraPosition));
         ShadowFinal *= CloudShadow;
+    #else
+        CloudShadow = 1;
     #endif
 
     float Dither = dither(FragCoord, true) * TAU;
