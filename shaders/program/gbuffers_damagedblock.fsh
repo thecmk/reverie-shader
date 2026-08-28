@@ -5,10 +5,15 @@
 #include "/generic/water.glsl"
 #include "/generic/shadow/main.glsl"
 #include "/generic/lighting/lighting.fsh"
-#include "/generic/lighting/gbuffers_translucent.fsh"
 
+#ifdef SEPARATE_ENTITY_DRAWS
+#include "/generic/lighting/gbuffers_translucent.fsh"
 void main() {
     init_frag_translucent();
-    if(Albedo.a < 0.1) discard;
 }
-
+#else
+#include "/generic/lighting/gbuffers.fsh"
+void main() {
+    init_frag();
+}
+#endif

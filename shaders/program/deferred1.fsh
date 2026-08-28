@@ -24,7 +24,7 @@ void main() {
 			GIDenoise = temporal_denoise_gi(GI, Pos.Screen, gl_FragCoord.xy, IsDH, BentNormalEncoded, GIAux);
 		} else {
 			GIDenoise = vec4(0,0,0,0);
-			GIAux = vec4(0);
+			GIAux = vec4(0,1,0,0);
 		}
 	#endif
 }
