@@ -23,14 +23,12 @@ void main() {
     if(Depth > 0.56) {
         Positions Pos = get_positions(texcoord, Depth, IsDH, true);
 
-        float _DepthCloud = 1e6;
+        float _DepthCloud = 1e8;
         vec4 CloudData = get_clouds(Pos.Player, Pos.PlayerN, 32, cameraPosition, true, FragPos, Depth, _DepthCloud);
 
-        if(_DepthCloud < 1e6) {
+        if(_DepthCloud < 1e8) {
             _DepthCloud = _DepthCloud / farLod / 4;
         }
-
-        // _DepthCloud = reinhard(_DepthCloud);
 
         // Transmittance should default to 1
         CloudData.a = 1 - CloudData.a;
@@ -38,6 +36,6 @@ void main() {
         imageStore(image1, ivec2(gl_GlobalInvocationID.xy), vec4(_DepthCloud, 0, 0, 0));
     } else {
         imageStore(image0, ivec2(gl_GlobalInvocationID.xy), vec4(0,0,0,0));
-        imageStore(image1, ivec2(gl_GlobalInvocationID.xy), vec4(1e6, 0,0,0));
+        imageStore(image1, ivec2(gl_GlobalInvocationID.xy), vec4(1e8, 0,0,0));
     }
 }

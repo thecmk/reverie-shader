@@ -17,7 +17,6 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
     }
 
     Mat.Lightmap = pow4(Mat.Lightmap);
-    Mat.Lightmap.x += Mat.Emissiveness * float(Mat.Emissiveness < 1);
     vec3 LMColor = TorchlightColor;
     #if (defined COLORED_LIGHTS) && (!defined DH_TERRAIN) && (!defined VOXY_TERRAIN)
         vec3 PlayerPosAbs = get_voxel_pos(Pos.Player) + view_player(Mat.Normal, false) * 0.065;
@@ -31,8 +30,11 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
             }
             VoxelData *= 12;
 
-            float Fade = shadow_fade(Pos.Player, voxelDistance);
+            float Fade = shadow_fade(Pos.Player * vec3(1,2,1), voxelDistance);
             LMColor = mix(VoxelData.rgb, LMColor, Fade);
+
+            // float VoxelLum = get_luminance(LMColor);
+            // LMColor = mix(TorchlightColor, LMColor, linstep(0.0, 0.2, VoxelLum)); // Return to default color if there is no color
         }
     #endif
     
@@ -78,6 +80,7 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
     #endif
 
     SunA += LMColor * Mat.Lightmap.x;
+    SunA += Mat.Emissiveness * float(Mat.Emissiveness < 1);
     // Ao
     #if AO_MODE == 2 && (defined DEFERRED)
         SunA *= 1 - GIDenoise.a;

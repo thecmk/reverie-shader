@@ -3,6 +3,7 @@
 
 // Write to bloom buffer
 in vec2 texcoord;
+const bool colortex0MipmapEnabled = true;
 
 /* RENDERTARGETS:10 */
 layout(location = 0) out vec4 Color;

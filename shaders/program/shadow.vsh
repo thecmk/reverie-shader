@@ -36,7 +36,7 @@ void main() {
                     // Is light source
                     if(at_midBlock.w > 0.1) {
                         Color.rgb = hardcoded_light_colors(Material, Color.rgb); 
-                        Color.rgb = max(vec3(0), Color.rgb * (at_midBlock.w - 0.5) / 15);
+                        Color.rgb *= max(0, (at_midBlock.w - 0.5) / 15);
                         Color.rgb = pow2(Color.rgb);
                         if(frameCounter % 2 == 1) {
                             imageStore(voxelImg_a, PlayerPosAbs, vec4(Color.rgb, 0));

@@ -188,12 +188,14 @@ layout(location = 1) out vec4 buf2;
             Mat.Lightmap.y += bayer8(gl_FragCoord.xy) / 255.0;
     #endif
 
-    #ifdef GBUFFERS_SPIDEREYES
-        Mat.Lightmap.y = 0; // Make spider eyes not affected by skylight
-    #endif
-
     Mat.SSS = get_sss(texcoord);
     Mat.Emissiveness = get_emissiveness(texcoord);
+
+    #if (defined GBUFFERS_SPIDEREYES) || (defined GBUFFERS_TEXTURED)
+        Mat.Lightmap.x = 0;
+        Mat.Lightmap.y = eyeBrightnessSmooth.y / 240.0;
+        Mat.Emissiveness = 0.99;
+    #endif
 
     Mat.Smoothness = texture(specular, texcoord).r;
     Mat.F0 = texture(specular, texcoord).g;

@@ -86,7 +86,6 @@
     "worleyNoiseTexture": "sampler3D",
     "smaaAreaTexture": "sampler2D",
     "smaaSearchTexture": "sampler2D",
-    "windTexture": "sampler2D",
     "shadowtex0": "sampler2D",
     "shadowtex1": "sampler2D",
     "shadowcolor0": "sampler2D",

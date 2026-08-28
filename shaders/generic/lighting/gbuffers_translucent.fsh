@@ -138,6 +138,12 @@ layout(location = 3) out vec4 Shadow;
     Mat.SSS = get_sss(DataIn.texcoord);
     Mat.Emissiveness = get_emissiveness(DataIn.texcoord);
 
+    #if (defined GBUFFERS_SPIDEREYES) || (defined GBUFFERS_TEXTURED)
+        Mat.Lightmap.x = 0;
+        Mat.Lightmap.y = eyeBrightnessSmooth.y / 240.0;
+        Mat.Emissiveness = 0.9;
+    #endif
+
     Mat.Smoothness = texture(specular, DataIn.texcoord).r;
     Mat.F0 = texture(specular, DataIn.texcoord).g;
     Mat.Id = DataIn.Id;
