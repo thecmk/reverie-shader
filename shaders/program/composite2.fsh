@@ -14,9 +14,10 @@ flat in vec3 LightColorDirect; // This needs to be initialized in the vertex sta
 #include "/generic/post/taa.glsl"
 
 
-/* RENDERTARGETS:0,6 */
+/* RENDERTARGETS:0,6,12 */
 layout(location = 0) out vec4 Color;
 layout(location = 1) out vec4 TemporalClouds;
+layout(location = 2) out vec4 TranslucentClear;
 
 
 
@@ -246,6 +247,7 @@ void main() {
     }
 
     // Clear
+    TranslucentClear = vec4(0);
     // imageStore(water_depth_max, ivec2(gl_FragCoord.xy), uvec4(0));
     // imageStore(water_depth_min, ivec2(gl_FragCoord.xy), uvec4(1e9));
 }

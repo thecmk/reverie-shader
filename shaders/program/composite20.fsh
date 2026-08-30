@@ -5,8 +5,9 @@ in vec2 BloomTilePos;
 
 #include "/generic/post/bloom.glsl"
 
-/* RENDERTARGETS:0 */
+/* RENDERTARGETS:0,10 */
 layout(location = 0) out vec4 Color;
+layout(location = 1) out vec4 BloomClear;
 
 void main() {
     Color = texture(colortex0, texcoord);
@@ -19,4 +20,6 @@ void main() {
 
     Color.rgb += FinalBloom * (BLOOM_STRENGTH + float(isEyeInWater == 1) * 0.5 + 0.2 * (rainStrength * isOutdoorsSmooth) + WeatherColor);
     #endif
+
+    BloomClear = vec4(0); // Clear here because glClear is bugged on mesa(?)
 }
