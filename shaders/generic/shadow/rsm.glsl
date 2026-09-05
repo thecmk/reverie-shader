@@ -113,7 +113,7 @@ vec4 gi_bilateral_upscale(vec2 FragCoord, vec3 CurrentNormal, float CurrentDepth
 
             Weight *= max(0, 1 - distance(PrevCoordOffset, FragCoord) * INDIRECT_RES_SCALE * 0.66); // Reduce pixelation
 
-            GI += texelFetch(colortex13, ivec2(FragCoord * INDIRECT_RES_SCALE + vec2(i, j)), 0) * Weight;
+            GI += texelFetch(colortex3, ivec2(FragCoord * INDIRECT_RES_SCALE + vec2(i, j)), 0) * Weight;
             BentNormal += decodeUnitVector(texelFetch(colortex5, ivec2(FragCoord * INDIRECT_RES_SCALE + vec2(i, j)), 0).zw * 2 - 1) * Weight;
             TotalWeight += Weight;
         }

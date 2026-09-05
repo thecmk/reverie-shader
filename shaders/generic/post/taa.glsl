@@ -138,7 +138,7 @@ vec4 temporal_upscale_clouds(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Pl
     return mix(Color, PrevColor, blendFactor);
 }
 
-vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 PlayerPos) {
+vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 PlayerPos, out vec4 PixelAgeBuf) {
     const int VOLUMETRICS_RES_INV = int(1 / VOLUMETRICS_RES);
 
     vec2 PrevCoord = toPrevScreenPos(ScreenPos.xy, ScreenPos.z, IsDH, true).xy;
@@ -150,6 +150,7 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
         vec4 Color = texture(image2Sampler, ScreenPos.xy * VOLUMETRICS_RES);
         Color.a = 1 - Color.a;
         Color = max(Color, 0);
+        PixelAgeBuf.x = 1/255.0;
         return Color;
     }
 
@@ -178,44 +179,47 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
     vec4 PrevColor = texture(colortex7, PrevCoord);
     float PrevDepth = texture(colortex8, PrevCoord).r;
 
+    float PixelAgeRaw = texture(colortex14, PrevCoord).x;
+    float PixelAge = min(64, PixelAgeRaw * 255);
+
     float DepthQuantized = l_depth(quantize_16bit(ScreenPos.z), IsDH);
-    float blendFactor = 0.92 * exp(-abs(l_depth(PrevDepth, IsDH) - DepthQuantized) * 0.5);
+    PixelAge *= max(0, 1-abs(l_depth(PrevDepth, IsDH) - DepthQuantized) * 0.5);
 
     vec2 pixelOffset = 1.0 - abs(2.0 * fract(PrevCoord * resolution) - 1.0);
     float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.1 + 0.9;
-    blendFactor *= OffcenterRejection;
+    PixelAge *= OffcenterRejection;
+
+    PixelAge += 1;
+    PixelAgeBuf.x = PixelAge/255.0;
+
+    float blendFactor = 1 - 1.0 / PixelAge;
 
     
-    return mix(Color, PrevColor, blendFactor);
+    return mix(Color, PrevColor, blendFactor * 0.98);
 }
 
-vec4 temporal_denoise_gi(vec4 Color, vec3 ScreenPos, vec2 FragCoord, bool IsDH, vec2 BentNormalCurrent, out vec4 GIUpscaleData) {
+vec4 temporal_denoise_gi(vec4 Color, vec3 ScreenPos, vec2 FragCoord, bool IsDH, out vec4 PixelAgeBuf) {
     vec2 PrevCoord = toPrevScreenPos(ScreenPos.xy, ScreenPos.z, IsDH, true).xy;
 
     float PrevDepth = texture(colortex8, PrevCoord).r;
     float DepthQuantized = l_depth(quantize_16bit(ScreenPos.z), IsDH);
     if(clamp(PrevCoord, 0, 1) != PrevCoord) {
-        GIUpscaleData.y = 1;
+        PixelAgeBuf.y = 1 / 255.0;
         return Color;
     }
 
-    vec4 PrevColor = texture(colortex13, PrevCoord * INDIRECT_RES_SCALE);
+    vec4 PrevColor = texture(colortex13, PrevCoord);
 
     vec4 ClippingMaxColor;
     vec4 ClampedColor = neighbourhoodClipping(colortex3, Color, PrevColor, ClippingMaxColor, ivec2(FragCoord));
 
-    vec4 GIData = texture(colortex14, PrevCoord * INDIRECT_RES_SCALE);
-
-    float PixelAge = min(64, float(floatBitsToUint(GIData.y)));
+    float PixelAgeRaw = texture(colortex14, PrevCoord).y;
+    float PixelAge = min(255, PixelAgeRaw * 255);
 
     PixelAge *= max(0, 1 - abs(l_depth(PrevDepth, IsDH) - DepthQuantized));
 
-    vec2 pixelOffset = 1.0 - abs(2.0 * fract(PrevCoord * resolution) - 1.0);
-    float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.15 + 0.85;
-    PixelAge *= OffcenterRejection;
-    
     PixelAge += 1;
-    GIData.y = uintBitsToFloat(uint(PixelAge));
+    PixelAgeBuf.y = PixelAge/255.0;
 
     float blendFactor = 1 - 1.0 / PixelAge;
 

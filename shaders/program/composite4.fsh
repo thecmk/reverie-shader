@@ -90,13 +90,15 @@ vec3 lens_flare() {
     return Color * dataBuf.SunVisibility * LightColorDirect;
 }
 
-/* RENDERTARGETS:0,7,10 */
+/* RENDERTARGETS:0,7,10,14 */
 layout(location = 0) out vec4 Color;
 layout(location = 1) out vec4 TemporalVl;
 layout(location = 2) out vec4 ArmorGlint;
+layout(location = 3) out vec4 PixelAgeBuf;
 
 void main() {
     Color = texture(colortex0, texcoord);
+    PixelAgeBuf.yzw = texture(colortex14, texcoord).yzw;
     bool IsDH;
     float Depth = get_depth(texcoord, IsDH);
     Positions Pos = get_positions(texcoord, Depth, IsDH, true);
@@ -106,7 +108,7 @@ void main() {
     #ifdef DIMENSION_OVERWORLD
 
         #if VL_OVERWORLD_MODE == 1
-            TemporalVl = temporal_upscale_vl(Pos.Screen, IsDH, ivec2(gl_FragCoord.xy), Pos.Player);
+            TemporalVl = temporal_upscale_vl(Pos.Screen, IsDH, ivec2(gl_FragCoord.xy), Pos.Player, PixelAgeBuf);
 
             // Quite terrible transmittance approx
             const float MtoRratio = (0.659 + 1.156) / 0.939; // For len = 500m
@@ -114,6 +116,7 @@ void main() {
             vec3 T = exp(log(TemporalVl.a) / dot(OpticalDepth, vec3(0.33)) * OpticalDepth);
             Color.rgb = blend_vl(Color.rgb, mat2x3(TemporalVl.rgb, T));
 
+            // Approximate fog on SkyColor, for border fog 
             float FogAmount = clamp(fogAmount / 5, 0, 1);
             vec4 VlScaled = vec4(TemporalVl.rgb * mix(1.1, 1.4, FogAmount), TemporalVl.a * mix(0.82, 0.5, FogAmount));
             T = exp(log(VlScaled.a) / dot(OpticalDepth, vec3(0.33)) * OpticalDepth);

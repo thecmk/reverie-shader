@@ -50,7 +50,11 @@ mat2x3 aerial_prespective(vec3 EndPos, vec3 PlayerPosN, const int STEP_COUNT, ve
         vec3 SampleCoord = vec3(WorldPosC) / 64 / 6;
         SampleCoord += frameTimeCounter * 0.002;
         float Density = pow4(1 - texture(worleyNoiseTexture, SampleCoord).r);
-        Density *= height_falloff(WorldPosC.y, 130);
+        Density *= height_falloff(WorldPosC.y, 110);
+
+        // More fog during rain for cooler light shafts
+        Density += 0.125 * rainStrength;
+
         Density *= DensityConstant;
         Density *= 1 - smoothstep(farLod + 16, farLod + 32, length(PlayerPosC));
         OpticalDepth.y += Density;

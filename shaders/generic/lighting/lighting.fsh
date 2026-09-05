@@ -32,19 +32,18 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
 
             float Fade = shadow_fade(Pos.Player * vec3(1,2,1), voxelDistance);
             LMColor = mix(VoxelData.rgb, LMColor, Fade);
-
-            // float VoxelLum = get_luminance(LMColor);
-            // LMColor = mix(TorchlightColor, LMColor, linstep(0.0, 0.2, VoxelLum)); // Return to default color if there is no color
         }
     #endif
     
     #ifdef DEFERRED
         #ifdef INDIRECT_LIGHTING
-            vec4 GIDenoise; vec3 _BentNormalEncoded;
+            vec3 _BentNormalEncoded;
             if(IsHand) {
                 GIDenoise = vec4(0, 0, 0, 0);
+                PixelAge.y = 1.0/255.0;
             } else {
-                GIDenoise = gi_bilateral_upscale(gl_FragCoord.xy, Mat.Normal, Pos.Screen.z, _BentNormalEncoded, IsDH);
+                vec4 GICurrent = gi_bilateral_upscale(gl_FragCoord.xy, Mat.Normal, Pos.Screen.z, _BentNormalEncoded, IsDH);
+                GIDenoise = temporal_denoise_gi(GICurrent, Pos.Screen, gl_FragCoord.xy, IsDH, PixelAge);
             }
         #endif
     #endif

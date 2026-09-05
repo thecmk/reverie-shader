@@ -5,25 +5,26 @@ in vec2 texcoord;
 flat in vec3 LightColorDirect;
 
 #ifdef VOXY
-/* RENDERTARGETS:0,5,1,2 */
-layout(location = 2) out vec4 vxData1;
-layout(location = 3) out vec4 vxData2;
+/* RENDERTARGETS:0,5,13,14,1,2 */
+layout(location = 4) out vec4 vxData1;
+layout(location = 5) out vec4 vxData2;
 #else
-/* RENDERTARGETS:0,5 */
+/* RENDERTARGETS:0,5,13,14 */
 #endif
 layout(location = 0) out vec4 Color;
 layout(location = 1) out vec4 Shadow;
-
+layout(location = 2) out vec4 GIDenoise;
+layout(location = 3) out vec4 PixelAge;
 
 #include "/lib/all_the_libs.glsl"
 #include "/generic/water.glsl"
 #include "/generic/fog.glsl"
 #include "/generic/shadow/main.glsl"
 #include "/generic/shadow/rsm.glsl"
+#include "/generic/post/taa.glsl"
 #include "/generic/lighting/lighting.fsh"
 #include "/generic/sky.glsl"
 #include "/generic/clouds.glsl"
-#include "/generic/post/taa.glsl"
 #include "/generic/shadow/vl.glsl"
 
 
@@ -33,6 +34,8 @@ void main() {
     bool IsHand;
     Depth = correct_hand_depth(Depth, IsDH, IsHand);
     Positions Pos = get_positions(texcoord, Depth, IsDH, true);
+
+    PixelAge.xzw = texture(colortex14, texcoord).xzw;
 
     float Dither = dither(gl_FragCoord.xy, true);
 
@@ -49,7 +52,8 @@ void main() {
                     #endif
                 #endif
             }
-        
+        GIDenoise = vec4(0,0,0,0);
+        PixelAge.y = 1.0/255.0;
     }
     else {
         mat2x4 GbufferData = mat2x4(texture(colortex1, texcoord), texture(colortex2, texcoord));
