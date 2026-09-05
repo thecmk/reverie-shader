@@ -57,11 +57,12 @@ vec3 apply_contrast(vec3 color, float contrast) {
 
 vec3 purkinje_effect(vec3 Color) {
     vec3 ColorXYZ = rgb_to_xyz(Color);
-    float ScotopicLuminance = ColorXYZ.y * (1.33 * (1.0 + (ColorXYZ.y + ColorXYZ.z) / max(ColorXYZ.x, 0.01)) - 1.68);
+    float ScotopicLuminance = ColorXYZ.y * (1.33 * (1.0 + (ColorXYZ.y + ColorXYZ.z) / (ColorXYZ.x + 0.0001)) - 1.68);
     vec3 NightColor = ScotopicLuminance * PurkinjeTint;
 
-    float BlendFactor = 1 - smoothstep(0.0, 0.05, get_luminance(Color));
-    vec3 FinalColor = Color * mix(vec3(1), NightColor, BlendFactor * PURKINJE_EFFECT_STRENGTH);
+    float BlendFactor = 1 - smoothstep(0.0, 0.05, ScotopicLuminance);
+    // if(BlendFactor > 0.001) return vec3(0,0,1);
+    vec3 FinalColor = mix(Color, NightColor, PURKINJE_EFFECT_STRENGTH * BlendFactor);
     return FinalColor;
 }
 
