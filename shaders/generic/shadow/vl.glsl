@@ -11,10 +11,8 @@ mat2x3 nether_fog(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, vec3 ScreenPos, f
         const vec3 SCATTERING = vec3(0.05, 0.2, 0.4);
         const vec3 ABSORBTION = vec3(0.2, 0.45, 1.0) * 0.2;
         const float DENSITY = 0.25;
-         const float MAX_HEIGHT = 200.0;
+        const float MAX_HEIGHT = 200.0;
     #endif
-
-   
 
     vec3 AmbientColor = vec3(0);
     vec3 DirectColor = get_direct_color(false, cameraPosition.y * 5);

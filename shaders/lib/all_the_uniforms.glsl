@@ -4,7 +4,11 @@
     uniform float aspectRatio;
     uniform int isEyeInWater;
     uniform float frameTime;
-    uniform float frameTimeCounter;
+    #ifndef SCREENSHOT_MODE
+        uniform float frameTimeCounter;
+    #else
+        const float frameTimeCounter = 1234.0;
+    #endif
     uniform vec3 fogColor;
     uniform vec3 cameraPosition;
     uniform vec3 cameraPositionFract;
@@ -114,7 +118,6 @@
     uniform sampler3D worleyNoiseTexture;
     uniform sampler2D smaaAreaTexture;
     uniform sampler2D smaaSearchTexture;
-    uniform sampler2D windTexture;
     uniform sampler2D milkyWay;
 
     uniform sampler2D vxDepthTexTrans;

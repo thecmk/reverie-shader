@@ -48,9 +48,7 @@ mat2x3 aerial_prespective(vec3 EndPos, vec3 PlayerPosN, const int STEP_COUNT, ve
 
         // Smoke-like ground fog
         vec3 SampleCoord = vec3(WorldPosC) / 64 / 6;
-        #ifndef SCREENSHOT_MODE
-            SampleCoord += frameTimeCounter * 0.002;
-        #endif
+        SampleCoord += frameTimeCounter * 0.002;
         float Density = pow4(1 - texture(worleyNoiseTexture, SampleCoord).r);
         Density *= height_falloff(WorldPosC.y, 130);
         Density *= DensityConstant;

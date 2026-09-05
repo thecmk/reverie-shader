@@ -1,9 +1,5 @@
 float noise_clouds_base_simple(vec3 p) {
-    #ifdef SCREENSHOT_MODE
-        vec2 Wind = vec2(0);
-    #else
-        vec2 Wind = windDirection * frameTimeCounter * 5 + cloudStartOffset;
-    #endif
+    vec2 Wind = windDirection * frameTimeCounter * 5 + cloudStartOffset;
     float Base = texture(cloudNoise, (p.xz + Wind) * 0.0004).r;
     Base = pow(Base, cloudCoverageVl);
     return Base;
@@ -11,11 +7,7 @@ float noise_clouds_base_simple(vec3 p) {
 
 
 float noise_clouds_base_simple_flat(vec3 p) {
-    #ifdef SCREENSHOT_MODE
-        vec2 Wind = vec2(0);
-    #else
-        vec2 Wind = windDirection * frameTimeCounter * 5 + cloudStartOffset;
-    #endif
+    vec2 Wind = windDirection * frameTimeCounter * 5 + cloudStartOffset;
     float Base = texture(cloudNoise, (p.xz + Wind) * 0.0003).r;
     Base = pow(Base, cloudCoverageFlat);
     return Base;
@@ -24,11 +16,7 @@ float noise_clouds_base_simple_flat(vec3 p) {
 float noise_clouds_flat(vec3 p) {
     float Base = noise_clouds_base_simple_flat(p * 0.5);
 
-    #ifdef SCREENSHOT_MODE
-        vec2 Wind = vec2(0);
-    #else
-        vec2 Wind = windDirection * frameTimeCounter * 5;
-    #endif
+    vec2 Wind = windDirection * frameTimeCounter * 5;
 
     vec2 D = textureNice(noisetex, (p.xz + Wind) * 0.000004).rg;
     vec2 Displacement = D * 0.33;
@@ -40,11 +28,7 @@ float noise_clouds_flat(vec3 p) {
 }
 
 float noise_clouds_base(vec3 p) {
-    #ifdef SCREENSHOT_MODE
-        vec2 Wind = vec2(0);
-    #else
-        vec2 Wind = windDirection * frameTimeCounter * 5 + cloudStartOffset;
-    #endif
+    vec2 Wind = windDirection * frameTimeCounter * 5 + cloudStartOffset;
 
     float Alt = linstep(CLOUD_LOWER_PLANE, CLOUD_UPPER_PLANE, p.y);
     float HeightDensity = smoothstep(0.0, 0.75, 1 - Alt) * smoothstep(0.0, 0.2, Alt);
@@ -59,11 +43,7 @@ float noise_clouds(vec3 p) {
     float Base = noise_clouds_base(p);
     if (Base < 0.001) return 0;
 
-    #ifdef SCREENSHOT_MODE
-        vec2 Wind = vec2(0);
-    #else
-        vec2 Wind = windDirection * frameTimeCounter * 5;
-    #endif
+    vec2 Wind = windDirection * frameTimeCounter * 5;
 
     vec2 D = vec2(textureNice(noisetex, (p.xy + Wind) * 0.0001).g, textureNice(noisetex, (p.xz + Wind) * 0.0001).g);
     vec3 Displacement = vec3(D.x, D.y, 1 - (D.x * D.x + D.y * D.y)) * 10;
