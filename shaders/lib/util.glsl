@@ -278,3 +278,7 @@ vec2 vogel_sample(float i, float SampleCount) {
 float quantize_16bit(float X) {
     return floor(X * 65535.0 + 0.5) / 65535.0;
 }
+
+float quantize_15bit(float X) {
+    return floor(X * 32767.0 + 0.5) / 32767.0;
+}

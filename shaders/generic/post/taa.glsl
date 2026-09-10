@@ -86,9 +86,14 @@ vec3 T2x(vec3 Color, ivec2 FragCoord, vec2 Texcoord) {
     if (PrevColor == vec3(0)) return Color;
 
     float DepthPrev = texture(colortex8, PrevCoord).r;
+    bool IsDH2 = false;
+    #ifdef DISTANT_HORIZONS
+        IsDH2 = DepthPrev < 0;
+        DepthPrev = abs(DepthPrev);
+    #endif
 
     vec2 velocity = (Texcoord - PrevCoord.xy) * resolution;
-    float blendFactor = 0.5 * max(0, 1 - abs(l_depth(DepthPrev, IsDH) - l_depth(quantize_16bit(Depth)))) * exp(-len2(velocity));
+    float blendFactor = 0.5 * max(0, 1 - abs(l_depth(DepthPrev, IsDH2) - l_depth(quantize_15bit(Depth), IsDH))) * exp(-len2(velocity));
 
     Color = mix(Color, PrevColor, blendFactor);
     return Color;
@@ -109,7 +114,8 @@ vec4 temporal_upscale_clouds(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Pl
     // Sample last updated pos when there's no other data available 
     bool WasOffScreen = clamp(PrevCoord, 0, 1) != PrevCoord;
     float DepthPrev = min_depth_4x4(PrevCoord, colortex8);
-    bool WasOccluded = DepthPrev < DepthToCloud;
+
+    bool WasOccluded = DepthPrev < DepthToCloud || (IsDH && DepthPrev < 1);
     if (WasOffScreen || WasOccluded || (ScreenPos.z < 0.56)) {
         vec4 Color = texture(image0Sampler, ScreenPos.xy * VOLUMETRICS_RES);
         Color.a = 1 - Color.a;
@@ -177,16 +183,21 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
     Color = max(Color, 0);
 
     vec4 PrevColor = texture(colortex7, PrevCoord);
-    float PrevDepth = texture(colortex8, PrevCoord).r;
+    float DepthPrev = texture(colortex8, PrevCoord).r;
+    bool IsDH2 = false;
+    #ifdef DISTANT_HORIZONS
+        IsDH2 = DepthPrev < 0;
+        DepthPrev = abs(DepthPrev);
+    #endif
 
     float PixelAgeRaw = texture(colortex14, PrevCoord).x;
     float PixelAge = min(64, PixelAgeRaw * 255);
 
-    float DepthQuantized = l_depth(quantize_16bit(ScreenPos.z), IsDH);
-    PixelAge *= max(0, 1-abs(l_depth(PrevDepth, IsDH) - DepthQuantized) * 0.5);
+    float DepthQuantized = l_depth(quantize_15bit(ScreenPos.z), IsDH);
+    PixelAge *= max(0, 1-abs(l_depth(DepthPrev, IsDH2) - DepthQuantized) * 0.2);
 
     vec2 pixelOffset = 1.0 - abs(2.0 * fract(PrevCoord * resolution) - 1.0);
-    float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.1 + 0.9;
+    float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.25 + 0.75;
     PixelAge *= OffcenterRejection;
 
     PixelAge += 1;
@@ -201,8 +212,14 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
 vec4 temporal_denoise_gi(vec4 Color, vec3 ScreenPos, vec2 FragCoord, bool IsDH, out vec4 PixelAgeBuf) {
     vec2 PrevCoord = toPrevScreenPos(ScreenPos.xy, ScreenPos.z, IsDH, true).xy;
 
-    float PrevDepth = texture(colortex8, PrevCoord).r;
-    float DepthQuantized = l_depth(quantize_16bit(ScreenPos.z), IsDH);
+    float DepthPrev = texture(colortex8, PrevCoord).r;
+    bool IsDH2 = false;
+    #ifdef DISTANT_HORIZONS
+        IsDH2 = DepthPrev < 0;
+        DepthPrev = abs(DepthPrev);
+    #endif
+
+    float DepthQuantized = l_depth(quantize_15bit(ScreenPos.z), IsDH);
     if(clamp(PrevCoord, 0, 1) != PrevCoord) {
         PixelAgeBuf.y = 1 / 255.0;
         return Color;
@@ -211,12 +228,12 @@ vec4 temporal_denoise_gi(vec4 Color, vec3 ScreenPos, vec2 FragCoord, bool IsDH, 
     vec4 PrevColor = texture(colortex13, PrevCoord);
 
     vec4 ClippingMaxColor;
-    vec4 ClampedColor = neighbourhoodClipping(colortex3, Color, PrevColor, ClippingMaxColor, ivec2(FragCoord));
+    vec4 ClampedColor = neighbourhoodClipping(colortex3, Color, PrevColor, ClippingMaxColor, ivec2(FragCoord * INDIRECT_RES_SCALE));
 
     float PixelAgeRaw = texture(colortex14, PrevCoord).y;
     float PixelAge = min(255, PixelAgeRaw * 255);
 
-    PixelAge *= max(0, 1 - abs(l_depth(PrevDepth, IsDH) - DepthQuantized));
+    PixelAge *= max(0, 1 - abs(l_depth(DepthPrev, IsDH2) - DepthQuantized));
 
     PixelAge += 1;
     PixelAgeBuf.y = PixelAge/255.0;

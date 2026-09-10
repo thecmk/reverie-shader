@@ -18,7 +18,9 @@ void main() {
 
     bool IsDH;
     PrevDepth.r = get_depth(texcoord, IsDH);
-    PrevDepth.g = get_depth_solid(texcoord, IsDH);
+    PrevDepth.r *= IsDH ? -1 : 1;
+    PrevDepth.g = texture(depthtex1, texcoord).r;
+
 
     #if AA_MODE == 1
         Color.rgb = pow(Color.rgb, vec3(1/2.2));
