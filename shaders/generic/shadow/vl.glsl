@@ -76,10 +76,16 @@ mat2x3 nether_fog(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, vec3 ScreenPos, f
 #endif
 
 float get_vl_shadowing(vec3 ScreenPos, vec3 LightPos, float Dither, bool IsDH, const bool OnlyOutsideShadowDist) {
-    if(LightPos.z > 0) return 0.5;
+    #if VL_OVERWORLD_MODE == 0
+        const float FALLBACK_STR = 0.5; // This eases the transition a bit, but kills cloud lightshafts
+    #else
+        float FALLBACK_STR = 0.5 + 0.5 * linstep(0.2, 0.25, sin(sunAngle * TAU)); // So we only do it when the sun is low (when it is most needed)
+    #endif
+
+    if(LightPos.z > 0) return FALLBACK_STR;
 
     vec3 LightPosScreen = view_screen(LightPos, IsDH, true);
-    if(LightPosScreen.xy != clamp(LightPosScreen.xy, 0, 1)) return 0.5;
+    if(LightPosScreen.xy != clamp(LightPosScreen.xy, 0, 1)) return FALLBACK_STR;
 
     // Trace
     float LightFactor = 0;
@@ -104,7 +110,7 @@ float get_vl_shadowing(vec3 ScreenPos, vec3 LightPos, float Dither, bool IsDH, c
     float Falloff = min_component(abs(step(0.5, LightPosScreen.xy) - LightPosScreen.xy));
     Falloff = smoothstep(0., 0.25, Falloff);
 
-    return mix(0.5, Hits == 0 ? 0.5 : LightFactor / Hits, Falloff);
+    return mix(FALLBACK_STR, Hits == 0 ? FALLBACK_STR : LightFactor / Hits, Falloff);
 }
 
 
