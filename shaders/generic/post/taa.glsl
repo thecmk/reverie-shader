@@ -116,7 +116,7 @@ vec4 temporal_upscale_clouds(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Pl
     float DepthPrev = min_depth_4x4(PrevCoord, colortex8);
 
     bool WasOccluded = DepthPrev < DepthToCloud || (IsDH && DepthPrev < 1);
-    if (WasOffScreen || WasOccluded || (ScreenPos.z < 0.56)) {
+    if (WasOffScreen || WasOccluded || (ScreenPos.z < 0.56) || timeSkip > 0.5) {
         vec4 Color = texture(image0Sampler, ScreenPos.xy * VOLUMETRICS_RES);
         Color.a = 1 - Color.a;
         Color = max(Color, 0);
@@ -135,7 +135,7 @@ vec4 temporal_upscale_clouds(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Pl
     float blendFactor = float(IsSampleNotCurrent);
 
     float Variance = exp(-10 * abs(PrevColor.a - Color.a));
-    blendFactor = mix(1, blendFactor, Variance);
+    blendFactor = mix(1 - step(0.01, fract(rainStrength + thunderStrength)) * 0.1, blendFactor, Variance);
 
     vec2 pixelOffset = 1.0 - abs(2.0 * fract(PrevCoord * resolution) - 1.0);
     float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.15 + 0.85;
@@ -152,7 +152,7 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
     // Sample last updated pos when there's no other data available 
     bool WasOffScreen = clamp(PrevCoord, 0, 1) != PrevCoord;
 
-    if(WasOffScreen || (ScreenPos.z < 0.56)) {
+    if(WasOffScreen || (ScreenPos.z < 0.56) || timeSkip > 0.5) {
         vec4 Color = texture(image2Sampler, ScreenPos.xy * VOLUMETRICS_RES);
         Color.a = 1 - Color.a;
         Color = max(Color, 0);

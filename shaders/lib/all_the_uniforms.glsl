@@ -94,6 +94,7 @@
     uniform vec3 sLightPosN;
     uniform float isOutdoorsSmooth;
     uniform float precipitationSmooth;
+    uniform float timeSkip;
 
     // Weather related custom uniforms
     uniform float cloudStartOffset;

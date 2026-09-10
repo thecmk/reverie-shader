@@ -79,12 +79,12 @@ float pcss(vec3 ShadowPosUndistorted, mat2 RotationOffset, bool DoSSS, out float
             Hits++;
         }
     }
-    BlockerDSSS = BlockerD * far;
+    BlockerDSSS = BlockerD * 256;
     if (Hits == 0) {
         return MaxRadius; // Prevent funny business
     }
     BlockerD /= Hits;
-    return min(BlockerD * far + 0.5, MaxRadius);
+    return min(BlockerD * 256 + 0.5, MaxRadius);
 }
 
 // Used in vl
