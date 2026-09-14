@@ -1,12 +1,12 @@
-const float DENSITY = 2.5;
+const float DENSITY = 4.5;
 
 const float CLOUD_EXTINCTION = 0.5;
 const float CLOUD_SCATTERING = CLOUD_EXTINCTION;
 
 // Multiple scattering approximation constants
-const float a_BASE = 0.5; // attenuation 
-const float b_BASE = 0.6; // contribution
-const float c_BASE = 0.4; // eccentricity attenuation
+const float a_BASE = 0.4; // attenuation 
+const float b_BASE = 0.5; // contribution
+const float c_BASE = 0.6; // eccentricity attenuation
 const int MULTIPLE_SCATTERING_ORDERS = 4;
 
 void intersect_with_cloud_plane_light(vec3 WorldPos, inout vec3 EndPos, vec3 RayDir) {
@@ -40,7 +40,7 @@ float get_optical_depth_volumetric(vec3 LightPosN, vec3 WorldPosC, float Dither,
     float OpticalDepth = 0;
     vec3 EndPosL;
     intersect_with_cloud_plane_light(WorldPosC, EndPosL, view_player(LightPosN, false));
-    float StepSizeL = min(24, length(EndPosL) / SampleCount);
+    float StepSizeL = min(32, length(EndPosL) / SampleCount);
     vec3 StepL = view_player(LightPosN, false) * StepSizeL;
     vec3 WorldPosCL = WorldPosC + StepL * Dither;
     for (int i = 1; i <= SampleCount; i++) {
@@ -49,6 +49,8 @@ float get_optical_depth_volumetric(vec3 LightPosN, vec3 WorldPosC, float Dither,
 
         WorldPosCL += StepL;
     }
+
+
     return OpticalDepth * StepSizeL * CLOUD_EXTINCTION;
 }
 
@@ -59,7 +61,7 @@ float march_to_light_volumetric(vec3 LightPosN, vec3 WorldPosC, float Dither, fl
     float b = 1;
 
     for(int i = 0; i < MULTIPLE_SCATTERING_ORDERS; i++) {
-        L += b * MiePhase[i] * exp(-a * OpticalDepth);
+        L += b * MiePhase[i] * exp(-a * OpticalDepth) * exp(-a * 2 * OpticalDepth) * 2;
 
         a *= a_BASE;
         b *= b_BASE;

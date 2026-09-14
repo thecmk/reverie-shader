@@ -31,10 +31,10 @@ float noise_clouds_base(vec3 p) {
     vec2 Wind = windDirection * frameTimeCounter * 5 + cloudStartOffset;
 
     float Alt = linstep(CLOUD_LOWER_PLANE, CLOUD_UPPER_PLANE, p.y);
-    float HeightDensity = smoothstep(0.0, 0.75, 1 - Alt) * smoothstep(0.0, 0.2, Alt);
+    float EggShape = smoothstep(0.0, 0.5, 1 - Alt) * smoothstep(0.0, 0.2, Alt);
 
     float Base = texture(cloudNoise, (p.xz + Wind) * 0.0004).r;
-    Base = pow(Base, cloudCoverageVl) * HeightDensity;
+    Base = pow(Base, cloudCoverageVl) * EggShape;
 
     return Base;
 }
@@ -51,6 +51,8 @@ float noise_clouds(vec3 p) {
     Base -= (1 - texture(worleyNoiseTexture, (p + Displacement) / vec3(64) * 0.75).r) * 0.03;
     // Detail *= 1 - texture(worleyNoiseTexture, (p) / vec3(64) * 0.25 + 0.33).r;
     Base -= texture(worleyNoiseTexture, (p) / vec3(64) * 0.125 + 0.5).r * 0.12;
+
+    Base *= pow(smoothstep(CLOUD_LOWER_PLANE, CLOUD_UPPER_PLANE, p.y), 2 - exp2(1-cloudCoverageVl) * 2); // Make clouds denser towards the top
 
     return clamp(Base, 0, 1);
 }
