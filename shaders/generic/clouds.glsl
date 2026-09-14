@@ -228,7 +228,7 @@ vec4 get_clouds(vec3 PlayerPos, vec3 PlayerPosN, const int STEP_COUNT, vec3 Came
     CloudDataFlat *= CloudDataVol.a;
     CloudDataFlat.rgb += CloudDataVol.rgb;
 
-    float FogFactor = DistToCloud / 10000; 
+    float FogFactor = max(0, DistToCloud - 1000) / 10000; 
     FogFactor = exp(-3 * FogFactor);
     return mix(vec4(0, 0, 0, 1), CloudDataFlat, FogFactor);
 }

@@ -11,4 +11,8 @@ void main() {
     Color.rgb *= 1 / (dataBuf.AvgLum * 9.6) * EXPOSURE_MULT;
     
     Color.rgb = apply_tonemap(Color.rgb);
+
+    #ifdef LUT
+        Color.rgb = decode_lut(Color.rgb, gl_FragCoord.xy);
+    #endif
 }

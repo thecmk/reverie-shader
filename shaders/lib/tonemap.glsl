@@ -98,3 +98,33 @@ vec3 hsv_to_rgb(vec3 c) {
     vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
+
+vec3 decode_lut(vec3 Color, vec2 FragCoord) {
+    float CellNr = pow(textureSize(lutTexture, 0).x, 1/3.0);
+
+    Color.rgb = pow(Color, vec3(1/2.2));
+    Color += (dither(FragCoord.xy, false) - 0.5) / pow2(CellNr); 
+    Color = clamp(Color, 0, 0.99999);
+
+    float OffsetInCell = fract(Color.b * CellNr);
+    vec2 CellOffset = vec2(floor(OffsetInCell * CellNr), floor(Color.b * CellNr));
+    vec2 Offset = Color.rg / CellNr;
+
+    vec3 LutColor = pow(texture(lutTexture, Offset + CellOffset / CellNr).rgb, vec3(2.2));
+
+    return LutColor;
+}
+
+vec3 display_lut(vec3 OldColor, vec2 FragCoord) {
+    const float SIZE = 512.0;
+    float CELL_NR = pow(SIZE, 1/3.0);
+    if(any(greaterThan(FragCoord, vec2(SIZE)))) { return OldColor; }
+    
+    vec3 Color;
+    vec2 Texcoord = FragCoord / SIZE;
+    Texcoord.y = 1 - Texcoord.y;
+
+    Color.rg = fract(Texcoord * CELL_NR);
+    Color.b = (floor(Texcoord.x * CELL_NR) / CELL_NR + floor(Texcoord.y * CELL_NR)) / CELL_NR;
+    return Color;
+}

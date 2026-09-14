@@ -120,6 +120,7 @@
     uniform sampler2D smaaAreaTexture;
     uniform sampler2D smaaSearchTexture;
     uniform sampler2D milkyWay;
+    uniform sampler2D lutTexture;
 
     uniform sampler2D vxDepthTexTrans;
     uniform sampler2D vxDepthTexOpaque;

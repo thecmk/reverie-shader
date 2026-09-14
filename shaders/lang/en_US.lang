@@ -45,6 +45,10 @@ option.EXPOSURE_MULT.comment=Controls how bright the scene should be
 option.EXPOSURE_SPEED=Exposure Speed
 option.EXPOSURE_SPEED.comment=Controls how quickly the "camera" adjusts to changes in brightness
 
+option.LUT=LUT
+option.LUT.comment=Uses a color lookup table to change how colors are represented. How to add your own: unzip the shaderpack and add your .png to the shaders/lib/img/luts subfolder. Make sure the name of your file matches with the 'LUT File' option.
+option.LUT_FILE=LUT File
+
 option.TONEMAP_OPERATOR=Tonemap
 option.TONEMAP_OPERATOR.comment=Converts colors to a range that can actually be displayed on the screen. This option drastically changes the look of the game and may require further tweaking to look good. 
 
@@ -178,3 +182,15 @@ value.VL_WATER_MODE.1=Raytraced
 value.AO_MODE.0=Off
 value.AO_MODE.1=SSAO
 value.AO_MODE.2=GTAO
+
+value.LUT_FILE.0=custom0.png
+value.LUT_FILE.1=custom1.png
+value.LUT_FILE.2=custom2.png
+value.LUT_FILE.3=custom3.png
+value.LUT_FILE.4=custom4.png
+value.LUT_FILE.5=custom5.png
+value.LUT_FILE.6=custom6.png
+value.LUT_FILE.7=custom7.png
+value.LUT_FILE.8=vintage.png
+value.LUT_FILE.9=mellow.png
+value.LUT_FILE.10=punchy.png
