@@ -48,13 +48,14 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         #endif
     #endif
 
-    #ifdef DIMENSION_OVERWORLD
-        // Ambient lighting
-        vec3 BentNormal = 
+    vec3 BentNormal = 
         #if AO_MODE == 2 && (defined DEFERRED)
             !IsHand ? _BentNormalEncoded: 
         #endif
             Mat.Normal;
+
+    // Ambient lighting
+    #ifdef DIMENSION_OVERWORLD
         float NangUp = dot(gbufferModelView[1].xyz, BentNormal) * 0.5 + 0.5;
         float NangL = -view_player(BentNormal, true).x * 0.5 + 0.5;
         vec3 SunA = texture(atm_ambient_sampler, vec2(NangL, NangUp)).rgb; 
@@ -69,13 +70,15 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         SunA = mix(MinLight, SunA, Mat.Lightmap.y);
     #elif defined DIMENSION_NETHER
         // Fake lighting, to make things look less flat
-        float NdotU = dot(Mat.Normal, gbufferModelView[1].xyz);
+        float NdotU = clamp(dot(BentNormal, gbufferModelView[1].xyz), -1, 1);
         vec3 FakeLavaLight = TorchlightColor * c_NETHER_LAVA_ILLUMINATION * (-NdotU * 0.5 + 0.5);
-        vec3 FakeAmbientLight = fogColor.rgb * c_NETHER_AMBIENT_ILLUMINATION * (NdotU * 0.5 + 0.5);
-        vec3 SunA = MinLight + FakeAmbientLight + FakeLavaLight;
-        SunA *= MinLight.x / get_luminance(SunA) * c_NETHER_BRIGHTNESS;
-    #else
+        vec3 FakeAmbientLight = fogColor.rgb / get_luminance(fogColor.rgb) * c_NETHER_AMBIENT_ILLUMINATION * (NdotU * 0.5 + 0.5);
+        vec3 SunA = FakeAmbientLight + FakeLavaLight;
+        SunA *= 0.1 * c_NETHER_BRIGHTNESS;
+    #elif defined DIMENSION_END
         vec3 SunA = srgb_linear(vec3(0.2, 0.1, 0.15));
+    #else
+        vec3 SunA = max(MinLight, 4 * srgb_linear(fogColor.rgb));
     #endif
 
     SunA += LMColor * Mat.Lightmap.x;

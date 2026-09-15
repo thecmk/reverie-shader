@@ -267,6 +267,8 @@ mat2x3 do_vl(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, vec3 ScreenPos, float 
                     return aerial_prespective_ld(StartPos, EndPos, ScreenPos, PlayerPosN, Dither, ScreenPos.z, true, IsDH);
                 }
                 break;
+            #elif defined DIMENSION_GENERIC
+                return mat2x3(vec3(0), vec3(1));
             #else
                 return nether_fog(StartPos, EndPos, PlayerPosN, ScreenPos, Dither, STEP_COUNT * 3, DoRT);
             #endif

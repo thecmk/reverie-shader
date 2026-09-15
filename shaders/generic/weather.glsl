@@ -1,7 +1,4 @@
 vec4 get_seasons_color(vec4 glcolor) {
-    #ifndef SEASONAL_COLORS
-        return glcolor;
-    #endif
     if(glcolor.rgb != vec3(1)) {
             glcolor.rgb = rgb_to_hsv(glcolor.rgb);
 

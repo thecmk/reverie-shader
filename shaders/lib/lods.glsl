@@ -1,7 +1,3 @@
-#define DH_NOISE
-#define DH_CUTOFF 16 // [0 16 32 48 64 80 96 128]
-#define DH_NOISE_SIZE 8 // [2 4 8 16 32 64]
-
 #ifdef DISTANT_HORIZONS
     #define farLod dhRenderDistance
 #else

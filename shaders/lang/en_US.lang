@@ -68,6 +68,11 @@ option.SHADOW_FILTER.comment=Makes shadows soft, just like in real life. PCF is 
 option.SHADOW_FILTER_SIZE=Filter Size
 option.SCREENSPACE_SHADOWS_FALLBACK=Screenspace Shadows
 option.SCREENSPACE_SHADOWS_FALLBACK.comment=Falls back to a cheaper method of doing shadows when outside of the shadow map.
+option.ENTITY_SHADOWS=Entity Shadows
+option.ENTITY_SHADOWS.comment=Whether entities should cast shadows. Can cause a lot of lag in large bases.
+option.BLOCK_ENTITY_SHADOWS=Block Entity Shadows
+option.BLOCK_ENTITY_SHADOWS.comment=Whether block entities (chests, hoppers, etc.) should cast shadows. Can cause a lot of lag in large bases.
+option.entityShadowDistanceMul=Entity Distance Multiplier
 
 option.VL_OVERWORLD_MODE=Overworld Fog
 option.VL_OVERWORLD_STRENGTH=Overworld Fog Strength
@@ -124,6 +129,11 @@ option.AURORA=Aurora Borealis
 option.AURORA.comment=Adds an aurora borealis effect at night, in cold biomes
 option.sunPathRotation=Sun Angle
 
+option.DH_NOISE=Distant Horizons Noise
+option.DH_NOISE.comment=Renders blocky noise on DH chunks to make them look less flat
+option.DH_NOISE_SIZE=DH Noise Size
+option.DH_CUTOFF=Distant Horizons Cutoff
+option.DH_CUTOFF.comment=Transitions from regular to DH chunks earlier than normal. Useful if you notice holes near the transition point.
 
 value.AA_MODE.0=None (TA only)
 value.AA_MODE.1=SMAA T2x
@@ -156,6 +166,7 @@ screen.screen_SEASONAL_COLORS=Seasonal Colors
 screen.screen_WIND=Wind
 screen.screen_ATMOSPHERE_PARAMS=Atmosphere
 screen.screen_CAMERA_DEGRADATION=Degradation Effects
+screen.screen_MOD_SUPPORT=Mod Support
 
 profile.TOASTER=Toaster
 profile.LOW=Low
@@ -182,6 +193,11 @@ value.VL_WATER_MODE.1=Raytraced
 value.AO_MODE.0=Off
 value.AO_MODE.1=SSAO
 value.AO_MODE.2=GTAO
+
+value.ENTITY_SHADOWS.0=Off
+value.ENTITY_SHADOWS.1=On
+value.BLOCK_ENTITY_SHADOWS.0=Off
+value.BLOCK_ENTITY_SHADOWS.1=On
 
 value.LUT_FILE.0=custom0.png
 value.LUT_FILE.1=custom1.png

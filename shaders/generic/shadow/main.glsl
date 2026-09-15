@@ -89,7 +89,7 @@ float pcss(vec3 ShadowPosUndistorted, mat2 RotationOffset, bool DoSSS, out float
 
 // Used in vl
 float get_shadow_unfiltered(vec3 PlayerPos, vec3 ShadowPos) {
-    #ifdef DIMENSION_NETHER
+    #if (defined DIMENSION_NETHER) || (defined DIMENSION_GENERIC)
     return 0.0;
     #endif
 
@@ -102,7 +102,7 @@ float get_shadow_unfiltered(vec3 PlayerPos, vec3 ShadowPos) {
 }
 
 float get_shadow_unfiltered(vec3 PlayerPos, vec3 FlatNormal, float Skylight) {
-    #ifdef DIMENSION_NETHER
+    #if (defined DIMENSION_NETHER) || (defined DIMENSION_GENERIC)
     return 0.0;
     #endif
 
@@ -136,7 +136,7 @@ float get_shadow_screenspace(vec3 ViewPos, bool IsDH, vec3 FlatNormal, float Dit
 
 vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float Skylight, bool DoSSS, out float BlockerDist, out float Fade, out float CloudShadow, vec2 FragCoord) {
     BlockerDist = 0;
-    #ifdef DIMENSION_NETHER
+    #if (defined DIMENSION_NETHER) || (defined DIMENSION_GENERIC)
     return vec3(0);
     #endif
 

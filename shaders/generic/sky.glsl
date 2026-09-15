@@ -103,12 +103,20 @@ vec3 get_sky_nether() {
     return SkyColor / 100;
 }
 
+float fogify(float x, float w) {
+    return w / (x * x + w);
+}
+
 vec3 get_sky(vec3 ViewPosN, const bool DrawSun, float PlayerPosY) {
     #ifdef DIMENSION_OVERWORLD
-    return get_sky_overworld(ViewPosN, DrawSun, PlayerPosY);
+        return get_sky_overworld(ViewPosN, DrawSun, PlayerPosY);
     #elif defined DIMENSION_NETHER
-    return get_sky_nether();
+        return get_sky_nether();
+    #elif defined DIMENSION_END
+        return vec3(0);
     #else
-    return vec3(0);
+        float upDot = dot(ViewPosN, gbufferModelView[1].xyz);
+        vec3 SkyColor = 4 * srgb_linear(fogColor.rgb) * mix(1.0, fogify(max(upDot + 0.2, 0), 0.02), 0.7);
+        return SkyColor;
     #endif
 }

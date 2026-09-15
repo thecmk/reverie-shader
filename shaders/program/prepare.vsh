@@ -17,7 +17,7 @@ void main() {
     gl_Position = vec4(-1);
 
     // Make the shadowmap run in the nether
-    #ifdef VOXELISATION && DIMENSION_NETHER
+    #if (defined VOXELISATION) && (defined DIMENSION_NETHER || defined DIMENSION_GENERIC)
     if(gl_VertexID == -1e6)
         dataBuf.AmbientColor = texture(shadowtex0, vec2(0)).gba;
     #endif

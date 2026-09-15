@@ -129,7 +129,10 @@ layout(location = 1) out vec4 buf2;
     #else
         vec2 texcoord = DataIn.texcoord;
     #endif
-    vec4 glcolor = get_seasons_color(DataIn.glcolor);
+    vec4 glcolor = DataIn.glcolor;
+    #if (defined SEASONAL_COLORS) && (defined DIMENSION_OVERWORLD)
+        glcolor = get_seasons_color(glcolor);
+    #endif
     #ifdef VOXY_TERRAIN
         vec4 Albedo = glcolor * param.sampledColour;
     #else

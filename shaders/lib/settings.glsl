@@ -127,6 +127,9 @@
 
 const int shadowMapResolution = 2048; // [512 1024 2048 4096 8192]
 const float shadowDistance = 192.0; // [64.0 96.0 128.0 192.0 256.0]
+const float entityShadowDistanceMul = 0.25; // [0.125 0.25 0.375 0.5 0.625 0.75 0.875 1.0]
+#define ENTITY_SHADOWS 1 // [0 1]
+#define BLOCK_ENTITY_SHADOWS 1 // [0 1]
 
 #define SHADOW_FILTER 2 // [0 1 2]
 #define SHADOW_FILTER_SIZE 0.7 // [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
@@ -200,9 +203,9 @@ const float sunPathRotation = -35; // [-40 -35 -30 -25 -20 -15 -10 -5 0 5 10 15 
 #define MIE_DENSITY_VARIANCE 1.0 // [0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5]
 #define RAYLEIGH_DENSITY_VARIANCE 1.0 // [0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5]
 
-#define c_NETHER_LAVA_ILLUMINATION 0.05 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33]
-#define c_NETHER_AMBIENT_ILLUMINATION 0.20 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33]
-#define c_NETHER_BRIGHTNESS 6 // [2 3 4 5 6 7 8 9 10]
+#define c_NETHER_LAVA_ILLUMINATION 0.10 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33]
+#define c_NETHER_AMBIENT_ILLUMINATION 0.10 // [0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33]
+#define c_NETHER_BRIGHTNESS 4 // [1 2 3 4 5 6 7 8 9 10]
 
 // #define VOXELISATION
 #ifdef VOXELISATION
@@ -234,6 +237,9 @@ const float voxelDistance = VOXEL_DISTANCE;
 #define WINTER_SAT -0.1 // [-0.2 -0.19 -0.18 -0.17 -0.16 -0.15 -0.14 -0.13 -0.12 -0.11 -0.1 -0.09 -0.08 -0.07 -0.06 -0.05 -0.04 -0.03 -0.02 -0.01 0.0 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.2]
 #define WINTER_VAL 0.0 // [-0.2 -0.19 -0.18 -0.17 -0.16 -0.15 -0.14 -0.13 -0.12 -0.11 -0.1 -0.09 -0.08 -0.07 -0.06 -0.05 -0.04 -0.03 -0.02 -0.01 0.0 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1 0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.19 0.2]
 
+#define DH_NOISE
+#define DH_NOISE_SIZE 8 // [2 4 8 16 32 64]
+#define DH_CUTOFF 16 // [0 16 32 48 64 80 96 128]
 
 #ifdef AA_MODE
 #endif
@@ -261,6 +267,12 @@ const float voxelDistance = VOXEL_DISTANCE;
 #endif
 
 #ifdef CHROMATIC_ABERRATION
+#endif
+
+#ifdef DH_NOISE
+#endif
+
+#ifdef SEASONAL_COLORS
 #endif
 
 const float CLOUD_LOWER_PLANE = 200.0;
