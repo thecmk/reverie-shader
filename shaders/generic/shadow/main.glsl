@@ -65,7 +65,7 @@ float pcss(vec3 ShadowPosUndistorted, mat2 RotationOffset, bool DoSSS, out float
     float BlockerD = 0, Hits = 0;
 
     float MaxRadius = 5 * SHADOW_FILTER_SIZE;
-    MaxRadius *= DoSSS ? 7 : 1;
+    MaxRadius *= DoSSS ? 1 + length(ShadowPosUndistorted.xy) * 6 : 1; // Reduce flickering on distant foliage
 
     for (int i = 0; i < 8; i++) {
         vec2 OffsetP = (RotationOffset * vogel_sample(i, 8)) * MaxRadius * shadowTexSize;
