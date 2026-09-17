@@ -1,8 +1,8 @@
 #include "/lib/all_the_libs.glsl"
 
-in vec2 texcoord;
-in float DepthCenterL;
-in float DepthCenter;
+noperspective in vec2 texcoord;
+flat in float DepthCenterL;
+flat in float DepthCenter;
 
 /* RENDERTARGETS:0 */
 layout(location = 0) out vec4 Color;

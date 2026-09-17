@@ -2,8 +2,8 @@
 
 #include "/generic/post/bloom.glsl"
 
-out vec2 texcoord;
-out vec2 BloomTilePos;
+noperspective out vec2 texcoord;
+noperspective out vec2 BloomTilePos;
 
 void main() {
 	gl_Position = ftransform();

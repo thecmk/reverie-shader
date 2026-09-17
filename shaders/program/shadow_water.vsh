@@ -4,13 +4,13 @@ attribute vec2 mc_Entity;
 attribute vec2 mc_midTexCoord;
 attribute vec4 at_midBlock;
 
-out vec2 texcoord;
-out vec4 glcolor;
+noperspective out vec2 texcoord;
+noperspective out vec4 glcolor;
+noperspective out vec3 PlayerPos;
 
 flat out vec3 Normal;
 flat out float Material;
 
-out vec3 PlayerPos;
 
 void main() {
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;

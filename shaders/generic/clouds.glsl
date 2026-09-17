@@ -39,9 +39,9 @@ struct LightData {
 float get_optical_depth_volumetric(vec3 LightPosN, vec3 WorldPosC, float Dither, int SampleCount) {
     float OpticalDepth = 0;
     vec3 EndPosL;
-    intersect_with_cloud_plane_light(WorldPosC, EndPosL, view_player(LightPosN, false));
+    intersect_with_cloud_plane_light(WorldPosC, EndPosL, LightPosN);
     float StepSizeL = min(32, length(EndPosL) / SampleCount);
-    vec3 StepL = view_player(LightPosN, false) * StepSizeL;
+    vec3 StepL = LightPosN * StepSizeL;
     vec3 WorldPosCL = WorldPosC + StepL * Dither;
     for (int i = 1; i <= SampleCount; i++) {
         float DensityL = noise_clouds(WorldPosCL) * DENSITY;
@@ -112,10 +112,10 @@ vec4 get_clouds_volumetric(vec3 PlayerPos, vec3 PlayerPosN, const int STEP_COUNT
         vec3 Scattering = dataBuf.AmbientColor * ISOTROPIC_PHASE * 10 * AmbientFactor;
 
         if (Ld.MarchToSun) {
-            Scattering += dataBuf.SunColorVlClouds * march_to_light_volumetric(sunPosN, WorldPosC, Dither.y, Ld.MiePhaseSun);
+            Scattering += dataBuf.SunColorVlClouds * march_to_light_volumetric(PLAYER_LIGHT_VEC, WorldPosC, Dither.y, Ld.MiePhaseSun);
         }
         if (Ld.MarchToMoon) {
-            Scattering += dataBuf.MoonColorVlClouds * march_to_light_volumetric(-sunPosN, WorldPosC, Dither.y, Ld.MiePhaseMoon);
+            Scattering += dataBuf.MoonColorVlClouds * march_to_light_volumetric(-PLAYER_LIGHT_VEC, WorldPosC, Dither.y, Ld.MiePhaseMoon);
         }
 
         if(lightningBoltPosition.w > 0) {
@@ -140,7 +140,7 @@ vec4 get_clouds_volumetric(vec3 PlayerPos, vec3 PlayerPosN, const int STEP_COUNT
 float get_optical_depth_flat(vec3 LightPosN, vec3 CloudPos, float Dither, int SampleCount) {
     float OpticalDepth = 0;
     float StepSizeL = 64;
-    vec3 StepL = view_player(LightPosN, false) * StepSizeL;
+    vec3 StepL = LightPosN * StepSizeL;
     StepL.y = 0;
     vec3 CloudPosCL = CloudPos + StepL * Dither;
     for (int i = 1; i <= SampleCount; i++) {
@@ -188,10 +188,10 @@ vec4 get_clouds_flat(vec3 PlayerPos, vec3 PlayerPosN, vec3 CameraPos, vec2 Dithe
     vec3 Scattering = dataBuf.AmbientColor * ISOTROPIC_PHASE * 5;
 
     if (Ld.MarchToSun) {
-        Scattering += dataBuf.SunColorFlatClouds * march_to_light_flat(sunPosN, CloudPos, Dither.x, Ld.MiePhaseSun);
+        Scattering += dataBuf.SunColorFlatClouds * march_to_light_flat(PLAYER_LIGHT_VEC, CloudPos, Dither.x, Ld.MiePhaseSun);
     }
     if (Ld.MarchToMoon) {
-        Scattering += dataBuf.MoonColorFlatClouds * march_to_light_flat(-sunPosN, CloudPos, Dither.x, Ld.MiePhaseMoon);
+        Scattering += dataBuf.MoonColorFlatClouds * march_to_light_flat(-PLAYER_LIGHT_VEC, CloudPos, Dither.x, Ld.MiePhaseMoon);
     }
 
     Scattering *= (1 - Transmittance) / CLOUD_EXTINCTION;
@@ -209,13 +209,12 @@ vec4 get_clouds(vec3 PlayerPos, vec3 PlayerPosN, const int STEP_COUNT, vec3 Came
     Ld.MarchToSun = LHeight > -0.1;
     Ld.MarchToMoon = LHeight < 0.1;
 
-    vec3 SunRay = view_player(sunPosN, false);
     if (Ld.MarchToSun) {
-        float VdotL = dot(SunRay, PlayerPosN);
+        float VdotL = dot(PLAYER_LIGHT_VEC, PlayerPosN);
         Ld.MiePhaseSun = calc_mie_phase(VdotL);
     }
     if (Ld.MarchToMoon) {
-        float VdotL = dot(-SunRay, PlayerPosN);
+        float VdotL = dot(-PLAYER_LIGHT_VEC, PlayerPosN);
         Ld.MiePhaseMoon = calc_mie_phase(VdotL);
     }
 

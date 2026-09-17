@@ -1,6 +1,6 @@
 #include "/lib/all_the_libs.glsl"
 
-in vec2 texcoord;
+noperspective in vec2 texcoord;
 
 /* RENDERTARGETS:0 */
 layout(location = 0) out vec4 Color;

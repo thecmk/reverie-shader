@@ -1,3 +1,26 @@
+// Projection matrix-vector multiplication.
+// The following three functions are licensed under the MIT license
+// Copyright (c) 2025-2026 Luracasmus
+vec4 proj_mmul(mat4 proj_mat, vec3 view) {
+	return vec4(
+		vec2(proj_mat[0].x, proj_mat[1].y) * view.xy,
+		fma(proj_mat[2].z, view.z, proj_mat[3].z),
+		proj_mat[2].w * view.z
+	);
+}
+
+vec4 proj_inv_mmul(mat4 inv_proj_mat, vec3 ndc) {
+	return vec4(
+		vec2(inv_proj_mat[0].x, inv_proj_mat[1].y) * ndc.xy,
+		inv_proj_mat[3].z,
+		fma(inv_proj_mat[2].w, ndc.z, inv_proj_mat[3].w)
+	);
+}
+
+vec3 rot_trans_mmul(mat4 rot_trans_mat, vec3 vec) {
+	return mat3(rot_trans_mat) * vec + rot_trans_mat[3].xyz;
+}
+
 vec3 project_and_divide(mat4 Projection_mat, vec3 x) {
     vec4 HomogeneousPos = Projection_mat * vec4(x, 1);
     return HomogeneousPos.xyz / HomogeneousPos.w;
@@ -10,7 +33,8 @@ vec3 screen_view(vec3 x, bool IsDH, const bool ShouldUnjitter) {
     x.xy -= taaJitter;
 
     mat4 ProjMat = IsDH ? dhProjectionInverse : gbufferProjectionInverse;
-    return project_and_divide(ProjMat, x);
+    vec4 r = proj_inv_mmul(ProjMat, x);
+    return r.xyz / r.w;
 }
 
 vec3 view_player(vec3 x, bool IsDH) {
@@ -34,7 +58,8 @@ vec3 player_view(vec3 x, bool IsDH) {
 
 vec3 view_screen(vec3 x, bool IsDH, const bool ShouldJitter) {
     mat4 ProjMat = IsDH ? dhProjection : gbufferProjection;
-    x = project_and_divide(ProjMat, x);
+    vec4 r = proj_mmul(ProjMat, x);
+    x = r.xyz / r.w;
 
     if(ShouldJitter)
         x.xy += taaJitter;
@@ -59,7 +84,8 @@ Positions get_positions(vec2 texcoord, float Depth, bool IsDH, const bool Should
 }
 
 vec3 player_shadow(vec3 PlayerPos) {
-    vec3 ShadowPos = project_and_divide(shadowProjection, (shadowModelView * vec4(PlayerPos + gbufferModelViewInverse[3].xyz, 1)).xyz); //convert to shadow ndc space
+    vec3 ShadowViewPos = rot_trans_mmul(shadowModelView, PlayerPos + gbufferModelViewInverse[3].xyz);
+    vec3 ShadowPos = proj_mmul(shadowProjection, ShadowViewPos).xyz; //convert to shadow ndc space
     return ShadowPos;
 }
 
@@ -127,3 +153,5 @@ vec3 RGBMDecode_srgb( vec4 rgbm ) {
 vec3 texture_rgbm_srgb(sampler2D sampler, vec2 texcoord) {
     return RGBMDecode_srgb(texture(sampler, texcoord));
 }
+
+#define PLAYER_LIGHT_VEC vec3(shadowModelView[0].z, shadowModelView[1].z, shadowModelView[2].z)

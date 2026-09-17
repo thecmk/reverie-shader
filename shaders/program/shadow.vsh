@@ -7,13 +7,13 @@ attribute vec2 mc_Entity;
 attribute vec2 mc_midTexCoord;
 attribute vec4 at_midBlock;
 
-out vec2 texcoord;
-out vec4 glcolor;
+noperspective out vec2 texcoord;
+noperspective out vec4 glcolor;
+noperspective out vec3 PlayerPos;
 
 flat out vec3 Normal;
 flat out float Material;
 
-out vec3 PlayerPos;
 
 void main() {
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
@@ -22,8 +22,7 @@ void main() {
 	Normal = normalize(gl_NormalMatrix * gl_Normal);
 	Material = (mc_Entity.x - 10000.0);
 
-	PlayerPos = (shadowModelViewInverse * vec4((gl_ModelViewMatrix * gl_Vertex).xyz, 1)).xyz;
-
+    PlayerPos = rot_trans_mmul(shadowModelViewInverse, (gl_ModelViewMatrix * gl_Vertex).xyz);
     #ifdef COLORED_LIGHTS
         if(renderStage == MC_RENDER_STAGE_TERRAIN_SOLID) {
             if(gl_VertexID % 4 == 0 && should_id_be_voxelised(Material)) {
@@ -56,7 +55,7 @@ void main() {
             WorldPos = get_wavy_plants(WorldPos, Material, gl_MultiTexCoord0.t < mc_midTexCoord.t);
         #endif
         
-        gl_Position = shadowProjection * vec4((shadowModelView * vec4((WorldPos - cameraPosition), 1)).xyz, 1);
+        gl_Position = vec4(proj_mmul(shadowProjection, rot_trans_mmul(shadowModelView, WorldPos - cameraPosition)).xyz, 1);
     } else {
         gl_Position = ftransform();
     }

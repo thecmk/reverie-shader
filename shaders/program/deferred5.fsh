@@ -1,6 +1,6 @@
 #define DEFERRED
 
-in vec2 texcoord;
+noperspective in vec2 texcoord;
 
 flat in vec3 LightColorDirect;
 

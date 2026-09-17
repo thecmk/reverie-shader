@@ -1,7 +1,7 @@
 #include "/lib/all_the_libs.glsl"
 // Reflection capture
 
-in vec2 texcoord;
+noperspective in vec2 texcoord;
 #include "/generic/water.glsl"
 #include "/generic/sky.glsl"
 #include "/generic/clouds.glsl"

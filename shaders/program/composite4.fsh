@@ -9,7 +9,7 @@ flat in vec3 LightColorDirect; // This needs to be initialized in the vertex sta
 #include "/generic/fog.glsl"
 #include "/generic/post/taa.glsl"
 
-in vec2 texcoord;
+noperspective in vec2 texcoord;
 
 flat in vec3 LightPosFlare;
 

@@ -1,7 +1,7 @@
 #include "/lib/all_the_libs.glsl"
 
-in vec2 texcoord;
-in vec2 BloomTilePos;
+noperspective in vec2 texcoord;
+noperspective in vec2 BloomTilePos;
 
 #include "/generic/post/bloom.glsl"
 

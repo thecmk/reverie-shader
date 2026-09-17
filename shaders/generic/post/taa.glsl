@@ -16,7 +16,7 @@ vec4 neighbourhoodClipping(sampler2D currTex, vec4 CurrentColor, vec4 prevColor,
 
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
-            if (x == y && x == 0) continue;
+            if (abs(x) == -abs(y)) continue;
             vec4 color = texelFetch2D(currTex, ivec2(FragCoord + vec2(x, y)), 0);
             minColor = min(minColor, color);
             maxColor = max(maxColor, color);

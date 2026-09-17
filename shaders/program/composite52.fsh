@@ -4,7 +4,7 @@
 /* RENDERTARGETS:0 */
 layout(location = 0) out vec4 Color;
 
-in vec2 texcoord;
+noperspective in vec2 texcoord;
 
 const bool colortex0MipmapEnabled = true;
 

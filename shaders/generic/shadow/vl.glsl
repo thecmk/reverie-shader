@@ -34,7 +34,7 @@ mat2x3 nether_fog(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, vec3 ScreenPos, f
     vec3 TotalScattering = vec3(0);
     vec3 PlayerPosC = StartPos + Dither * Step;
 
-    float VdotL = dot(view_player(sLightPosN, false), PlayerPosN);
+    float VdotL = dot(PLAYER_LIGHT_VEC, PlayerPosN);
     float MiePhase = cs_phase(VdotL, anisotropy * 0.7) * 0.75 + cs_phase(VdotL, -anisotropy * 0.3) * 0.25;
 
     float DensityConstant = DENSITY * StepSize;
@@ -130,7 +130,7 @@ mat2x3 do_water_vl(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, float Dither, ve
     vec3 AmbientColor = dataBuf.AmbientColor;
 
     AmbientColor = mix(MinLight, AmbientColor, isOutdoorsSmooth);
-    float VdotL = dot(view_player(sLightPosN, false), PlayerPosN);
+    float VdotL = dot(PLAYER_LIGHT_VEC, PlayerPosN);
 
     float Density = StepSize;
     vec3 TotalScattering = vec3(0);
@@ -155,7 +155,7 @@ mat2x3 do_water_vl(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, float Dither, ve
         Transmittance = TotalTransmittance;
 
         float DistToSky = 5;
-        float DistToSun = DistToSky / max(0.0001, view_player(sLightPosN, false).y);
+        float DistToSun = DistToSky / max(0.0001, PLAYER_LIGHT_VEC.y);
         vec3 SkyAttenuation = exp(-DistToSky * WATER_EXTINCTION);
         vec3 SunAttenuation = exp(-DistToSun * WATER_EXTINCTION);
 
@@ -178,7 +178,7 @@ mat2x3 do_water_vl(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, float Dither, ve
             if (ShadowFactor > 0.01) { // Is in sun
                 if(isEyeInWater == 1)
                     ShadowFactor *= pow4(get_water_caustics(WorldPosC)) + 0.5;
-                float DistToSun = DistToSky / max(0.0001, view_player(sLightPosN, false).y);
+                float DistToSun = DistToSky / max(0.0001, PLAYER_LIGHT_VEC.y);
                 vec3 SunAttenuation = exp(-DistToSun * WATER_EXTINCTION);
                 TotalScattering += TotalTransmittance * LightColorDirect * SunAttenuation * (SunPhase + MS) * ShadowFactor;
             }
@@ -203,7 +203,7 @@ mat2x3 aerial_prespective_ld(vec3 StartPos, vec3 EndPos, vec3 ScreenPos, vec3 Pl
 
     vec3 PlayerPosC = EndPos;
 
-    float VdotL = dot(view_player(sLightPosN, false), PlayerPosN);
+    float VdotL = dot(PLAYER_LIGHT_VEC, PlayerPosN);
 
     float RayPhase = rayleigh_phase(VdotL);
     float MiePhase = cs_phase(VdotL, anisotropy);
@@ -234,7 +234,7 @@ mat2x3 aerial_prespective_ld(vec3 StartPos, vec3 EndPos, vec3 ScreenPos, vec3 Pl
     vec3 MediumScattering = RayScattering + MieScattering;
     vec3 MediumExtinction = OpticalDepth.x * BETA_R_E + OpticalDepth.y * BETA_M_E;
     
-    vec3 ScatteringSample = calc_scatt_towards_sun(EarthPosC + vec3(0, EarthRad, 0), view_player(sLightPosN, false), Len, vec2(RayPhase, MiePhase), RayScattering, MieScattering) * get_shadowlight_color();
+    vec3 ScatteringSample = calc_scatt_towards_sun(EarthPosC + vec3(0, EarthRad, 0), PLAYER_LIGHT_VEC, Len, vec2(RayPhase, MiePhase), RayScattering, MieScattering) * get_shadowlight_color();
 
     float u = view_player(sunPosN, false).y * 0.5 + 0.5;
     float v = (EarthPosC.y) / (AtmRad - EarthRad);

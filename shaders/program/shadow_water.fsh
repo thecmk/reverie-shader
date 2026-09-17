@@ -1,12 +1,12 @@
 #include "/lib/all_the_libs.glsl"
 #include "/generic/water.glsl"
-in vec2 texcoord;
-in vec4 glcolor;
+noperspective in vec2 texcoord;
+noperspective in vec4 glcolor;
+noperspective in vec3 PlayerPos;
 
 flat in vec3 Normal;
 flat in float Material;
 
-in vec3 PlayerPos;
 
 #ifdef RSM
     /* RENDERTARGETS:0,2,1 */

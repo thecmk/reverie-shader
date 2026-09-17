@@ -27,7 +27,7 @@ mat2x3 aerial_prespective(vec3 EndPos, vec3 PlayerPosN, const int STEP_COUNT, ve
     float Dither = blue_noise(FragPos, true).r;
     vec3 PlayerPosC = StartPos + Step * Dither;
 
-    float VdotL = dot(view_player(sLightPosN, false), PlayerPosN);
+    float VdotL = dot(PLAYER_LIGHT_VEC, PlayerPosN);
 
     float RayPhase = rayleigh_phase(VdotL);
     float MiePhase = cs_phase(VdotL, anisotropy);
@@ -66,7 +66,7 @@ mat2x3 aerial_prespective(vec3 EndPos, vec3 PlayerPosN, const int STEP_COUNT, ve
         vec3 MediumExtinction = OpticalDepth.x * BETA_R_E + OpticalDepth.y * BETA_M_E;
         vec3 TransmittanceSample = exp(-MediumExtinction);
 
-        vec3 ScatteringSample = calc_scatt_towards_sun(EarthPosC + vec3(0, EarthRad, 0), view_player(sLightPosN, false), Len, vec2(RayPhase, MiePhase), RayScattering, MieScattering) * get_shadowlight_color();
+        vec3 ScatteringSample = calc_scatt_towards_sun(EarthPosC + vec3(0, EarthRad, 0), PLAYER_LIGHT_VEC, Len, vec2(RayPhase, MiePhase), RayScattering, MieScattering) * get_shadowlight_color();
 
         vec3 ShadowNDCPosC = player_shadow(PlayerPosC);
         vec3 ShadowPosC = distort(ShadowNDCPosC);
@@ -78,7 +78,7 @@ mat2x3 aerial_prespective(vec3 EndPos, vec3 PlayerPosN, const int STEP_COUNT, ve
         #ifdef CLOUDS
             if(Shadowing > 0.01) {
                 float _DistToCloud;
-                float CloudShadow = get_clouds(vec3(1000), view_player(sLightPosN, false), 4, WorldPosC, false, vec2(0), 1, _DistToCloud).a;
+                float CloudShadow = get_clouds(vec3(1000), PLAYER_LIGHT_VEC, 4, WorldPosC, false, vec2(0), 1, _DistToCloud).a;
                 CloudShadow = mix(1-exp2(1-cloudCoverageVl), CloudShadow, linstep(0.2, 0.25, sin(sunAngle * TAU))); // No shadows in the morning because it looks weird
                 Shadowing *= CloudShadow;
             }

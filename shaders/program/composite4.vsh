@@ -1,7 +1,7 @@
 #include "/lib/all_the_libs.glsl"
 
 #include "/generic/clouds.glsl"
-out vec2 texcoord;
+noperspective out vec2 texcoord;
 
 flat out vec3 LightPosFlare;
 
@@ -24,7 +24,7 @@ void main() {
 
 		#ifdef CLOUDS
 			float _Void;
-			IsSunVisible *= get_clouds(vec3(1000), view_player(sLightPosN, false), 6, cameraPosition, false, vec2(0), 1, _Void).a;
+			IsSunVisible *= get_clouds(vec3(1000), PLAYER_LIGHT_VEC, 6, cameraPosition, false, vec2(0), 1, _Void).a;
 		#endif
 		IsSunVisible *= 1 - float(isEyeInWater == 1) * 0.97;
 		

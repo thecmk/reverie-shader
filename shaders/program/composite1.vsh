@@ -1,7 +1,7 @@
 #include "/lib/all_the_libs.glsl"
 
 flat out vec3 LightColorDirect;
-out vec2 texcoord;
+noperspective out vec2 texcoord;
 void main() {
     gl_Position = ftransform();
     gl_Position = gl_Position * 0.5 + 0.5;

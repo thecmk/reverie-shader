@@ -1,6 +1,6 @@
 #include "/lib/all_the_libs.glsl"
 
-in vec2 texcoord;
+noperspective in vec2 texcoord;
 flat in vec3 LightColorDirect;
 
 #include "/generic/clouds.glsl"

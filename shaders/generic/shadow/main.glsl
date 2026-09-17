@@ -5,7 +5,7 @@ float cloud_shadows(vec3 WorldPos) {
     
     vec3 CloudSamplePos = WorldPos;
     if (CloudSamplePos.y < CLOUD_LOWER_PLANE) {
-        CloudSamplePos = intersectRayWithPlane(CloudSamplePos, view_player(sLightPosN, false), CLOUD_UPPER_PLANE);
+        CloudSamplePos = intersectRayWithPlane(CloudSamplePos, PLAYER_LIGHT_VEC, CLOUD_UPPER_PLANE);
         if(CloudSamplePos == vec3(0))
             return 0;
         CloudSamplePos += WorldPos;

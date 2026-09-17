@@ -1,8 +1,8 @@
 #include "/lib/all_the_libs.glsl"
 
-out vec2 texcoord;
-out float DepthCenterL;
-out float DepthCenter;
+noperspective out vec2 texcoord;
+flat out float DepthCenterL;
+flat out float DepthCenter;
 
 void main() {
 	gl_Position = ftransform();

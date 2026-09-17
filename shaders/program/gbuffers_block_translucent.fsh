@@ -1,3 +1,5 @@
+#define GBUFFERS_BLOCK_TRANSLUCENT
+
 #include "/lib/all_the_libs.glsl"
 
 #include "/generic/water.glsl"

@@ -37,7 +37,7 @@
     }
 #endif
 
-#if (defined GBUFFERS_SPIDEREYES) || (defined GBUFFERS_DAMAGEDBLOCK) // No translucency sorting for these programs
+#if (defined GBUFFERS_SPIDEREYES) || (defined GBUFFERS_DAMAGEDBLOCK)  || (defined GBUFFERS_BLOCK_TRANSLUCENT) // No translucency sorting for these programs
 /* RENDERTARGETS:0,1,2,5 */
 #else
 /* RENDERTARGETS:12,1,2,5 */
