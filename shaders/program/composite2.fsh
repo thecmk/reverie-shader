@@ -106,6 +106,10 @@ void main() {
             Color = texture(colortex0, Pos.Screen.xy);
         }
 
+        // Enchant glint
+        vec4 ArmorGlintData = texture(colortex10, texcoord);
+        Color.rgb += ArmorGlintData.rgb * get_luminance(Color.rgb) * 20;
+
         // Translucent blending
 
         float _DistToClouds = 1e6, DistToWater = 1e6, DistToTranslucents = 1e6;

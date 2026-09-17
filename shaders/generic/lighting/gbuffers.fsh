@@ -48,7 +48,12 @@ in Data {
 #endif
 vec2 dCoordx = dFdx(DataIn.texcoord), dCoordy = dFdy(DataIn.texcoord);
 
+#ifdef IRIS_INLINE_GLINT
+/* RENDERTARGETS:1,2,10 */
+layout(location = 2) out vec4 GlintCol;
+#else
 /* RENDERTARGETS:1,2 */
+#endif
 layout(location = 0) out vec4 buf1;
 layout(location = 1) out vec4 buf2;
 
@@ -167,6 +172,15 @@ layout(location = 1) out vec4 buf2;
 
     #ifdef GBUFFERS_ENTITIES
     Albedo.rgb = mix(Albedo.rgb, entityColor.rgb, entityColor.a);
+    #endif
+
+    #ifdef IRIS_INLINE_GLINT
+        if (mc_hasGlint()) {
+            vec3 glint = mc_sampleGlint();
+            GlintCol.rgb = glint * glint;
+        } else {
+            GlintCol.rgb = vec3(0);
+        }
     #endif
 
     MaterialProperties Mat;

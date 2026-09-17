@@ -58,8 +58,6 @@ void main() {
     else {
         mat2x4 GbufferData = mat2x4(texture(colortex1, texcoord), texture(colortex2, texcoord));
         MaterialProperties Mat = unpack_material(GbufferData, IsDH);
-        vec4 ArmorGlintData = texture(colortex10, texcoord);
-        Mat.Albedo.rgb += ArmorGlintData.rgb;
 
         vec3 TerrainColor = calc_lighting(Pos, Mat, IsDH, texcoord, IsHand, Shadow);
         Color.rgb = mix(SkyColor, TerrainColor, Mat.chunkFade);
