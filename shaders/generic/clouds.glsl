@@ -70,7 +70,7 @@ float march_to_light_volumetric(vec3 LightPosN, vec3 WorldPosC, float Dither, fl
     return L * CLOUD_SCATTERING;
 }
 
-vec4 get_clouds_volumetric(vec3 PlayerPos, vec3 PlayerPosN, const int STEP_COUNT, vec3 CameraPos, vec2 Dither, LightData Ld, float Depth, inout float DistToCloud) {
+vec4 get_clouds_volumetric(vec3 PlayerPos, vec3 PlayerPosN, const int STEP_COUNT, vec3 CameraPos, vec3 SunDir, vec2 Dither, LightData Ld, float Depth, inout float DistToCloud) {
     vec3 StartPos, EndPos;
     bool Hit = intersect_with_cloud_plane(CameraPos, StartPos, EndPos, PlayerPosN, CLOUD_LOWER_PLANE, CLOUD_UPPER_PLANE);
     if (!Hit) return vec4(vec3(0), 1);
@@ -112,10 +112,10 @@ vec4 get_clouds_volumetric(vec3 PlayerPos, vec3 PlayerPosN, const int STEP_COUNT
         vec3 Scattering = dataBuf.AmbientColor * ISOTROPIC_PHASE * 10 * AmbientFactor;
 
         if (Ld.MarchToSun) {
-            Scattering += dataBuf.SunColorVlClouds * march_to_light_volumetric(PLAYER_LIGHT_VEC, WorldPosC, Dither.y, Ld.MiePhaseSun);
+            Scattering += dataBuf.SunColorVlClouds * march_to_light_volumetric(SunDir, WorldPosC, Dither.y, Ld.MiePhaseSun);
         }
         if (Ld.MarchToMoon) {
-            Scattering += dataBuf.MoonColorVlClouds * march_to_light_volumetric(-PLAYER_LIGHT_VEC, WorldPosC, Dither.y, Ld.MiePhaseMoon);
+            Scattering += dataBuf.MoonColorVlClouds * march_to_light_volumetric(-SunDir, WorldPosC, Dither.y, Ld.MiePhaseMoon);
         }
 
         if(lightningBoltPosition.w > 0) {
@@ -168,7 +168,7 @@ float march_to_light_flat(vec3 LightPosN, vec3 CloudPos, float Dither, float[MUL
     return L * CLOUD_SCATTERING;
 }
 
-vec4 get_clouds_flat(vec3 PlayerPos, vec3 PlayerPosN, vec3 CameraPos, vec2 Dither, LightData Ld, float Depth, inout float DistToCloud) {
+vec4 get_clouds_flat(vec3 PlayerPos, vec3 PlayerPosN, vec3 CameraPos, vec3 SunDir, vec2 Dither, LightData Ld, float Depth, inout float DistToCloud) {
     vec3 CloudPos = intersectRayWithPlane(CameraPos, PlayerPosN, 500);
     if (CloudPos == vec3(0)) return vec4(vec3(0), 1);
     if(Depth < 1) {
@@ -186,12 +186,11 @@ vec4 get_clouds_flat(vec3 PlayerPos, vec3 PlayerPosN, vec3 CameraPos, vec2 Dithe
 
     float Transmittance = exp(-Density * 50 * CLOUD_EXTINCTION);
     vec3 Scattering = dataBuf.AmbientColor * ISOTROPIC_PHASE * 5;
-
     if (Ld.MarchToSun) {
-        Scattering += dataBuf.SunColorFlatClouds * march_to_light_flat(PLAYER_LIGHT_VEC, CloudPos, Dither.x, Ld.MiePhaseSun);
+        Scattering += dataBuf.SunColorFlatClouds * march_to_light_flat(SunDir, CloudPos, Dither.x, Ld.MiePhaseSun);
     }
     if (Ld.MarchToMoon) {
-        Scattering += dataBuf.MoonColorFlatClouds * march_to_light_flat(-PLAYER_LIGHT_VEC, CloudPos, Dither.x, Ld.MiePhaseMoon);
+        Scattering += dataBuf.MoonColorFlatClouds * march_to_light_flat(-SunDir, CloudPos, Dither.x, Ld.MiePhaseMoon);
     }
 
     Scattering *= (1 - Transmittance) / CLOUD_EXTINCTION;
@@ -209,20 +208,21 @@ vec4 get_clouds(vec3 PlayerPos, vec3 PlayerPosN, const int STEP_COUNT, vec3 Came
     Ld.MarchToSun = LHeight > -0.1;
     Ld.MarchToMoon = LHeight < 0.1;
 
+    vec3 SunDir = view_player(sunPosN, false);
     if (Ld.MarchToSun) {
-        float VdotL = dot(PLAYER_LIGHT_VEC, PlayerPosN);
+        float VdotL = dot(SunDir, PlayerPosN);
         Ld.MiePhaseSun = calc_mie_phase(VdotL);
     }
     if (Ld.MarchToMoon) {
-        float VdotL = dot(-PLAYER_LIGHT_VEC, PlayerPosN);
+        float VdotL = dot(-SunDir, PlayerPosN);
         Ld.MiePhaseMoon = calc_mie_phase(VdotL);
     }
 
     float _DistToCloudFlat = DistToCloud;
-    vec4 CloudDataFlat = get_clouds_flat(PlayerPos, PlayerPosN, CameraPos, Dither, Ld, Depth, _DistToCloudFlat);
+    vec4 CloudDataFlat = get_clouds_flat(PlayerPos, PlayerPosN, CameraPos, SunDir, Dither, Ld, Depth, _DistToCloudFlat);
 
     float _DistToCloudVol = DistToCloud;
-    vec4 CloudDataVol = get_clouds_volumetric(PlayerPos, PlayerPosN, STEP_COUNT, CameraPos, Dither, Ld, Depth, _DistToCloudVol);
+    vec4 CloudDataVol = get_clouds_volumetric(PlayerPos, PlayerPosN, STEP_COUNT, CameraPos, SunDir, Dither, Ld, Depth, _DistToCloudVol);
 
     DistToCloud = min(_DistToCloudFlat, _DistToCloudVol); // Return dist to nearest cloud
 
