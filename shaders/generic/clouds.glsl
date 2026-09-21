@@ -181,7 +181,7 @@ vec4 get_clouds_flat(vec3 PlayerPos, vec3 PlayerPosN, vec3 CameraPos, vec3 SunDi
     if (Density <= 1e-5) {
         return vec4(0, 0, 0, 1);
     }
-    DistToCloud = length(CloudPos);
+    DistToCloud = length(CloudPos - CameraPos);
     Density *= DENSITY;
 
     float Transmittance = exp(-Density * 50 * CLOUD_EXTINCTION);

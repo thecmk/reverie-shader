@@ -17,6 +17,8 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
     }
 
     Mat.Lightmap = pow4(Mat.Lightmap);
+
+    
     vec3 LMColor = TorchlightColor;
     #if (defined COLORED_LIGHTS) && (!defined DH_TERRAIN) && (!defined VOXY_TERRAIN)
         vec3 PlayerPosAbs = get_voxel_pos(Pos.Player) + view_player(Mat.Normal, false) * 0.065;
