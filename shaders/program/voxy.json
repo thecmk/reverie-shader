@@ -70,7 +70,8 @@
     "lightningBoltPosition",
     "windDirection",
     "wetness",
-    "hideGUI"
+    "hideGUI",
+    "nightVision"
   ],
 
   "samplers": {
