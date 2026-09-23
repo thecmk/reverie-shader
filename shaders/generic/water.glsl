@@ -85,7 +85,7 @@ float get_water_caustics(vec3 PlayerPos) {
     vec3 WorldPos = PlayerPos + cameraPosition;
     vec3 PlayerPosS = WorldPos - PLAYER_LIGHT_VEC / max(0.25, PLAYER_LIGHT_VEC.y) * WorldPos.y;
     float WaterHeight = get_water_height_noise(PlayerPosS);
-    float CausticsColor = exp(-abs(WaterHeight) * 3);
+    float CausticsColor = exp(-abs(WaterHeight) * 3) * 1.5 + 0.25;
     return CausticsColor;
 }
 

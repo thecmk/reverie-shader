@@ -18,7 +18,7 @@ void main() {
 
     float WeatherColor = texture(colortex5, texcoord).g * 0.5;
 
-    Color.rgb += FinalBloom * (BLOOM_STRENGTH + float(isEyeInWater == 1) * 0.5 + 0.2 * (rainStrength * isOutdoorsSmooth) + WeatherColor);
+    Color.rgb += FinalBloom * (BLOOM_STRENGTH + float(isEyeInWater == 1) * 2 + 0.2 * (rainStrength * isOutdoorsSmooth) + WeatherColor);
     #endif
 
     BloomClear = vec4(0); // Clear here because glClear is bugged on mesa(?)

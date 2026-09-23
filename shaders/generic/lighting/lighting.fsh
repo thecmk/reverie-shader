@@ -98,8 +98,9 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         OutColor.rgb += GIDenoise.rgb;
     #endif
 
-    float SSSS = Mat.Lightmap.y > 0.1 ? Mat.SSS : 0;
-    if (Mat.SSS <= 64.0 / 255.0 && Mat.Lightmap.y > 0.1) {
+    float SSSS = Mat.SSS;
+    // float SSSS = Mat.Lightmap.y > 0.1 ? Mat.SSS : 0;
+    if (Mat.SSS <= 64.0 / 255.0) {
         if (Mat.Id == MATERIAL_SSS_WEAK) SSSS = SSS_STRENGTH_WEAK;
         else if (Mat.Id >= MATERIAL_SSS_STRONG && Mat.Id <= MATERIAL_LEAVES) SSSS = SSS_STRENGTH_STRONG;
         else SSSS = 0;

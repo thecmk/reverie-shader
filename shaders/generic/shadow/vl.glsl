@@ -136,9 +136,9 @@ mat2x3 do_water_vl(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, float Dither, ve
     vec3 TotalScattering = vec3(0);
     vec3 TotalTransmittance = vec3(1), Transmittance;
 
-    float SunPhase = mix(hg_phase(VdotL, 0.9), hg_phase(VdotL, -0.3), 0.25);
+    float SunPhase = hg_phase(VdotL, 0.9);
 
-    vec3 fms = WATER_SCATTERING / WATER_EXTINCTION * (1 - exp(-1 * WATER_EXTINCTION));
+    vec3 fms = WATER_SCATTERING / WATER_EXTINCTION * (1 - exp(-5 * WATER_EXTINCTION));
     vec3 MS = ISOTROPIC_PHASE * fms / (1 - fms);
 
     float CloudShadow = cloud_shadows(StartPos + cameraPosition);
@@ -177,7 +177,7 @@ mat2x3 do_water_vl(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, float Dither, ve
 
             if (ShadowFactor > 0.01) { // Is in sun
                 if(isEyeInWater == 1)
-                    ShadowFactor *= pow4(get_water_caustics(WorldPosC)) + 0.5;
+                    ShadowFactor *= pow2(get_water_caustics(WorldPosC));
                 float DistToSun = DistToSky / max(0.0001, PLAYER_LIGHT_VEC.y);
                 vec3 SunAttenuation = exp(-DistToSun * WATER_EXTINCTION);
                 TotalScattering += TotalTransmittance * LightColorDirect * SunAttenuation * (SunPhase + MS) * ShadowFactor;

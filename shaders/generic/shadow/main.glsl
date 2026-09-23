@@ -73,7 +73,7 @@ float pcss(vec3 ShadowPosUndistorted, mat2 RotationOffset, bool DoSSS, out float
         ShadowPosD = distort(vec3(ShadowPosD, 0)).xy;
         ShadowPosD = ShadowPosD * 0.5 + 0.5;
 
-        float Sample = texture(shadowtex0, ShadowPosD).x;
+        float Sample = texture(shadowtex1, ShadowPosD).x;
         if (Sample < ReceiverD) {
             BlockerD += ReceiverD - Sample;
             Hits++;
