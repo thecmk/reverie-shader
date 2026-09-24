@@ -1,7 +1,7 @@
 vec3 BETA_R = vec3(5.802e-6, 13.558e-6, 33.1e-6) * betaRfact * vec3(RAYLEIGH_RED, RAYLEIGH_GREEN, RAYLEIGH_BLUE);
 float BETA_M = 3.996e-6 * fogAmount * MIE_MULT;
-float BETA_M_A = BETA_M * 1.101;
-const vec3 BETA_O_A = vec3(0.650e-6, 1.881e-6, 0.085e-6) * vec3(OZONE_RED, OZONE_GREEN, OZONE_BLUE);
+float BETA_M_A = BETA_M * 0.101;
+const vec3 BETA_O_A = vec3(2.67399800e-06, 1.41143586e-06, -6.50006909e-08) * vec3(OZONE_RED, OZONE_GREEN, OZONE_BLUE);
 vec3 BETA_R_E = BETA_R;
 float BETA_M_E = BETA_M + BETA_M_A;
 const vec3 BETA_O_E = BETA_O_A;
@@ -12,6 +12,8 @@ const float AtmRad = 6420e3;
 
 const float Hr = 7994;
 const float Hm = 1200;
+
+const float G = 0.8;
 
 const float ISOTROPIC_PHASE = 1 / (4 * PI);
 
@@ -69,7 +71,7 @@ vec3 all_densities(float h) {
 } 
 
 float cs_phase(float Mu) {
-    return cs_phase(Mu, anisotropy);
+    return cs_phase(Mu, G);
 }
 
 vec3 vec_from_ang(float theta) {

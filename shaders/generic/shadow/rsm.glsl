@@ -6,10 +6,9 @@ vec3 rsm(vec3 PlayerPos, vec3 Normal, vec3 LightColor) {
     if(Fade > 0.99) return vec3(0);
 
     float CloudCoverage = cloud_shadows(PlayerPos + cameraPosition);
-    if(CloudCoverage < 0.01) return vec3(0);
 
     vec3 ShadowPos = player_shadow(PlayerPos);
-
+    
     vec3 ShadowNormal = mat3(shadowModelView) * (mat3(gbufferModelViewInverse) * Normal);
     vec3 Sum = vec3(0);
 

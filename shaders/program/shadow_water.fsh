@@ -44,14 +44,11 @@ void main() {
         
         Color.a = 1 - WaterFog;
         MaterialBuf.r = 1;
-        #ifdef RSM
-            ShadowNormal.rg = vec2(0, -1);
-        #endif
     } else {
         Color.rgb = srgb_linear(Color.rgb);
-        #ifdef RSM
-            ShadowNormal.rg = encodeUnitVector(Normal) * 0.5 + 0.5;
-        #endif
         MaterialBuf.r = 0;
     }
+    #ifdef RSM
+        ShadowNormal.rg = encodeUnitVector(Normal) * 0.5 + 0.5;
+    #endif
 }

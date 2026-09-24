@@ -213,6 +213,7 @@ const bool shadowcolor0Clear = false;
 const vec4 shadowcolor0ClearColor = vec4(0, 0, 0, 1);
 const bool shadowcolor1Clear = false;
 const bool shadowcolor2Clear = true;
+const vec4 shadowcolor2ClearColor = vec4(0, 0, 0, 1);
 
 const float PI = 3.141592653589793;
 const float TAU = 2 * PI;

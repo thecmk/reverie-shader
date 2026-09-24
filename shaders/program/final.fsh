@@ -101,6 +101,6 @@ void main() {
     // }
     // Color.rgb = vec3(texture(colortex11, texcoord).rgb);
     // Color.rgb = vec3(texture(colortex14, texcoord).r);
-    // Color.rgb = texture(shadowcolor0, texcoord).rgb;
+    // Color.rgb = vec3(texture(shadowcolor2, texcoord).r);
     imageStore(water_depth_min, ivec2(gl_FragCoord.xy), uvec4(floatBitsToUint(1e6)));
 }
