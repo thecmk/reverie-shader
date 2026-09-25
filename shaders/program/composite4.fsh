@@ -113,13 +113,13 @@ void main() {
             // Quite terrible transmittance approx
             const float MtoRratio = (0.659 + 1.156) / 0.939; // For len = 500m
             vec3 OpticalDepth = BETA_M_E * MtoRratio + BETA_R_E / MtoRratio;
-            vec3 T = exp(log(TemporalVl.a) / dot(OpticalDepth, vec3(0.33)) * OpticalDepth);
+            vec3 T = exp(log(TemporalVl.a) / dot(OpticalDepth, vec3(0.33333)) * OpticalDepth);
             Color.rgb = blend_vl(Color.rgb, mat2x3(TemporalVl.rgb, T));
 
             // Approximate fog on SkyColor, for border fog 
             float FogAmount = clamp(fogAmount / 5, 0, 1);
             vec4 VlScaled = vec4(TemporalVl.rgb * mix(1.1, 1.4, FogAmount), TemporalVl.a * mix(0.82, 0.5, FogAmount));
-            T = exp(log(VlScaled.a) / dot(OpticalDepth, vec3(0.33)) * OpticalDepth);
+            T = exp(log(VlScaled.a) / dot(OpticalDepth, vec3(0.33333)) * OpticalDepth);
             SkyColor = blend_vl(SkyColor.rgb, mat2x3(VlScaled.rgb, T));
         #endif
     #endif  

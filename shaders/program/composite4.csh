@@ -121,14 +121,13 @@ void main() {
             
             mat2x3 AtmData = aerial_prespective(Pos.Player, Pos.PlayerN, VL_SAMPLES, FragPos, vec3(texcoord, Depth), IsDH);
 
-            float T = dot(AtmData[1], vec3(0.33));
-            T = 1 - T;
+            float T = dot(AtmData[1], vec3(0.33333));
             
             imageStore(image2, ivec2(gl_GlobalInvocationID.xy), vec4(AtmData[0], T));
         } else {
-            imageStore(image2, ivec2(gl_GlobalInvocationID.xy), vec4(0,0,0,0));
+            imageStore(image2, ivec2(gl_GlobalInvocationID.xy), vec4(0,0,0,1));
         }
     } else {
-        imageStore(image2, ivec2(gl_GlobalInvocationID.xy), vec4(0,0,0,0));
+        imageStore(image2, ivec2(gl_GlobalInvocationID.xy), vec4(0,0,0,1));
     }
 }

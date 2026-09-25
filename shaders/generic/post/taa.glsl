@@ -17,7 +17,7 @@ vec4 neighbourhoodClipping(sampler2D currTex, vec4 CurrentColor, vec4 prevColor,
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
             if (abs(x) == -abs(y)) continue;
-            vec4 color = texelFetch2D(currTex, ivec2(FragCoord + vec2(x, y)), 0);
+            vec4 color = texelFetch(currTex, ivec2(FragCoord + vec2(x, y)), 0);
             minColor = min(minColor, color);
             maxColor = max(maxColor, color);
         }
@@ -154,7 +154,6 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
 
     if(WasOffScreen || (ScreenPos.z < 0.56) || timeSkip > 0.5) {
         vec4 Color = texture(image2Sampler, ScreenPos.xy * VOLUMETRICS_RES);
-        Color.a = 1 - Color.a;
         Color = max(Color, 0);
         PixelAgeBuf.x = 1/255.0;
         return Color;
@@ -179,7 +178,6 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
         }
     }
     Color /= TotalFactor;
-    Color.a = 1 - Color.a;
     Color = max(Color, 0);
 
     vec4 PrevColor = texture(colortex7, PrevCoord);
@@ -190,23 +188,34 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
         DepthPrev = abs(DepthPrev);
     #endif
 
+    // Neighbourhood clipping for better responsiveness when fog is suddenly in/out of shadow
+    if(ScreenPos.z < 1) {
+        vec4 ClippingMaxColor;
+        vec4 ClampedColor = neighbourhoodClipping(image2Sampler, Color, PrevColor, ClippingMaxColor, ivec2(FragCoord * VOLUMETRICS_RES));
+        float velocity = len2((ScreenPos.xy - PrevCoord.xy) * resolution);
+        if(velocity > 0.1) {
+            PrevColor = mix(ClampedColor, PrevColor, exp(-0.25 * velocity));
+        }
+    }
+    
+
     float PixelAgeRaw = texture(colortex14, PrevCoord).x;
     float PixelAge = min(64, PixelAgeRaw * 255);
 
     float DepthQuantized = l_depth(quantize_15bit(ScreenPos.z), IsDH);
-    PixelAge *= max(0, 1-abs(l_depth(DepthPrev, IsDH2) - DepthQuantized) * 0.2);
+    PixelAge *= max(0, 1-abs(l_depth(DepthPrev, IsDH2) - DepthQuantized) * 0.1);
 
     vec2 pixelOffset = 1.0 - abs(2.0 * fract(PrevCoord * resolution) - 1.0);
     float OffcenterRejection = sqrt(pixelOffset.x * pixelOffset.y) * 0.25 + 0.75;
     PixelAge *= OffcenterRejection;
+
 
     PixelAge += 1;
     PixelAgeBuf.x = PixelAge/255.0;
 
     float blendFactor = 1 - 1.0 / PixelAge;
 
-    
-    return mix(Color, PrevColor, blendFactor * 0.98);
+    return mix(Color, PrevColor, 0.98 * blendFactor);
 }
 
 vec4 temporal_denoise_gi(vec4 Color, vec3 ScreenPos, vec2 FragCoord, bool IsDH, out vec4 PixelAgeBuf) {
