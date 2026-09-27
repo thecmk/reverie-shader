@@ -147,7 +147,7 @@ layout(location = 1) out vec4 buf2;
         vec4 Albedo = vec4(glcolor.rgb, 1) * texture(gtexture, texcoord);
         #endif
     #endif
-    if (Albedo.a < 0.1) {
+    if (Albedo.a < alphaTestRef) {
         discard;
     }
 

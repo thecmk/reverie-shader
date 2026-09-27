@@ -71,7 +71,8 @@
     "windDirection",
     "wetness",
     "hideGUI",
-    "nightVision"
+    "nightVision",
+    "alphaTestRef"
   ],
 
   "samplers": {

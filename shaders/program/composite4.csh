@@ -118,6 +118,8 @@ void main() {
         float Depth = get_depth(texcoord, IsDH);
         if(Depth > 0.56) {
             Positions Pos = get_positions(texcoord, Depth, IsDH, true);
+
+            Pos.Player -= 0.5 * Pos.PlayerN; // Fixes light leaking
             
             mat2x3 AtmData = aerial_prespective(Pos.Player, Pos.PlayerN, VL_SAMPLES, FragPos, vec3(texcoord, Depth), IsDH);
 

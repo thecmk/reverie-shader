@@ -39,6 +39,7 @@
     uniform float wetness;
     uniform bool hideGUI;
     uniform float nightVision;
+    uniform float alphaTestRef;
 
     uniform sampler2D colortex0;
     uniform sampler2D colortex1;

@@ -92,7 +92,7 @@ layout(location = 3) out vec4 Shadow;
         Albedo = glcolor_flat;
     #endif
 
-    if(Albedo.a < 0.01) {
+    if(Albedo.a < alphaTestRef) {
         discard;
     }
 

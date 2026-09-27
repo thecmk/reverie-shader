@@ -199,7 +199,7 @@ mat2x3 aerial_prespective_ld(vec3 StartPos, vec3 EndPos, vec3 ScreenPos, vec3 Pl
 
     vec3 Step = (EndPos - StartPos);
     float StepSize = min(farLod, length(Step));
-    if(StepSize < 1) return mat2x3(vec3(0), vec3(1));
+    if(StepSize < 0.25) return mat2x3(vec3(0), vec3(1));
 
     vec3 PlayerPosC = EndPos;
 
