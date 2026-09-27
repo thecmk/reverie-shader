@@ -112,7 +112,7 @@ vec4 temporal_upscale_clouds(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Pl
     ivec2 LastUpdatePos = FragCoord - FragCoord % VOLUMETRICS_RES_INV + ivec2(frameCounter * VOLUMETRICS_RES, frameCounter) % VOLUMETRICS_RES_INV;
 
     // Sample last updated pos when there's no other data available 
-    bool WasOffScreen = clamp(PrevCoord, 0, 1) != PrevCoord;
+    bool WasOffScreen = clamp(PrevCoord + resolutionInv * VOLUMETRICS_RES_INV, 0, 1) != PrevCoord + resolutionInv * VOLUMETRICS_RES_INV;
     float DepthPrev = min_depth_4x4(PrevCoord, colortex8);
 
     bool WasOccluded = DepthPrev < DepthToCloud || (IsDH && DepthPrev < 1);
@@ -150,7 +150,7 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
     vec2 PrevCoord = toPrevScreenPos(ScreenPos.xy, ScreenPos.z, IsDH, true).xy;
 
     // Sample last updated pos when there's no other data available 
-    bool WasOffScreen = clamp(PrevCoord, 0, 1) != PrevCoord;
+    bool WasOffScreen = clamp(PrevCoord + resolutionInv * VOLUMETRICS_RES_INV, 0, 1) != PrevCoord + resolutionInv * VOLUMETRICS_RES_INV;
 
     if(WasOffScreen || (ScreenPos.z < 0.56) || timeSkip > 0.5) {
         vec4 Color = texture(image2Sampler, ScreenPos.xy * VOLUMETRICS_RES);
@@ -193,9 +193,7 @@ vec4 temporal_upscale_vl(vec3 ScreenPos, bool IsDH, ivec2 FragCoord, vec3 Player
         vec4 ClippingMaxColor;
         vec4 ClampedColor = neighbourhoodClipping(image2Sampler, Color, PrevColor, ClippingMaxColor, ivec2(FragCoord * VOLUMETRICS_RES));
         float velocity = len2((ScreenPos.xy - PrevCoord.xy) * resolution);
-        if(velocity > 0.1) {
-            PrevColor = mix(ClampedColor, PrevColor, exp(-0.25 * velocity));
-        }
+        PrevColor = mix(ClampedColor, PrevColor, exp(-0.25 * velocity));
     }
     
 

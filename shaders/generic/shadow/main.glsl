@@ -177,6 +177,7 @@ vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float 
     float PenumbraSize;
     #if SHADOW_FILTER == 2
         PenumbraSize = pcss(player_shadow(PlayerPos), RotationOffset, DoSSS, BlockerDist);
+        PenumbraSize = mix(SHADOW_FILTER_SIZE, PenumbraSize, Skylight);
     #else
         PenumbraSize = SHADOW_FILTER_SIZE;
     #endif

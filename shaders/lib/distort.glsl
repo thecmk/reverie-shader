@@ -36,9 +36,9 @@ vec3 compute_bias(vec3 PlayerPos, vec3 WorldNormal, float NdotL, float Skylight)
     vec3 Bias = WorldNormal * DistanceBias * (2 - 0.95 * max(NdotL, 0));
 
     #ifdef DIMENSION_OVERWORLD
-        if (Skylight < 0.5 && isEyeInWater != 1) {
-            vec3 EdgeFactor = 0.2 * (0.5 - fract(PlayerPos + cameraPosition + WorldNormal * 0.01));
-            Bias += max(0.5 - Skylight, 0) * EdgeFactor;
+        if (Skylight <= 0.001 && isEyeInWater != 1) {
+            vec3 EdgeFactor = 0.25 - 0.5 * fract(PlayerPos + cameraPositionFract + Bias * 0.01);
+            Bias = EdgeFactor;
         }
     #endif
     

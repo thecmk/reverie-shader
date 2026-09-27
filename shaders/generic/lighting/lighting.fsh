@@ -18,6 +18,8 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
 
     Mat.Lightmap = pow4(Mat.Lightmap);
 
+    if(IsHand)
+        NdotL *= Mat.Lightmap.y;
     
     vec3 LMColor = TorchlightColor;
     #if (defined COLORED_LIGHTS) && (!defined DH_TERRAIN) && (!defined VOXY_TERRAIN)

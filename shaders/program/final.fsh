@@ -95,6 +95,7 @@ void main() {
     // Color.rgb = texture(atm_transmittance_sampler, texcoord).rgb;
     // Color.rgb = vec3(texture(image0Sampler, texcoord / 32).rgb)/5;
     // Color.rgb = vec3(isnan(Color.rgb));
+    // Color.rgb = texture(shadowtex1, texcoord).rgb;
 
     // for(int i = 1; i <= 100000; i++) {
     //     Color.rgb = vec3(pow(Color.rgb, vec3(1 / 2.2)));
