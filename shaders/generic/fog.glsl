@@ -1,6 +1,6 @@
 vec3 get_lava_fog(float dist, vec3 color) {
-    const vec3 LAVA_FOG_COLOR = srgb_linear(vec3(0.65, 0.3, 0.1));
-    const vec3 PSNOW_FOG_COLOR = srgb_linear(vec3(0.5, 0.6, 0.8));
+    const vec3 LAVA_FOG_COLOR = srgb_rec2020(vec3(0.65, 0.3, 0.1));
+    const vec3 PSNOW_FOG_COLOR = srgb_rec2020(vec3(0.5, 0.6, 0.8));
 
     if (isEyeInWater == 2) {
         dist = clamp(dist / 2, 0, 1);

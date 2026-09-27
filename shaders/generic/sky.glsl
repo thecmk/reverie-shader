@@ -24,8 +24,8 @@ vec3 get_stars(vec3 PlayerPosN) {
 vec3 get_aurora(vec3 PlayerPosN, float Dither) {
     if(precipitationSmooth <= 1) return vec3(0);
 
-    const vec3 COLOR_TOP = srgb_linear(vec3(28, 255, 218) / 255.0);
-    const vec3 COLOR_BOTTOM = srgb_linear(vec3(122, 255, 28) / 255.0);
+    const vec3 COLOR_TOP = srgb_rec2020(vec3(28, 255, 218) / 255.0);
+    const vec3 COLOR_BOTTOM = srgb_rec2020(vec3(122, 255, 28) / 255.0);
     const float AURORA_STRENGTH = 3;
 
     // Calculate intersection with aurora plane
@@ -60,7 +60,7 @@ vec3 get_milky_way(vec3 PlayerPosN) {
     vec2 Coord = PlayerPosN.xz / (PlayerPosN.y * 0.5 + 0.5);
 
     vec3 Sample = texture(milkyWay, Coord * 0.5).rgb;
-    Sample = srgb_linear(Sample);
+    Sample = srgb_rec2020(Sample);
 
     Sample *= smoothstep(0., 0.5, PlayerPosN.y);
     return Sample * 0.02;
@@ -98,8 +98,8 @@ vec3 get_sky_overworld(vec3 ViewPosN, const bool DrawSun, float PlayerPosY) {
 }
 
 vec3 get_sky_nether() {
-    vec3 fogColorL = srgb_linear(fogColor.rgb);
-    vec3 SkyColor = fogColorL / get_luminance(fogColorL);
+    vec3 fogColorL = srgb_rec2020(fogColor.rgb);
+    vec3 SkyColor = fogColorL / get_luminance_rec2020(fogColorL);
     return SkyColor / 100;
 }
 
@@ -116,7 +116,7 @@ vec3 get_sky(vec3 ViewPosN, const bool DrawSun, float PlayerPosY) {
         return vec3(0);
     #else
         float upDot = dot(ViewPosN, gbufferModelView[1].xyz);
-        vec3 SkyColor = 4 * srgb_linear(fogColor.rgb) * mix(1.0, fogify(max(upDot + 0.2, 0), 0.02), 0.7);
+        vec3 SkyColor = 4 * srgb_rec2020(fogColor.rgb) * mix(1.0, fogify(max(upDot + 0.2, 0), 0.02), 0.7);
         return SkyColor;
     #endif
 }

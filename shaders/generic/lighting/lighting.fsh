@@ -78,9 +78,9 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
         vec3 SunA = FakeAmbientLight + FakeLavaLight;
         SunA *= 0.1 * c_NETHER_BRIGHTNESS;
     #elif defined DIMENSION_END
-        vec3 SunA = srgb_linear(vec3(0.2, 0.1, 0.15));
+        vec3 SunA = srgb_rec2020(vec3(0.2, 0.1, 0.15));
     #else
-        vec3 SunA = max(MinLight, 4 * srgb_linear(fogColor.rgb));
+        vec3 SunA = max(MinLight, 4 * srgb_rec2020(fogColor.rgb));
     #endif
 
     SunA += LMColor * Mat.Lightmap.x;

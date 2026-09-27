@@ -96,7 +96,7 @@ layout(location = 3) out vec4 Shadow;
         discard;
     }
 
-    Albedo.rgb = srgb_linear(Albedo.rgb);
+    Albedo.rgb = srgb_rec2020(Albedo.rgb);
 
     #ifdef GBUFFERS_ENTITIES
     Albedo.rgb = mix(Albedo.rgb, entityColor.rgb, entityColor.a);

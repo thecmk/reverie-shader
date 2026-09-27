@@ -147,7 +147,7 @@ MaterialProperties unpack_material(mat2x4 GbufferData, bool IsDH) {
     MaterialProperties NewMat;
 
     NewMat.Albedo = vec3(UnpackX, UnpackY.x);
-    NewMat.Albedo = srgb_linear(NewMat.Albedo);
+    NewMat.Albedo = srgb_rec2020(NewMat.Albedo);
 
     NewMat.Id = UnpackY.y * 255;
 

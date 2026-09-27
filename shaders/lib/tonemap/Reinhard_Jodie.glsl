@@ -2,7 +2,7 @@
 
 vec3 reinhard_jodie(vec3 v)
 {
-    float l = get_luminance(v);
+    float l = get_luminance_rec2020(v);
     vec3 tv = v / (1.0f + v);
     return mix(v / (1.0f + l), tv, tv);
 }

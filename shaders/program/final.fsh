@@ -92,7 +92,7 @@ void main() {
     // Color.rgb = vec3(0, texture(colortex5, texcoord).zw);
     // Color.rgb = texture(atm_multi_scattering_sampler, texcoord).rgb;
     // Color.rgb = sample_normal(texcoord * INDIRECT_RES_SCALE);
-    // Color.rgb = texture(atm_skyview_sampler, texcoord).rgb;
+    // Color.rgb = texture(atm_transmittance_sampler, texcoord).rgb;
     // Color.rgb = vec3(texture(image0Sampler, texcoord / 32).rgb)/5;
     // Color.rgb = vec3(isnan(Color.rgb));
 

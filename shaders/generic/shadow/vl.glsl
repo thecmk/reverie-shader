@@ -8,8 +8,8 @@ mat2x3 nether_fog(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, vec3 ScreenPos, f
         const float DENSITY = 0.05;
         const float MAX_HEIGHT = 120.0;
     #else
-        const vec3 SCATTERING = vec3(0.05, 0.2, 0.4);
-        const vec3 ABSORBTION = vec3(0.2, 0.45, 1.0) * 0.2;
+        const vec3 SCATTERING = vec3(0.05, 0.2, 0.4) * REC709_REC2020;
+        const vec3 ABSORBTION = (vec3(0.2, 0.45, 1.0) * 0.2) * REC709_REC2020;
         const float DENSITY = 0.25;
         const float MAX_HEIGHT = 200.0;
     #endif
@@ -229,7 +229,7 @@ mat2x3 aerial_prespective_ld(vec3 StartPos, vec3 EndPos, vec3 ScreenPos, vec3 Pl
     OpticalDepth.y += Density;
     
     vec3 RayScattering = BETA_R * OpticalDepth.x;
-    float MieScattering = BETA_M * OpticalDepth.y;
+    vec3 MieScattering = BETA_M * OpticalDepth.y;
 
     vec3 MediumScattering = RayScattering + MieScattering;
     vec3 MediumExtinction = OpticalDepth.x * BETA_R_E + OpticalDepth.y * BETA_M_E;

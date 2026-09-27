@@ -60,7 +60,7 @@ mat2x3 aerial_prespective(vec3 EndPos, vec3 PlayerPosN, const int STEP_COUNT, ve
         OpticalDepth.y += Density;
         
         vec3 RayScattering = BETA_R * OpticalDepth.x;
-        float MieScattering = BETA_M * OpticalDepth.y;
+        vec3 MieScattering = BETA_M * OpticalDepth.y;
 
         vec3 MediumScattering = RayScattering + MieScattering;
         vec3 MediumExtinction = OpticalDepth.x * BETA_R_E + OpticalDepth.y * BETA_M_E;

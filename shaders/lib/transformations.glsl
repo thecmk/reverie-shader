@@ -114,44 +114,4 @@ vec2 toPrevScreenPos(vec2 currScreenPos, float depth, bool isDH, bool ShouldUnji
     return finalPos * 0.5 + 0.5;
 }
 
-#define linear_srgb(linear) ( mix(12.92 * linear, 1.055 * pow(linear, vec3(1/2.4)) - 0.055, step(0.0031308, linear)) )
-
-#define srgb_linear(srgb) ( mix(srgb / 12.92, pow(((srgb + 0.055)/(1.055)), vec3(2.4)), step(0.04045, srgb)))
-
-// https://graphicrants.blogspot.com/2009/04/rgbm-color-encoding.html
-vec4 RGBMEncode( vec3 color ) {
-    vec4 rgbm;
-    color = sqrt(color);
-    color *= 1.0 / 6.0;
-    rgbm.a = clamp( max( max( color.r, color.g ), max( color.b, 1e-6 ) ), 0, 1 );
-    rgbm.a = ceil( rgbm.a * 255.0 ) / 255.0;
-    rgbm.rgb = color / rgbm.a;
-    return rgbm;
-}
-
-vec3 RGBMDecode( vec4 rgbm ) {
-    return pow2(6.0 * rgbm.rgb * rgbm.a);
-}
-
-vec3 texture_rgbm(sampler2D sampler, vec2 texcoord) {
-    return RGBMDecode(texture(sampler, texcoord));
-}
-
-vec4 RGBMEncode_srgb( vec3 color ) {
-    vec4 rgbm;
-    color *= 1.0 / 6.0;
-    rgbm.a = clamp( max( max( color.r, color.g ), max( color.b, 1e-6 ) ), 0, 1 );
-    rgbm.a = ceil( rgbm.a * 255.0 ) / 255.0;
-    rgbm.rgb = color / rgbm.a;
-    return rgbm;
-}
-
-vec3 RGBMDecode_srgb( vec4 rgbm ) {
-    return 6.0 * rgbm.rgb * rgbm.a;
-}
-
-vec3 texture_rgbm_srgb(sampler2D sampler, vec2 texcoord) {
-    return RGBMDecode_srgb(texture(sampler, texcoord));
-}
-
 #define PLAYER_LIGHT_VEC vec3(shadowModelView[0].z, shadowModelView[1].z, shadowModelView[2].z)

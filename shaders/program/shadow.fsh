@@ -29,7 +29,7 @@ void main() {
         Color.rgb = vec3(0);
     } 
 
-    Color.rgb = srgb_linear(Color.rgb);
+    Color.rgb = srgb_rec2020(Color.rgb);
 
     #ifdef RSM
         ShadowNormal.rg = encodeUnitVector(Normal) * 0.5 + 0.5;

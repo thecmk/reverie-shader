@@ -1,9 +1,9 @@
-vec3 BETA_R = vec3(5.802e-6, 13.558e-6, 33.1e-6) * betaRfact * vec3(RAYLEIGH_RED, RAYLEIGH_GREEN, RAYLEIGH_BLUE);
-float BETA_M = 3.996e-6 * fogAmount * MIE_MULT;
-float BETA_M_A = BETA_M * 0.101;
-const vec3 BETA_O_A = vec3(2.67399800e-06, 1.41143586e-06, -6.50006909e-08) * vec3(OZONE_RED, OZONE_GREEN, OZONE_BLUE);
+vec3 BETA_R = vec3(5.802e-6, 13.558e-6, 33.1e-6) * betaRfact * vec3(RAYLEIGH_RED, RAYLEIGH_GREEN, RAYLEIGH_BLUE) * REC709_REC2020;
+vec3 BETA_M = vec3(3.996e-6 * fogAmount * MIE_MULT) * REC709_REC2020;
+vec3 BETA_M_A = BETA_M * 0.101;
+const vec3 BETA_O_A = vec3(2.67399800e-06, 1.41143586e-06, -6.50006909e-08) * vec3(OZONE_RED, OZONE_GREEN, OZONE_BLUE) * REC709_REC2020;
 vec3 BETA_R_E = BETA_R;
-float BETA_M_E = BETA_M + BETA_M_A;
+vec3 BETA_M_E = BETA_M + BETA_M_A;
 const vec3 BETA_O_E = BETA_O_A;
 
 // Atmosphere height
@@ -98,7 +98,7 @@ vec3 calc_transmittance(vec3 Origin, vec3 Dir, float t1) {
 
 vec3 retrieve_transmittance(float Len, float LdotUp) {
     float x = Len / (AtmRad - EarthRad);
-    return texture(atm_transmittance_sampler, vec2(LdotUp * 0.5 + 0.5, x)).rgb;
+    return texture_rgbm(atm_transmittance_sampler, vec2(LdotUp * 0.5 + 0.5, x)).rgb;
 }
 
 struct ScatteringResult {
@@ -107,7 +107,7 @@ struct ScatteringResult {
     vec3 L;
 };
 
-vec3 calc_scatt_towards_sun(vec3 P, vec3 LightDir, float Len, vec2 Phase, vec3 RayScattering, float MieScattering) {
+vec3 calc_scatt_towards_sun(vec3 P, vec3 LightDir, float Len, vec2 Phase, vec3 RayScattering, vec3 MieScattering) {
     // if(LightDir.y < -0.1) return vec3(0);
 
     // // Earth's shadow
@@ -164,7 +164,7 @@ ScatteringResult calc_atm_scatt(vec3 Origin, vec3 Dir, vec3 SunDir, const int ST
         vec3 OpticalDepth = all_densities(Len) * Step;
 
         vec3 RayScattering = BETA_R * OpticalDepth.x;
-        float MieScattering = BETA_M * OpticalDepth.y;
+        vec3 MieScattering = BETA_M * OpticalDepth.y;
 
         vec3 ScatteringSample = vec3(0);
         ScatteringSample += calc_scatt_towards_sun(P, SunDir, Len, Phase.xy, RayScattering, MieScattering) * DayAmbientColor;

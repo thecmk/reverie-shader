@@ -12,6 +12,11 @@ void main() {
     
     Color.rgb = apply_tonemap(Color.rgb);
 
+    #if TONEMAP_OPERATOR != 1 && TONEMAP_OPERATOR != 3
+        Color.rgb = Color.rgb * REC2020_REC709;
+    #endif
+
+
     #ifdef LUT
         Color.rgb = decode_lut(Color.rgb, gl_FragCoord.xy);
     #endif

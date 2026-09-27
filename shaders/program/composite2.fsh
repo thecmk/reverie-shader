@@ -108,7 +108,7 @@ void main() {
 
         // Enchant glint
         vec4 ArmorGlintData = texture(colortex10, texcoord);
-        Color.rgb += ArmorGlintData.rgb * get_luminance(Color.rgb) * 20;
+        Color.rgb += ArmorGlintData.rgb * get_luminance_rec2020(Color.rgb) * 20;
 
         // Translucent blending
 

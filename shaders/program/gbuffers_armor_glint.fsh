@@ -12,6 +12,6 @@ void main() {
         discard;
     }
 
-    Color.rgb = srgb_linear(Color.rgb);
+    Color.rgb = srgb_rec2020(Color.rgb);
 }
 

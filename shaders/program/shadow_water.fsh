@@ -40,12 +40,12 @@ void main() {
 
         float WaterFog = min(1, exp(-distance(ViewPos, ViewPos1) * 0.25));
 
-        Color.rgb = srgb_linear(vec3(0.1, 0.3, 0.5));
+        Color.rgb = srgb_rec2020(vec3(0.1, 0.3, 0.5));
         
         Color.a = 1 - WaterFog;
         MaterialBuf.r = 1;
     } else {
-        Color.rgb = srgb_linear(Color.rgb);
+        Color.rgb = srgb_rec2020(Color.rgb);
         MaterialBuf.r = 0;
     }
     #ifdef RSM

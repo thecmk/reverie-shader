@@ -46,7 +46,7 @@ vec3 RRTAndODTFit(vec3 v)
 
 vec3 ACESFitted(vec3 color)
 {
-    color = linear_srgb(color * 1.8);
+    color = linear_srgb(max(color * REC2020_REC709, 0) * 1.8);
     color = ACESInputMat * color;
 
     // Apply RRT and ODT

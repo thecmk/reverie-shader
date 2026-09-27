@@ -156,15 +156,6 @@ float SmoothMax(float a, float b, float alpha) {
     return b + 1.0 - SmoothF(1.0 - a + b, alpha);
 }
 
-vec3 rgb_to_xyz(vec3 rgb) {
-    const mat3 XYZ_MATRIX = mat3(
-            0.5149, 0.3654, 0.0248,
-            0.3244, 0.6704, 0.1248,
-            0.1607, 0.0642, 0.8504
-        );
-    return XYZ_MATRIX * rgb;
-}
-
 const float shadowTexSize = 1.0/shadowMapResolution;
 
 // Gets solid depth for nhow

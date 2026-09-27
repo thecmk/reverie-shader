@@ -2,6 +2,10 @@ float get_luminance(vec3 x) {
     return dot(x, vec3(0.2126, 0.7152, 0.0722));
 }
 
+float get_luminance_rec2020(vec3 x) {
+    return dot(x, vec3(0.2627, 0.6780, 0.0593));
+}
+
 vec3 reinhard(vec3 x) {
     return x / (1 + x);
 }
@@ -56,7 +60,7 @@ vec3 apply_contrast(vec3 color, float contrast) {
 }
 
 vec3 purkinje_effect(vec3 Color) {
-    vec3 ColorXYZ = rgb_to_xyz(Color);
+    vec3 ColorXYZ = rgb_to_xyz(Color * REC2020_REC709);
     float ScotopicLuminance = ColorXYZ.y * (1.33 * (1.0 + (ColorXYZ.y + ColorXYZ.z) / (ColorXYZ.x + 0.0001)) - 1.68);
     vec3 NightColor = ScotopicLuminance * PurkinjeTint;
 
@@ -72,31 +76,6 @@ vec3 film_grain(vec3 Color, vec2 Pos) {
     vec3 GrainColor = (texture(noisetex, fract(Pos.xy * SIZE + framemod60 * 1.61)).rgb - 0.5) * FILM_GRAIN_STRENGTH * 0.1;
     float BlendFactor = 1 - smoothstep(0.0, FILM_GRAIN_MAX_BRIGHTNESS, get_luminance(Color));
     return Color + GrainColor * BlendFactor;
-}
-
-
-vec3 rgb_to_hsv(vec3 c) {
-    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-    vec4 p = mix(vec4(c.bg, K.wz),
-                 vec4(c.gb, K.xy),
-                 step(c.b, c.g));
-    vec4 q = mix(vec4(p.xyw, c.r),
-                 vec4(c.r, p.yzx),
-                 step(p.x, c.r));
-
-    float d = q.x - min(q.w, q.y);
-    float e = 1.0e-10;
-    return vec3(
-        abs(q.z + (q.w - q.y) / (6.0 * d + e)), // Hue
-        d / (q.x + e),                          // Saturation
-        q.x                                     // Value
-    );
-}
-
-vec3 hsv_to_rgb(vec3 c) {
-    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
 vec3 decode_lut(vec3 Color, vec2 FragCoord) {
