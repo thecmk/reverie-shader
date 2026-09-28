@@ -238,7 +238,7 @@ mat2x3 aerial_prespective_ld(vec3 StartPos, vec3 EndPos, vec3 ScreenPos, vec3 Pl
 
     float u = view_player(sunPosN, false).y * 0.5 + 0.5;
     float v = (EarthPosC.y) / (AtmRad - EarthRad);
-    vec3 MS = texture(atm_multi_scattering_sampler, vec2(u, v)).rgb * MediumScattering;
+    vec3 MS = texture_rgbm(atm_imageSampler, coords_multiscatt(vec2(u, v))).rgb * MediumScattering;
 
     // Cloud coverage avg
     float Shadowing = eyeBrightnessSmooth.y / 240.0;

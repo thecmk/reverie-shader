@@ -82,7 +82,7 @@ vec3 get_sky_overworld(vec3 ViewPosN, const bool DrawSun, float PlayerPosY) {
 
     float u = dot(sunPosN, ViewPosN) * 0.5 + 0.5;
 
-    vec3 SkyColor = texture_rgbm(atm_skyview_sampler, vec2(u, v)).rgb;
+    vec3 SkyColor = texture_rgbm(atm_imageSampler, coords_skyview(vec2(u, v))).rgb;
 
     float Fade = smoothstep(-0.02, 0.1, PlayerPosY);
 

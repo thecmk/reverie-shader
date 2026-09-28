@@ -26,5 +26,5 @@ void main() {
     vec3 SunDir = vec3(sqrt(1 - pow2(LdotU)), LdotU, 0);
 
     vec3 Scattering = calc_atm_scatt(Origin, Dir, SunDir, 32, false, true).L;
-    imageStore(atm_skyview, ivec2(FragCoord), RGBMEncode(Scattering));
+    imageStore(atm_image, coords_skyview(ivec2(FragCoord)), RGBMEncode(Scattering));
 }

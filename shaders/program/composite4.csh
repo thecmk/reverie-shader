@@ -86,7 +86,7 @@ mat2x3 aerial_prespective(vec3 EndPos, vec3 PlayerPosN, const int STEP_COUNT, ve
 
         float u = view_player(sunPosN, false).y * 0.5 + 0.5;
         float v = (EarthPosC.y) / (AtmRad - EarthRad);
-        vec3 MS = texture(atm_multi_scattering_sampler, vec2(u, v)).rgb * MediumScattering;
+        vec3 MS = texture_rgbm(atm_imageSampler, coords_multiscatt(vec2(u, v))).rgb * MediumScattering;
 
         TotalScattering += TotalTransmittance * (ScatteringSample * Shadowing + MS * isOutdoorsSmooth) * (1 - TransmittanceSample) / MediumExtinction;
 

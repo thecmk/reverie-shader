@@ -78,6 +78,25 @@ vec3 vec_from_ang(float theta) {
     return vec3(sin(theta), cos(theta), 0);
 }
 
+// Maps transmittance, skyview, multi scattering and ambient luts to a single, merged image
+vec2 _scale(vec2 x, vec2 scale) { 
+    const vec2 H = 0.5 / vec2(256, 128); // half a texel
+    x *= scale;
+    return clamp(x, H, scale-H); // Prevents bilinear filtering from sampling other parts of the image
+}
+
+vec2 coords_transmittance(vec2 x) { return _scale(x, vec2(1, 0.5)); }
+ivec2 coords_transmittance(ivec2 x) { return x; }
+
+vec2 coords_skyview(vec2 x) { return _scale(x, vec2(0.5, 0.5)) + vec2(0.0, 0.5); }
+ivec2 coords_skyview(ivec2 x) { return x + ivec2(0, 64); }
+
+vec2 coords_multiscatt(vec2 x) { return _scale(x, vec2(32.0 / 256.0, 32.0 / 128.0)) + vec2(0.5, 0.5); }
+ivec2 coords_multiscatt(ivec2 x) { return x + ivec2(128, 64); }
+
+vec2 coords_ambient(vec2 x) { return _scale(x, vec2(16.0 / 256.0, 16.0 / 128.0)) + vec2(0.5 + 32.0 / 256.0, 0.5); }
+ivec2 coords_ambient(ivec2 x) { return x + ivec2(128 + 32, 64); }
+
 vec3 calc_transmittance(vec3 Origin, vec3 Dir, float t1) {
     const float STEP_COUNT = 12;
     float Step = t1 / STEP_COUNT;
@@ -98,7 +117,7 @@ vec3 calc_transmittance(vec3 Origin, vec3 Dir, float t1) {
 
 vec3 retrieve_transmittance(float Len, float LdotUp) {
     float x = Len / (AtmRad - EarthRad);
-    return texture_rgbm(atm_transmittance_sampler, vec2(LdotUp * 0.5 + 0.5, x)).rgb;
+    return texture_rgbm(atm_imageSampler, coords_transmittance(vec2(LdotUp * 0.5 + 0.5, x))).rgb;
 }
 
 struct ScatteringResult {
@@ -177,7 +196,7 @@ ScatteringResult calc_atm_scatt(vec3 Origin, vec3 Dir, vec3 SunDir, const int ST
         if(USE_MULTI_SCATT) {
             float u = dot(vec3(0, 1, 0), SunDir) * 0.5 + 0.5;
             float v = (P.y - EarthRad) / (AtmRad - EarthRad);
-            ScatteringSample += texture(atm_multi_scattering_sampler, vec2(u, v)).rgb * MediumScattering;
+            ScatteringSample += texture_rgbm(atm_imageSampler, coords_multiscatt(vec2(u, v))).rgb * MediumScattering;
         }
 
         result.MultiScatt += Throughput * MediumScattering * (1 - TransmittanceSample) / MediumExtinction;
@@ -236,7 +255,7 @@ vec3 get_ambient_color() {
     for (float i = 0.0; i < STEP_COUNT; i++) {
         float VangUp = (i / STEP_COUNT - 0.5) * PI / 2; // [0, PI / 2]
         float v = 0.5 + 0.5 * sign(-VangUp) * sqrt(abs(-VangUp) / (PI / 2)); // [0.5, 1]
-        Ambient += texture_rgbm(atm_skyview_sampler, vec2(0.5, v)).rgb;
+        Ambient += texture_rgbm(atm_imageSampler, coords_skyview(vec2(0.5, v))).rgb;
     }
     return Ambient / STEP_COUNT;
 }

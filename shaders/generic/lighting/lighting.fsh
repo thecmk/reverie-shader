@@ -62,7 +62,7 @@ vec3 calc_lighting(Positions Pos, MaterialProperties Mat, bool IsDH, vec2 texcoo
     #ifdef DIMENSION_OVERWORLD
         float NangUp = dot(gbufferModelView[1].xyz, BentNormal) * 0.5 + 0.5;
         float NangL = -view_player(BentNormal, true).x * 0.5 + 0.5;
-        vec3 SunA = texture(atm_ambient_sampler, vec2(NangL, NangUp)).rgb; 
+        vec3 SunA = texture_rgbm(atm_imageSampler, coords_ambient(vec2(NangL, NangUp))).rgb; 
 
         if(lightningBoltPosition.w > 0) {
             float VdotLi = 1 - min(1, distance(lightningBoltPosition.xz, Pos.Player.xz) * 0.0025);

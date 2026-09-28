@@ -87,21 +87,7 @@ void main() {
     float Depth = get_depth(texcoord, IsDH);
     Positions Pos = get_positions(texcoord, Depth, IsDH, false);
 
-    // Color.rgb = vec3(min(length(Pos.Player), uintBitsToFloat(texture(water_depth_maxSampler, texcoord).r)), 0, 0)/ 100;
-    // Color.rgb = reinhard(texture_rgbm(atm_skyview_sampler, texcoord).rgb / 10);
-    // Color.rgb = vec3(0, texture(colortex5, texcoord).zw);
-    // Color.rgb = texture(atm_multi_scattering_sampler, texcoord).rgb;
-    // Color.rgb = sample_normal(texcoord * INDIRECT_RES_SCALE);
-    // Color.rgb = texture(atm_transmittance_sampler, texcoord).rgb;
-    // Color.rgb = vec3(texture(image0Sampler, texcoord / 32).rgb)/5;
-    // Color.rgb = vec3(isnan(Color.rgb));
-    // Color.rgb = texture(shadowtex1, texcoord).rgb;
+    // Color.rgb = RGBMDecode(texture(atm_imageSampler, texcoord)) * 0.1;
 
-    // for(int i = 1; i <= 100000; i++) {
-    //     Color.rgb = vec3(pow(Color.rgb, vec3(1 / 2.2)));
-    // }
-    // Color.rgb = vec3(texture(colortex11, texcoord).rgb);
-    // Color.rgb = vec3(texture(colortex14, texcoord).r);
-    // Color.rgb = vec3(texture(shadowcolor2, texcoord).r);
     imageStore(water_depth_min, ivec2(gl_FragCoord.xy), uvec4(floatBitsToUint(1e6)));
 }

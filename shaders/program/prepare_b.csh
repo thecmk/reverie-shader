@@ -92,6 +92,6 @@ void main() {
 
         vec3 MultiScattering = L2 / (1 - fms);
 
-        imageStore(atm_multi_scattering, ivec2(FragCoord), vec4(MultiScattering, 0));
+        imageStore(atm_image, coords_multiscatt(ivec2(FragCoord)), RGBMEncode(MultiScattering));
     }
 }

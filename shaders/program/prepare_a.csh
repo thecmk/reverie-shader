@@ -20,5 +20,5 @@ void main() {
 
     vec3 Transmittance = calc_transmittance(Origin, Dir, _t1);
 
-    imageStore(atm_transmittance, ivec2(FragCoord), RGBMEncode(Transmittance));
+    imageStore(atm_image, coords_transmittance(ivec2(FragCoord)), RGBMEncode(Transmittance));
 }

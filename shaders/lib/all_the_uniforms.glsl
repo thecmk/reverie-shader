@@ -114,15 +114,12 @@
     uniform sampler2D image1Sampler;
     uniform sampler2D image2Sampler;
     uniform usampler2D water_depth_minSampler;
-    uniform sampler2D atm_transmittance_sampler;
-    uniform sampler2D atm_skyview_sampler;
-    uniform sampler2D atm_multi_scattering_sampler;
-    uniform sampler2D atm_ambient_sampler;
     uniform sampler3D worleyNoiseTexture;
     uniform sampler2D smaaAreaTexture;
     uniform sampler2D smaaSearchTexture;
     uniform sampler2D milkyWay;
     uniform sampler2D lutTexture;
+    uniform sampler2D atm_imageSampler;
 
     uniform sampler2D vxDepthTexTrans;
     uniform sampler2D vxDepthTexOpaque;
@@ -168,10 +165,7 @@ layout(rgba16f) uniform restrict image2D image0;
 layout(rg8) uniform restrict image2D image1;
 layout(rgba16f) uniform restrict image2D image2;
 layout(r32ui) uniform restrict uimage2D water_depth_min;
-layout(rgba8) uniform restrict image2D atm_transmittance;
-layout(rgba8) uniform restrict image2D atm_skyview;
-layout(rgba16f) uniform restrict image2D atm_multi_scattering;
-layout(rgba16f) uniform restrict image2D atm_ambient;
+layout(rgba8) uniform image2D atm_image;
 
 #ifdef VOXY
     #define DISTANT_HORIZONS
