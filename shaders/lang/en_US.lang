@@ -128,9 +128,11 @@ option.CLOUDS=Clouds
 option.AURORA=Aurora Borealis
 option.AURORA.comment=Adds an aurora borealis effect at night, in cold biomes
 option.sunPathRotation=Sun Angle
+option.CAVE_SKY_DARKENING=Cave Sky Darkening
+option.CAVE_SKY_DARKENING.comment=Darkens the bottom of the sky when the player is in dark areas. Helps with low render distances, but might trigger in some scenarios when it shouldn't.
 
 option.DH_NOISE=Distant Horizons Noise
-option.DH_NOISE.comment=Renders blocky noise on DH chunks to make them look less flat
+option.DH_NOISE.comment=Renders blocky noise on DH chunks to make them look less flat. For older DH versions, where textures are not supported.
 option.DH_NOISE_SIZE=DH Noise Size
 option.DH_CUTOFF=Distant Horizons Cutoff
 option.DH_CUTOFF.comment=Transitions from regular to DH chunks earlier than normal. Useful if you notice holes near the transition point.

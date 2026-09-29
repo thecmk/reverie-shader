@@ -164,7 +164,7 @@ layout(location = 1) out vec4 buf2;
             discard;
         }
         #ifdef DH_TERRAIN
-            #if MC_VERSION >= 12602
+            #if MC_VERSION >= 260200
                 if(dh_hasTexture()) {
                     vec4 DhAlbedo = dh_sampleTexture();
                     vec3 DhTextureCol = clamp(DhAlbedo.rgb * Albedo.rgb * 2, 0, 1);

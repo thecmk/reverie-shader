@@ -230,7 +230,7 @@ const float shadowDistanceRenderMul = 1.0;
     float shadowDistanceDH = shadowDistance;
 #endif
 
-#if MC_VERSION < 12105 || MC_VERSION >= 12601
+#if MC_VERSION < 12105 || MC_VERSION >= 260100
     #define SEPARATE_ENTITY_DRAWS
 #endif
 

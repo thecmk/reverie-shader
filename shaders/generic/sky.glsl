@@ -73,6 +73,14 @@ float get_moon_texture(vec3 MoonPos, vec3 ViewPosN) {
     return texture(cloudNoise, Coord * 7).r * 0.8 + 0.2;
 }
 
+float get_sky_darkening(float PlayerPosY) {
+    #if (defined CAVE_SKY_DARKENING) && (defined DIMENSION_OVERWORLD)
+        return 1 - smoothstep(-1, -0.3, -PlayerPosY) * (1 - isOutdoorsSmooth) * (1-linstep(45.0, 55.0, cameraPosition.y));
+    #else
+        return 1.0;
+    #endif
+}
+
 vec3 get_sky_overworld(vec3 ViewPosN, const bool DrawSun, float PlayerPosY) {
     float VangUp = acosf(dot(gbufferModelView[1].xyz, ViewPosN)) - PI / 2;
     float v = 0.5 + 0.5 * sign(-VangUp) * sqrt(abs(-VangUp) / (PI / 2));
@@ -91,8 +99,7 @@ vec3 get_sky_overworld(vec3 ViewPosN, const bool DrawSun, float PlayerPosY) {
         SkyColor += step(0.9995, dot(-sunPosN, ViewPosN)) * dataBuf.MoonColor * Fade * get_moon_texture(-sunPosN, ViewPosN) * 10;
     }
 
-    // Darkening in caves
-    SkyColor *= 1 - smoothstep(-1, -0.3, -PlayerPosY) * (1 - isOutdoorsSmooth);
+    SkyColor *= get_sky_darkening(PlayerPosY);
 
     return SkyColor;
 }

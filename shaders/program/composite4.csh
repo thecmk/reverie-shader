@@ -99,9 +99,8 @@ mat2x3 aerial_prespective(vec3 EndPos, vec3 PlayerPosN, const int STEP_COUNT, ve
         PlayerPosC += Step;
     }
 
-    // Darkening in caves
     if(ScreenPos.z >= 1) {
-        TotalScattering.rgb *= 1 - smoothstep(-1, -0.3, -PlayerPosN.y) * (1 - isOutdoorsSmooth);
+        TotalScattering.rgb *= get_sky_darkening(PlayerPosN.y);
     }
 
     return mat2x3(TotalScattering, TotalTransmittance);

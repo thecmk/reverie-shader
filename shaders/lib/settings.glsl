@@ -173,6 +173,7 @@ const float sunPathRotation = -35; // [-40 -35 -30 -25 -20 -15 -10 -5 0 5 10 15 
 // #define REFLECTION_CAPTURE
 
 #define AURORA
+#define CAVE_SKY_DARKENING
 
 #define INFO 0 // [0] 
 
@@ -273,6 +274,9 @@ const float voxelDistance = VOXEL_DISTANCE;
 #endif
 
 #ifdef SEASONAL_COLORS
+#endif
+ 
+#ifdef CAVE_SKY_DARKENING 
 #endif
 
 const float CLOUD_LOWER_PLANE = 200.0;
