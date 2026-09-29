@@ -137,7 +137,7 @@ float get_shadow_screenspace(vec3 ViewPos, bool IsDH, vec3 FlatNormal, float Dit
 vec3 get_shadow(vec3 PlayerPos, vec3 ViewPos, bool IsDH, vec3 FlatNormal, float Skylight, bool DoSSS, out float BlockerDist, out float Fade, out float CloudShadow, vec2 FragCoord) {
     BlockerDist = 0;
     #if (defined DIMENSION_NETHER) || (defined DIMENSION_GENERIC)
-    return vec3(0);
+        return vec3(0);
     #endif
 
     if (dot(sLightPosN, FlatNormal) <= 0 && !DoSSS) return vec3(0);
