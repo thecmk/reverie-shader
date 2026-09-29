@@ -57,7 +57,7 @@ bool raytrace(vec3 ScreenPos, vec3 ViewPos, vec3 Dir, bool IsDH, float Dither, o
     return false;
 }
 
-bool flipped_image_ref(vec3 RVec, vec3 ViewPos, bool IsDH, out vec3 SamplePos) {
+bool flipped_image_ref(vec3 RVec, vec3 ViewPos, bool IsDH, out vec3 SamplePos, out bool IsDHReal) {
     #ifdef DISTANT_HORIZONS
     float Offset = min(1000, 50 + dhRenderDistance / 4);
     #else
@@ -66,7 +66,6 @@ bool flipped_image_ref(vec3 RVec, vec3 ViewPos, bool IsDH, out vec3 SamplePos) {
 
     SamplePos = view_screen(ViewPos + RVec * Offset, IsDH, true);
     if(SamplePos.xy == vec2(clamp(SamplePos.x, -0.1, 1.1), clamp(SamplePos.y, 0, 1))) {
-        bool IsDHReal;
         float RealDepth = get_depth_solid(SamplePos.xy, IsDHReal);
         #ifdef DISTANT_HORIZONS
             if(SamplePos.z >= 1) {
@@ -110,13 +109,13 @@ vec3 ssr(vec3 Normal, Positions Pos, bool IsDH, float LightmapSky, float Dither)
 
     vec3 RayPos; 
     bool Hit = raytrace(Pos.Screen, Pos.View, Dir, IsDH, Dither, RayPos);
+    bool IsRayDH = IsDH;
     #ifdef DISTANT_HORIZONS
         if(!Hit) {
-            Hit = flipped_image_ref(Dir, Pos.View, IsDH, RayPos);
+            Hit = flipped_image_ref(Dir, Pos.View, IsDH, RayPos, IsRayDH);
         }
     #endif
 
-    // if(Hit) return vec3(100, 0,0 );
     vec3 SphereColor;
     bool SphereHit = false;
     #ifdef REFLECTION_CAPTURE
@@ -131,7 +130,7 @@ vec3 ssr(vec3 Normal, Positions Pos, bool IsDH, float LightmapSky, float Dither)
         else
             TerrainColor = SphereColor;
         vec3 StartPos = Pos.Player;
-        vec3 EndPos = view_player(screen_view(RayPos, IsDH, true), IsDH);
+        vec3 EndPos = view_player(screen_view(RayPos, IsRayDH, true), IsRayDH);
         mat2x3 Vl = aerial_prespective_ld(StartPos, EndPos, Pos.Screen, view_player(Dir, IsDH), Dither, 0, false, IsDH);
         TerrainColor = blend_vl(TerrainColor, Vl); 
 
@@ -141,12 +140,6 @@ vec3 ssr(vec3 Normal, Positions Pos, bool IsDH, float LightmapSky, float Dither)
             TerrainColor = get_border_fog(length(EndPos), TerrainColor, SkyColor);
         #endif
 
-        float Dist = length(EndPos);
-        #ifdef DISTANT_HORIZONS
-            Dist /= dhRenderDistance;
-        #else
-            Dist /= far;
-        #endif
         return TerrainColor;
     } else {
         #ifdef 

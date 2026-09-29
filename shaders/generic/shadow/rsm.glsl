@@ -103,7 +103,7 @@ vec4 gi_bilateral_upscale(vec2 FragCoord, vec3 CurrentNormal, float CurrentDepth
         for(int j = -1; j <= 1; j++) {
             vec2 PrevCoordOffset = PrevCoord + vec2(i, j) / INDIRECT_RES_SCALE;
 
-            float PrevDepth = texelFetch(depthtex0, ivec2(PrevCoordOffset), 0).r;
+            float PrevDepth = get_depth(PrevCoordOffset * resolutionInv, IsDH);
             PrevDepth = l_depth(PrevDepth, IsDH);
             float Weight = pow4(clamp(2 - abs(CurrentDepth - PrevDepth), 0, 1));
             
@@ -117,7 +117,7 @@ vec4 gi_bilateral_upscale(vec2 FragCoord, vec3 CurrentNormal, float CurrentDepth
             TotalWeight += Weight;
         }
     }
-    BentNormal = player_view(normalize(BentNormal), false);
     if(TotalWeight < 0.00001) return vec4(0,0,0,0);
+    BentNormal = player_view(normalize(BentNormal), IsDH);
     return GI / TotalWeight;
 }

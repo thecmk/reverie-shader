@@ -163,8 +163,16 @@ layout(location = 1) out vec4 buf2;
         if (transition_to_dh(Pos.Player, Dither)) {
             discard;
         }
-        #if (defined DH_NOISE) && (defined DH_TERRAIN)
-            Albedo.rgb = dh_noise(Pos.Player, Albedo.rgb);
+        #ifdef DH_TERRAIN
+            #if MC_VERSION >= 12602
+                if(dh_hasTexture()) {
+                    vec4 DhAlbedo = dh_sampleTexture();
+                    vec3 DhTextureCol = clamp(DhAlbedo.rgb * Albedo.rgb * 2, 0, 1);
+                    Albedo.rgb = mix(Albedo.rgb, DhTextureCol, DhAlbedo.a);
+                }
+            #elif (defined DH_NOISE)
+                Albedo.rgb = dh_noise(Pos.Player, Albedo.rgb);
+            #endif
         #endif
     #endif
 

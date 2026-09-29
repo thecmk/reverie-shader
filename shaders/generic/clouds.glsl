@@ -1,4 +1,4 @@
-const float DENSITY = 4.5;
+const float DENSITY = 3.5;
 
 const float CLOUD_EXTINCTION = 0.5;
 const float CLOUD_SCATTERING = CLOUD_EXTINCTION;
