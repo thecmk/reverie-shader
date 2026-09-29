@@ -87,7 +87,5 @@ void main() {
     float Depth = get_depth(texcoord, IsDH);
     Positions Pos = get_positions(texcoord, Depth, IsDH, false);
 
-    // Color.rgb = RGBMDecode(texture(atm_imageSampler, texcoord)) * 0.1;
-
     imageStore(water_depth_min, ivec2(gl_FragCoord.xy), uvec4(floatBitsToUint(1e6)));
 }

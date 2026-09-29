@@ -201,7 +201,7 @@ mat2x3 aerial_prespective_ld(vec3 StartPos, vec3 EndPos, vec3 ScreenPos, vec3 Pl
     float StepSize = min(farLod, length(Step));
     if(StepSize < 0.25) return mat2x3(vec3(0), vec3(1));
 
-    vec3 PlayerPosC = EndPos;
+    vec3 PlayerPosC = StartPos + normalize(Step) * StepSize * 0.33;
 
     float VdotL = dot(PLAYER_LIGHT_VEC, PlayerPosN);
 
@@ -219,9 +219,9 @@ mat2x3 aerial_prespective_ld(vec3 StartPos, vec3 EndPos, vec3 ScreenPos, vec3 Pl
     float DensityConstant = DaytimeFactor * StepSize * 2500;
 
     // No smoke-like ground fog :(
-    float Density = 0.25 * DensityConstant;
+    float Density = 0.125 * DensityConstant;
     #ifdef DISTANT_HORIZONS
-        float Height = Depth >= 1 ? (PlayerPosC.y / StepSize + 1.7) * 50 : PlayerPosC.y + cameraPosition.y;
+        float Height = Depth >= 1 ? (PlayerPosC.y / StepSize + 2.25) * 50 : PlayerPosC.y + cameraPosition.y;
     #else
         float Height = Depth >= 1 ? (PlayerPosC.y / StepSize + 1.) * 50 : PlayerPosC.y + cameraPosition.y;
     #endif
