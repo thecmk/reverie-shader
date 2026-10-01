@@ -15,10 +15,10 @@ vec3 rsm(vec3 PlayerPos, vec3 Normal, vec3 LightColor) {
     vec2 Pos = gl_FragCoord.xy;
     float Dither = blue_noise(Pos, true).r * TAU;
     mat2 RotationMat = rotation_mat(Dither);
+    const float SampleSize = shadowTexSize * 64 * shadowMapResolution / 2048.0;
     
     for (int i = 1; i <= RSM_SAMPLE_COUNT; i++) {
-        vec2 Offset = (RotationMat * vogel_sample(i, RSM_SAMPLE_COUNT));
-        Offset = Offset * shadowTexSize * 64;
+        vec2 Offset = (RotationMat * vogel_sample(i, RSM_SAMPLE_COUNT)) * SampleSize;
         
         Offset *= sign(dot(Offset, ShadowNormal.xy));
 
@@ -31,7 +31,7 @@ vec3 rsm(vec3 PlayerPos, vec3 Normal, vec3 LightColor) {
         OffsetPos.z = RealDepth;
 
         float Dist = distance(OffsetPos, ShadowPos);
-        float Flux = pow1_33_f(max(1 - Dist / (shadowTexSize * 64), 0));
+        float Flux = pow1_33_f(max(1 - Dist / SampleSize, 0));
 
         if (Flux < 0.0001) continue;
 
