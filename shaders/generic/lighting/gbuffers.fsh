@@ -140,16 +140,24 @@ layout(location = 1) out vec4 buf2;
     #endif
     #ifdef VOXY_TERRAIN
         vec4 Albedo = glcolor * param.sampledColour;
+    #elif defined GBUFFERS_BEACONBEAM
+        vec4 Albedo = glcolor * texture(gtexture, texcoord);
     #else
         #ifdef PBR_POM
-        vec4 Albedo = vec4(glcolor.rgb, 1) * textureGrad(gtexture, texcoord, dCoordx, dCoordy);
+            vec4 Albedo = vec4(glcolor.rgb, 1) * textureGrad(gtexture, texcoord, dCoordx, dCoordy);
         #else
-        vec4 Albedo = vec4(glcolor.rgb, 1) * texture(gtexture, texcoord);
+            vec4 Albedo = vec4(glcolor.rgb, 1) * texture(gtexture, texcoord);
         #endif
     #endif
     if (Albedo.a < alphaTestRef) {
         discard;
     }
+
+    #ifdef GBUFFERS_BEACONBEAM
+        if (Albedo.a < 0.5) { // Translucent part of beacon beam causes me nothing but sorrow. So we get rid of it.
+            discard;
+        }
+    #endif
 
     vec3 ScreenPos = gl_FragCoord.xyz * vec3(resolutionInv, 1);
     #if (defined DH_TERRAIN) || (defined VOXY_TERRAIN)

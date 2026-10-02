@@ -8,8 +8,8 @@ mat2x3 nether_fog(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, vec3 ScreenPos, f
         const float DENSITY = 0.05;
         const float MAX_HEIGHT = 120.0;
     #else
-        const vec3 SCATTERING = vec3(0.05, 0.2, 0.4) * REC709_REC2020;
-        const vec3 ABSORBTION = (vec3(0.2, 0.45, 1.0) * 0.2) * REC709_REC2020;
+        const vec3 SCATTERING = srgb_rec2020(vec3(0.2, 0.4, 1.0));
+        const vec3 ABSORBTION = srgb_rec2020((vec3(0.01, 1.2, 2.0) * 0.3));
         const float DENSITY = 0.25;
         const float MAX_HEIGHT = 200.0;
     #endif
@@ -17,7 +17,7 @@ mat2x3 nether_fog(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, vec3 ScreenPos, f
     vec3 AmbientColor = vec3(0);
     vec3 DirectColor = get_direct_color(false, cameraPosition.y * 5);
 
-    const vec3 EXTINCTION = SCATTERING + ABSORBTION;
+    const vec3 EXTINCTION = ABSORBTION;
 
     if(!ray_intersect(WorldPos, StartPos, EndPos, PlayerPosN, MAX_HEIGHT)) mat2x3(vec3(0), vec3(1));
 
@@ -45,9 +45,8 @@ mat2x3 nether_fog(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, vec3 ScreenPos, f
         #ifdef DIMENSION_NETHER
             float Density = noise_smoke(WorldPosC);
         #else
-            float Density = noise_end(WorldPosC);
+            float Density = noise_end(WorldPosC) * 0.75 + 0.1;
         #endif
-        Density *= height_falloff(WorldPosC.y, MAX_HEIGHT);
         Density *= DensityConstant;
         if (Density <= 0) {
             PlayerPosC += Step;
@@ -55,15 +54,15 @@ mat2x3 nether_fog(vec3 StartPos, vec3 EndPos, vec3 PlayerPosN, vec3 ScreenPos, f
         }
 
         vec3 Transmittance = vec3(exp(-Density * EXTINCTION));
-        vec3 T = TotalTransmittance;
-        vec3 ScatteringSample = AmbientColor * T;
 
         vec3 ShadowNDCPosC = player_shadow(PlayerPosC);
         vec3 ShadowPosC = distort(ShadowNDCPosC);
         ShadowPosC = ShadowPosC * 0.5 + 0.5;
         float ShadowFactor = get_shadow_unfiltered(PlayerPosC, ShadowPosC);
+        vec3 ScatteringSample = AmbientColor * Transmittance;
+        float DistanceTraveled = exp(-0.02 * max(0, WorldPosC.y));
 
-        ScatteringSample += DirectColor * T * MiePhase * ShadowFactor;
+        ScatteringSample += DirectColor * Transmittance * MiePhase * ShadowFactor * DistanceTraveled;
 
         TotalScattering += TotalTransmittance * ScatteringSample * (1 - Transmittance) * SCATTERING / EXTINCTION;
 
