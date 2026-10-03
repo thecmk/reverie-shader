@@ -84,7 +84,7 @@ vec3 agxLook(vec3 val) {
 
 // Sample usage
 vec3 agx_tonemapping(vec3 value) {
-    value = value * REC2020_REC709;
+    value = max(value * REC2020_REC709, 0);
     value = agx(value);
     value = agxLook(value);
     value = agxEotf(value);

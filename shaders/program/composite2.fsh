@@ -122,12 +122,10 @@ void main() {
         #endif   
 
         // Translucents
-        if(Depth != Depth1) {
-            DistToTranslucents = length(Pos.Player) + 0.01; // bias fixes translucents underwater
-            TranslucentData = texture(colortex12, texcoord);
-            if(Mat.Id != MATERIAL_WATER)
-                TranslucentsVlResult = do_vl(Pos.Player, Pos1.Player, Pos1.PlayerN, Pos1.Screen, Dither, LightColorDirect, IsDH1, VL_SAMPLES, false, false);
-        }
+        DistToTranslucents = length(Pos.Player) + 0.01; // bias fixes translucents underwater
+        TranslucentData = texture(colortex12, texcoord);
+        if(Mat.Id != MATERIAL_WATER)
+            TranslucentsVlResult = do_vl(Pos.Player, Pos1.Player, Pos1.PlayerN, Pos1.Screen, Dither, LightColorDirect, IsDH1, VL_SAMPLES, false, false);
 
         // Water
         if (isEyeInWater == 0) {

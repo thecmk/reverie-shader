@@ -34,7 +34,7 @@ jobs:
           loaders: |
             iris
           game-versions: |
-            >=1.21
+            >=1.20
           
           # --- File Upload ---
           files: "Reverie Beta ${{ github.event.release.tag_name }}.zip"

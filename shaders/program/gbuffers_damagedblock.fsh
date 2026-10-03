@@ -6,7 +6,7 @@
 #include "/generic/shadow/main.glsl"
 #include "/generic/lighting/lighting.fsh"
 
-#ifdef SEPARATE_ENTITY_DRAWS
+#if (defined SEPARATE_ENTITY_DRAWS) && MC_VERSION < 260300
 #include "/generic/lighting/gbuffers_translucent.fsh"
 void main() {
     init_frag_translucent();

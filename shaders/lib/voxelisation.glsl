@@ -3,10 +3,6 @@ bool is_in_voxel_range(vec3 PlayerPos) {
         all(lessThan(PlayerPos, voxelDistance * vec3(2, 1, 2)));
 }
 
-bool should_id_be_voxelised(float Id) {
-    return Id != MATERIAL_FLOODFILL_PASSTHROUGH;
-}
-
 vec3 get_voxel_pos(vec3 PlayerPos) {
     return PlayerPos + voxelDistance * vec3(1, 0.5, 1) + cameraPositionFract;
 }
