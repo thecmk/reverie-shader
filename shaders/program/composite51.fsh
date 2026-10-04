@@ -33,9 +33,8 @@ vec3 blur_dof(vec2 texcoord, float CoC) {
 
 void main() {
 
-    bool IsDH;
-    float Depth = get_depth(texcoord, IsDH);
-    float DepthL = l_depth(Depth, IsDH);
+    float Depth = texture(depthtex1, texcoord).r;
+    float DepthL = l_depth(Depth);
 
     float CoC = calc_CoC(DepthL, DepthCenterL);
     CoC = Depth < 0.56 ? min(10, CoC) : min(50, CoC);

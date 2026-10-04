@@ -11,13 +11,12 @@ void main() {
 	#ifdef DOF_MANUAL_FOCUS
         DepthCenterL = DOF_FOCUS_DISTANCE;
     #else
-        bool IsDH;
-        DepthCenter = get_depth(vec2(0.5), IsDH);
+        DepthCenter = texture(depthtex1, vec2(0.5)).r;
 
         float OldDepth = dataBuf.DofFocus;
         float BlendFactor = frameTime / (1 + frameTime) * DOF_FOCUS_ADJUSTMENT_SPEED;
         DepthCenter = mix(OldDepth, DepthCenter, BlendFactor);
 
-        DepthCenterL = l_depth(DepthCenter, IsDH);
+        DepthCenterL = l_depth(DepthCenter);
     #endif
 }
