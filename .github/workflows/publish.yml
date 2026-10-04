@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v6.0.2
 
       - name: Zip the project
-        run: zip -r "Reverie Beta ${{ github.event.release.tag_name }}.zip" shaders/ LICENSE
+        run: zip -r "Reverie ${{ github.event.release.tag_name }}.zip" shaders/ LICENSE
 
       - name: Publish to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
@@ -37,6 +37,6 @@ jobs:
             >=1.20
           
           # --- File Upload ---
-          files: "Reverie Beta ${{ github.event.release.tag_name }}.zip"
+          files: "Reverie ${{ github.event.release.tag_name }}.zip"
 
           retry-attempts: 0
