@@ -27,11 +27,11 @@ vec3 SampleVndf_GGX(vec2 u, vec3 wi, vec2 alpha) {
     return wm;
 }
 
-bool raytrace(vec3 ScreenPos, vec3 ViewPos, vec3 Dir, bool IsDH, float Dither, out vec3 RayPos) {
+float raytrace(vec3 ScreenPos, vec3 ViewPos, vec3 Dir, bool IsDH, float Dither, out vec3 RayPos) {
     int Steps = SSR_STEPS;
     vec3 Offset = normalize(view_screen(ViewPos + Dir, IsDH, true) - ScreenPos);
     vec3 Len = (step(0, Offset) - ScreenPos) / Offset;
-    float MinLen = min(Len.x, min(Len.y, Len.z)) / Steps;
+    float MinLen = min(Len.y, Len.z) / Steps;
     Offset *= MinLen;
 
     RayPos = ScreenPos + Offset * Dither;
@@ -50,14 +50,14 @@ bool raytrace(vec3 ScreenPos, vec3 ViewPos, vec3 Dir, bool IsDH, float Dither, o
                     RayPos = EPos1;
                 }
             }
-            return true;
+            return 1.0 - linstep(0.5, 0.7, abs(0.5 - RayPos.x));
         }
         RayPos += Offset;
     }
-    return false;
+    return 0.0;
 }
 
-bool flipped_image_ref(vec3 RVec, vec3 ViewPos, bool IsDH, out vec3 SamplePos, out bool IsDHReal) {
+float flipped_image_ref(vec3 RVec, vec3 ViewPos, bool IsDH, out vec3 SamplePos, out bool IsDHReal) {
     #ifdef DISTANT_HORIZONS
     float Offset = min(1000, 50 + dhRenderDistance / 4);
     #else
@@ -65,7 +65,7 @@ bool flipped_image_ref(vec3 RVec, vec3 ViewPos, bool IsDH, out vec3 SamplePos, o
     #endif
 
     SamplePos = view_screen(ViewPos + RVec * Offset, IsDH, true);
-    if(SamplePos.xy == vec2(clamp(SamplePos.x, -0.1, 1.1), clamp(SamplePos.y, 0, 1))) {
+    if(SamplePos.xy == vec2(clamp(SamplePos.x, -0.2, 1.2), clamp(SamplePos.y, 0, 1))) {
         float RealDepth = get_depth_solid(SamplePos.xy, IsDHReal);
         #ifdef DISTANT_HORIZONS
             if(SamplePos.z >= 1) {
@@ -76,11 +76,11 @@ bool flipped_image_ref(vec3 RVec, vec3 ViewPos, bool IsDH, out vec3 SamplePos, o
             SamplePos.z = RealDepth;
             vec3 ViewPosReal = screen_view(SamplePos, IsDHReal, true);
             if(len2(ViewPosReal) + 25 > len2(ViewPos)) {
-                return true;
+                return 1 - linstep(0.5, 0.7, abs(SamplePos.x - 0.5));
             }
         }
     }
-    return false;
+    return 0.0;
 }
 
 bool sample_ref_capture(vec3 StartPos, vec3 Dir, bool IsDH, float Dither, out vec3 Color, out vec3 ExpectedPos) {
@@ -108,24 +108,30 @@ vec3 ssr(vec3 Normal, Positions Pos, bool IsDH, float LightmapSky, float Dither)
     vec3 Dir = reflect(Pos.ViewN, Normal);
 
     vec3 RayPos; 
-    bool Hit = raytrace(Pos.Screen, Pos.View, Dir, IsDH, Dither, RayPos);
+    float Hit = raytrace(Pos.Screen, Pos.View, Dir, IsDH, Dither, RayPos);
     bool IsRayDH = IsDH;
     #ifdef DISTANT_HORIZONS
-        if(!Hit) {
+        if(Hit == 0) {
             Hit = flipped_image_ref(Dir, Pos.View, IsDH, RayPos, IsRayDH);
         }
     #endif
+    RayPos = clamp(RayPos, 0, 1);
 
-    vec3 SphereColor;
+    vec3 SphereColor, SphereRayPos;
     bool SphereHit = false;
     #ifdef REFLECTION_CAPTURE
-        if(!Hit)
-            SphereHit = sample_ref_capture(Pos.Screen, Dir, IsDH, Dither, SphereColor, RayPos);
+        if(Hit < 1)
+            SphereHit = sample_ref_capture(Pos.Screen, Dir, IsDH, Dither, SphereColor, SphereRayPos);
+        if(SphereHit) {
+            Hit = 1;
+            RayPos = SphereRayPos;
+        }
     #endif
 
-    if(Hit || SphereHit) {
+    vec3 FinalColor = vec3(0);
+    if(Hit > 0) {
         vec3 TerrainColor;
-        if(Hit)
+        if(!SphereHit)
             TerrainColor = texture(colortex0, RayPos.xy).rgb;
         else
             TerrainColor = SphereColor;
@@ -140,9 +146,9 @@ vec3 ssr(vec3 Normal, Positions Pos, bool IsDH, float LightmapSky, float Dither)
             TerrainColor = get_border_fog(length(EndPos), TerrainColor, SkyColor);
         #endif
 
-        return TerrainColor;
-    } else {
-        #ifdef 
+        FinalColor += TerrainColor * Hit;
+    } 
+    if(Hit < 1) {
         // Sky reflections
         vec3 StartPos = Pos.Player;
         vec3 EndPos = view_player(Dir, IsDH);
@@ -156,6 +162,7 @@ vec3 ssr(vec3 Normal, Positions Pos, bool IsDH, float LightmapSky, float Dither)
         SkyColor += get_stars(EndPos);
         mat2x3 Vl = aerial_prespective_ld(StartPos, view_player(Dir * 1000, IsDH), Pos.Screen, view_player(Dir, IsDH), Dither, 0, false, IsDH);
         SkyColor = blend_vl(SkyColor, Vl);
-        return SkyColor * LightmapSky;
+        FinalColor += SkyColor * LightmapSky * (1 - Hit);
     }
+    return FinalColor;
 }
