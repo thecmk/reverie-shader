@@ -44,10 +44,10 @@ uniform sampler2D atlasTexture;
 
 
 void main() {
-    #if AA_MODE != 0
-	Color.rgb = CAS(colortex0, texcoord / exp2(PIXELATION_AMOUNT), 0.0, SHARPENING_AMOUNT);
+    #if AA_MODE != 0 && !(defined PIXELATION)
+	    Color.rgb = CAS(colortex0, texcoord, SHARPENING_AMOUNT);
     #else
-    Color.rgb = textureLod(colortex0, texcoord / exp2(PIXELATION_AMOUNT), 0).rgb;
+        Color.rgb = textureLod(colortex0, texcoord, 0).rgb;
     #endif
 
     vec2 PrevCoord = ((floor(gl_FragCoord.xy * INDIRECT_RES_SCALE)) / INDIRECT_RES_SCALE);

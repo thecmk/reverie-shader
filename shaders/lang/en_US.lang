@@ -30,6 +30,10 @@ option.CA_STRENGTH=CA Strength
 
 option.PIXELATION=Pixelation
 option.PIXELATION_AMOUNT=Pixelation Amount
+option.PIXELATION_SHARPENING=Pixelation Sharpen
+option.PIXELATION_SHARPENING.comment=Adds a rudimentary sharpening filter after the pixelation, similar to what old digicams do.
+option.PIXELATION_SHARPENING_AMOUNT=Pixelation Sharpen Amount
+
 
 option.DOF=Depth of Field
 option.DOF_APERTURE_SIZE=Aperture Size

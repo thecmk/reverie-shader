@@ -47,7 +47,7 @@ vec3 TAA(vec3 Color, ivec2 FragCoord, vec2 Texcoord) {
         return Color;
 
     vec3 PrevColor = texture_catmullrom_fast(colortex4, PrevCoord).rgb;
-    if (PrevColor == vec3(0) || any(isnan(PrevColor))) return Color;
+    if (any(lessThanEqual(PrevColor, vec3(0))) || any(isnan(PrevColor))) return Color;
 
     vec4 ClippingMaxColor;
     vec3 ClampedColor = neighbourhoodClipping(colortex0, vec4(Color, 1), vec4(PrevColor, 1), ClippingMaxColor, FragCoord).rgb;

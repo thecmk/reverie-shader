@@ -84,7 +84,7 @@ vec3 decode_lut(vec3 Color, vec2 FragCoord) {
 
     Color.rgb = pow(Color, vec3(1/2.2));
     Color += (dither(FragCoord.xy, false) - 0.5) / pow2(CellNr); 
-    Color = clamp(Color, 0, 0.99999);
+    Color = clamp(Color, 0.0001, 0.99999);
 
     float OffsetInCell = fract(Color.b * CellNr);
     vec2 CellOffset = vec2(floor(OffsetInCell * CellNr), floor(Color.b * CellNr));
