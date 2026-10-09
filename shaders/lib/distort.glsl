@@ -1,9 +1,5 @@
 float shadowMapBias = 1.0 - 25.6 / shadowDistanceDH;
 
-// float get_distort_factor(vec2 pos) {
-//     return length(pos.xy) * shadowMapBias + (1 - shadowMapBias);
-// }
-
 // Squircle distortion - covers the shadowmap better
 // https://gist.github.com/Luracasmus/7ef1602bc9bdc14c95e3e1f98c9c4dd0
 float get_distort_factor(vec2 pos) {

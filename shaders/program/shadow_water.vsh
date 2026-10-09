@@ -36,9 +36,9 @@ void main() {
                     Color.rgb *= max(0, (at_midBlock.w - 0.5) / 15);
                     Color.rgb = pow2(Color.rgb);
                     if(frameCounter % 2 == 1) {
-                        imageStore(voxelImg_a, PlayerPosAbs, vec4(Color.rgb, 0));
+                        imageStore(voxelImg_a, PlayerPosAbs, RGBMEncode(Color.rgb));
                     } else {
-                        imageStore(voxelImg_b, PlayerPosAbs, vec4(Color.rgb, 0));
+                        imageStore(voxelImg_b, PlayerPosAbs, RGBMEncode(Color.rgb));
                     }
                 }
             }

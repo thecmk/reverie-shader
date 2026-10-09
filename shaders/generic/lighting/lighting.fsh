@@ -2,7 +2,7 @@
 
 vec3 filter_floodfill(sampler3D Sampler, vec3 FragPos) {
     vec3 Pos = FragPos / voxelDistance / vec3(2, 1, 2); 
-    vec3 C = texture(Sampler, Pos).rgb; // Center
+    vec3 C = RGBMDecode(texture(Sampler, Pos)); // Center
 
     return sqrt(C);
 }

@@ -17,28 +17,28 @@ void main() {
     ivec3 Pos = ivec3(gl_GlobalInvocationID.xyz);
     ivec3 PrevPos = Pos - ivec3(previousCameraPosition) + ivec3(cameraPosition);
 
-    vec4 Light = vec4(0);
+    vec3 Light = vec3(0);
     if(frameCounter % 2 == 0) {
-        Light += texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, -1, 0));
-        Light += texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, 1, 0));
-        Light += texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(-1, 0, 0));
-        Light += texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(1, 0, 0));
-        Light += texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, 0, -1));
-        Light += texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, 0, 1));
+        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, -1, 0)));
+        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, 1, 0)));
+        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(-1, 0, 0)));
+        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(1, 0, 0)));
+        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, 0, -1)));
+        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, 0, 1)));
     } else {
-        Light += texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, -1, 0));
-        Light += texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, 1, 0));
-        Light += texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(-1, 0, 0));
-        Light += texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(1, 0, 0));
-        Light += texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, 0, -1));
-        Light += texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, 0, 1));
+        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, -1, 0)));
+        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, 1, 0)));
+        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(-1, 0, 0)));
+        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(1, 0, 0)));
+        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, 0, -1)));
+        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, 0, 1)));
     }
 
-    Light = max(vec4(0), Light / 6.1);
+    Light = max(vec3(0), Light / 6.1);
 
     if(frameCounter % 2 == 1) {
-        imageStore(voxelImg_a, Pos, Light);
+        imageStore(voxelImg_a, Pos, RGBMEncode(Light));
     } else {
-        imageStore(voxelImg_b, Pos, Light);
+        imageStore(voxelImg_b, Pos, RGBMEncode(Light));
     }
 }

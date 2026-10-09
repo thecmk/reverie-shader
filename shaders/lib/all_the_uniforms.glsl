@@ -158,8 +158,8 @@
 #endif
 
 #ifdef VOXELISATION
-    layout(rgba16) uniform restrict image3D voxelImg_a;
-    layout(rgba16) uniform restrict image3D voxelImg_b;
+    layout(rgba8) uniform restrict image3D voxelImg_a;
+    layout(rgba8) uniform restrict image3D voxelImg_b;
 #endif
 layout(rgba16f) uniform restrict image2D image0;
 layout(rg8) uniform restrict image2D image1;
