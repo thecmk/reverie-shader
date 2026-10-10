@@ -104,3 +104,31 @@ vec3 get_water_parallax(vec3 WorldPos, vec3 PlayerPosN) {
     }
     return CurrentPos;
 }
+
+MaterialProperties get_puddles(Positions Pos, MaterialProperties Mat, inout vec3 Color, inout float PuddleStrength) {
+    PuddleStrength = wetness; // Only after it's raining
+    if(PuddleStrength < 0.01) return Mat;
+
+    vec3 WorldPos = Pos.Player + cameraPosition;
+    PuddleStrength *= linstep(0.9, 0.95, Mat.Lightmap.y); // Not in the shade
+    PuddleStrength *= float(Mat.Id < MATERIAL_WATER); // Not on foliage or other mats
+    PuddleStrength *= step(0.99, dot(gbufferModelView[1].xyz, Mat.FlatNormal)); // Only when facing up
+
+    if(PuddleStrength < 0.01) return Mat;
+    PuddleStrength *= texture(noisetex, WorldPos.xz / 1000).r;
+
+    float Darkening = pow2(PuddleStrength);
+    PuddleStrength = smoothstep(1 - PUDDLE_COVERAGE - 0.05, 1 - PUDDLE_COVERAGE + 0.05, PuddleStrength);
+    if(PuddleStrength < 0.01) return Mat; 
+
+    Mat.Smoothness = hardcoded_smoothness(MATERIAL_WATER);
+    Mat.F0 = hardcoded_f0(MATERIAL_WATER);
+
+    Mat.Normal = view_player(Mat.FlatNormal, false);
+    Mat.Normal = tbn_normal(Mat.Normal) * get_water_normal(WorldPos * 3, Mat.Normal);
+    Mat.Normal = player_view(Mat.Normal, false);
+
+    Color.rgb *= 1 - Darkening * 0.33;
+
+    return Mat;
+}

@@ -83,6 +83,10 @@ option.VL_OVERWORLD_STRENGTH=Overworld Fog Strength
 option.VL_WATER_MODE=Water Fog
 option.VL_SAMPLES=Fog Quality
 
+option.PUDDLES=Water Puddles
+option.PUDDLES.comment=Adds water puddles when it's raining
+option.PUDDLE_COVERAGE=Puddle Coverage
+
 option.BORDER_FOG=Border Fog
 
 option.AO_MODE=Ambient Occlusion

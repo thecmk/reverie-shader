@@ -64,11 +64,11 @@ void main() {
 
     float Dither = dither(gl_FragCoord.xy, true);
 
-    
-
     if (Depth < 1) {
         mat2x4 GbufferData = mat2x4(texture(colortex1, texcoord), texture(colortex2, texcoord));
         MaterialProperties Mat = unpack_material(GbufferData, IsDH);
+
+
         if(Mat.Id == MATERIAL_WATER) {
             Mat.Normal = view_player(Mat.Normal, IsDH);
             mat3 TBN = tbn_normal(Mat.Normal);
@@ -110,8 +110,9 @@ void main() {
         vec4 ArmorGlintData = texture(colortex10, texcoord);
         Color.rgb += ArmorGlintData.rgb * get_luminance_rec2020(Color.rgb) * 20;
 
-        // Translucent blending
 
+
+        // Translucent blending
         float _DistToClouds = 1e6, DistToWater = 1e6, DistToTranslucents = 1e6;
         vec4 TranslucentData;
         mat2x3 TranslucentsVlResult = mat2x3(0,0,0,1,1,1), WaterVlResult;
@@ -168,6 +169,11 @@ void main() {
             }
         }
 
+        float _PuddleStrength = 0;
+        #ifdef PUDDLES
+            Mat = get_puddles(Pos, Mat, Color.rgb, _PuddleStrength);
+        #endif
+
         bool IsMetal, IsHardcodedMetal;
         mat2x3 Reflectance = get_reflectance(Mat.F0, Mat.Id, Mat.Albedo, IsMetal, IsHardcodedMetal);
         float Smoothness = get_smoothness(Mat.Smoothness, Mat.Id);
@@ -207,7 +213,8 @@ void main() {
                     ReflectionBlendFactor *= Mat.Albedo;
                 }
                 
-                Color.rgb += ssr(RefNormal, Pos, IsDH, Mat.Lightmap.y, Dither, _ReflectionHit) * ReflectionBlendFactor * Mat.chunkFade;
+                Color.rgb += ssr(RefNormal, Pos, IsDH, Mat.Lightmap.y, Dither, _ReflectionHit) 
+                    * ReflectionBlendFactor * Mat.chunkFade * max(float(Mat.Id == MATERIAL_WATER), _PuddleStrength);
             }
         }
 
@@ -236,7 +243,7 @@ void main() {
                     Specular *= WaterColor;
                 }
                 
-                Color.rgb += Specular * LightColorDirect * Shadow * Mat.chunkFade * (1 - _ReflectionHit);
+                Color.rgb += Specular * LightColorDirect * Shadow * Mat.chunkFade * (1 - _ReflectionHit) * max(float(Mat.Id == MATERIAL_WATER), _PuddleStrength);
             }
         }
     }
