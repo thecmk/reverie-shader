@@ -104,11 +104,11 @@ bool sample_ref_capture(vec3 StartPos, vec3 Dir, bool IsDH, float Dither, out ve
     return false;
 }
 
-vec3 ssr(vec3 Normal, Positions Pos, bool IsDH, float LightmapSky, float Dither) {
+vec3 ssr(vec3 Normal, Positions Pos, bool IsDH, float LightmapSky, float Dither, inout float Hit) {
     vec3 Dir = reflect(Pos.ViewN, Normal);
 
     vec3 RayPos; 
-    float Hit = raytrace(Pos.Screen, Pos.View, Dir, IsDH, Dither, RayPos);
+    Hit = raytrace(Pos.Screen, Pos.View, Dir, IsDH, Dither, RayPos);
     bool IsRayDH = IsDH;
     #ifdef DISTANT_HORIZONS
         if(Hit == 0) {

@@ -172,6 +172,7 @@ void main() {
         mat2x3 Reflectance = get_reflectance(Mat.F0, Mat.Id, Mat.Albedo, IsMetal, IsHardcodedMetal);
         float Smoothness = get_smoothness(Mat.Smoothness, Mat.Id);
         // Reflections
+        float _ReflectionHit = 0.0;
         if (Smoothness > 0.3 && isEyeInWater == 0) {
             #ifdef ROUGH_REFLECTIONS
             bool RoughReflections = Smoothness < 0.95 && Mat.Id != MATERIAL_WATER;
@@ -206,35 +207,37 @@ void main() {
                     ReflectionBlendFactor *= Mat.Albedo;
                 }
                 
-                Color.rgb += ssr(RefNormal, Pos, IsDH, Mat.Lightmap.y, Dither) * ReflectionBlendFactor * Mat.chunkFade;
+                Color.rgb += ssr(RefNormal, Pos, IsDH, Mat.Lightmap.y, Dither, _ReflectionHit) * ReflectionBlendFactor * Mat.chunkFade;
             }
         }
 
         // Specular
-        float Shadow = texture(colortex5, Pos.Screen.xy).r;
-        float NdotL = max(dot(sLightPosN, Mat.Normal), 0);
-        Shadow *= NdotL;
-        if (Shadow != 0) {
-            vec3 H = normalize(sLightPosN - Pos.ViewN); // Half-way vector
-            vec3 F;
-            if (IsHardcodedMetal) {
-                F = fresnel_metals(H, -Pos.ViewN, Reflectance);
-            }
-            else {
-                F = schlick(H, -Pos.ViewN, Reflectance[0]);
-            }
+        if(_ReflectionHit < 1) {
+            float Shadow = texture(colortex5, Pos.Screen.xy).r;
+            float NdotL = max(dot(sLightPosN, Mat.Normal), 0);
+            Shadow *= NdotL;
+            if (Shadow != 0) {
+                vec3 H = normalize(sLightPosN - Pos.ViewN); // Half-way vector
+                vec3 F;
+                if (IsHardcodedMetal) {
+                    F = fresnel_metals(H, -Pos.ViewN, Reflectance);
+                }
+                else {
+                    F = schlick(H, -Pos.ViewN, Reflectance[0]);
+                }
 
-            vec3 Specular = cook_torrance(-Pos.ViewN, sLightPosN, Mat.Normal, 1 - Smoothness, H, F);
+                vec3 Specular = cook_torrance(-Pos.ViewN, sLightPosN, Mat.Normal, 1 - Smoothness, H, F);
 
-            if(IsMetal) {
-                Specular *= Mat.Albedo;
-            }
+                if(IsMetal) {
+                    Specular *= Mat.Albedo;
+                }
 
-            if(isEyeInWater == 1) {
-                Specular *= WaterColor;
+                if(isEyeInWater == 1) {
+                    Specular *= WaterColor;
+                }
+                
+                Color.rgb += Specular * LightColorDirect * Shadow * Mat.chunkFade * (1 - _ReflectionHit);
             }
-            
-            Color.rgb += Specular * LightColorDirect * Shadow * Mat.chunkFade;
         }
     }
     else {
