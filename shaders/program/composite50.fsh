@@ -25,8 +25,8 @@ void main() {
         //Offsets -= 0.5;
 
         vec3 FinalColor = vec3(0);
-        FinalColor += pow(textureLod(colortex0, texcoord + Offsets.zw * resolutionInv, 0).rgb, vec3(2.2)) * BlendFactor.y;
-        FinalColor += pow(textureLod(colortex0, texcoord + Offsets.xy * resolutionInv, 0).rgb, vec3(2.2)) * BlendFactor.x;
+        FinalColor += srgb_linear_fast(textureLod(colortex0, texcoord + Offsets.zw * resolutionInv, 0).rgb) * BlendFactor.y;
+        FinalColor += srgb_linear_fast(textureLod(colortex0, texcoord + Offsets.xy * resolutionInv, 0).rgb) * BlendFactor.x;
 
         Color.rgb = FinalColor;
         //Color.rgb += vec3(D);
@@ -35,7 +35,7 @@ void main() {
     #endif
         Color = textureLod(colortex0, texcoord, 0);
     #if AA_MODE == 1
-        Color.rgb = pow(Color.rgb, vec3(2.2));
+        Color.rgb = srgb_linear_fast(Color.rgb);
     }
     #endif
 }

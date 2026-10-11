@@ -3,6 +3,7 @@
 in vec2 texcoord;
 
 #include "/generic/post/taa.glsl"
+#include "/lib/tonemap/Uncharted2_ext.glsl"
 
 vec3 sample_normal(vec2 FragCoord) {
     return decodeUnitVector(texture(colortex14, FragCoord, 0).zw * 2 - 1) * 0.5 + 0.5;
@@ -40,8 +41,20 @@ vec3 color_balance(vec3 Color) {
 /* RENDERTARGETS:0 */
 layout(location = 0) out vec4 Color;
 
-uniform sampler2D atlasTexture;
+vec3 sRGB_EncodeSafe(vec3 c) {
+   //Save sign for Wide Color Gamut
+   vec3 s = sign(c);
+   c = abs(c);
+    
+   //sRGB
+   bvec3 cutoff = lessThan(c, vec3(0.0031308));
+   vec3 higher = vec3(1.055) * pow(c, vec3(1.0 / 2.4)) - vec3(0.055);
+   vec3 lower = c * vec3(12.92);
+   c = mix(higher, lower, cutoff);
 
+   //Restore Sign
+   return c * s;
+}
 
 void main() {
     #if AA_MODE != 0 && !(defined PIXELATION)
@@ -50,11 +63,6 @@ void main() {
         Color.rgb = textureLod(colortex0, texcoord, 0).rgb;
     #endif
 
-    vec2 PrevCoord = ((floor(gl_FragCoord.xy * INDIRECT_RES_SCALE)) / INDIRECT_RES_SCALE);
-    if(floor(gl_FragCoord.x) == floor(PrevCoord.x) || floor(gl_FragCoord.y) == floor(PrevCoord.y)) {
-        // Color.r *= 1.5;
-    }
-
     #ifdef COLOR_BALANCING
         Color.rgb = color_balance(Color.rgb);
     #endif
@@ -62,15 +70,21 @@ void main() {
     #ifdef CHANNEL_MIXER
         Color.rgb = channel_mixer(Color.rgb);
     #endif
-    
-    
-    // These tonemaps already have the conversion built in
-    #if TONEMAP_OPERATOR != 1 && TONEMAP_OPERATOR != 3
-        Color.rgb = linear_srgb(Color.rgb);
+
+    #ifdef HDR_ENABLED
+        Color.rgb = reinhard_odd_inv(Color.rgb);
+        Color.rgb = Uncharted2_ext(Color.rgb);
+        Color.rgb *= HdrGamePaperWhiteBrightness / HdrUIBrightness;
+        Color.rgb = sRGB_EncodeSafe(Color.rgb);
+    #else
+        // These tonemaps already have the conversion built in
+        #if TONEMAP_OPERATOR != 1 && TONEMAP_OPERATOR != 3
+            Color.rgb = linear_srgb(Color.rgb);
+        #endif
     #endif
 
     #ifdef FILM_GRAIN
-    Color.rgb = film_grain(Color.rgb, gl_FragCoord.xy);
+     Color.rgb = film_grain(Color.rgb, gl_FragCoord.xy);
     #endif
 
     Color.rgb = apply_vibrance(Color.rgb, VIBRANCE);
@@ -81,11 +95,9 @@ void main() {
         Color.rgb = apply_vignette(Color.rgb, texcoord);
     #endif
 
-    Color.rgb += (dither(gl_FragCoord.xy, false) - 0.5) / 255;
-
-    bool IsDH;
-    float Depth = get_depth(texcoord, IsDH);
-    Positions Pos = get_positions(texcoord, Depth, IsDH, false);
+    #ifndef HDR_ENABLED
+        Color.rgb += (dither(gl_FragCoord.xy, false) - 0.5) / 255;
+    #endif
 
     imageStore(water_depth_min, ivec2(gl_FragCoord.xy), uvec4(floatBitsToUint(1e6)));
 }

@@ -54,7 +54,7 @@ option.LUT.comment=Uses a color lookup table to change how colors are represente
 option.LUT_FILE=LUT File
 
 option.TONEMAP_OPERATOR=Tonemap
-option.TONEMAP_OPERATOR.comment=Converts colors to a range that can actually be displayed on the screen. This option drastically changes the look of the game and may require further tweaking to look good. 
+option.TONEMAP_OPERATOR.comment=Converts colors to a range that can actually be displayed on the screen. This option drastically changes the look of the game and may require further tweaking to look good. This setting is ignored when an HDR mod is present. 
 
 option.SATURATION=Saturation
 option.SATURATION.comment=Adjusts how "intense" colors are

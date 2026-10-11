@@ -30,6 +30,22 @@ const mat3 REC2020_REC709 = REC2020_TO_XYZ * XYZ_TO_REC709;
 
 #define srgb_rec2020(srgb) ( srgb_linear(srgb) * REC709_REC2020 )
 
+vec3 srgb_linear_fast(vec3 srgb) {
+    #ifdef HDR_ENABLED
+        return sign(srgb) * pow(abs(srgb), vec3(2.2));
+    #else
+        return pow(srgb, vec3(2.2));
+    #endif
+}
+
+vec3 linear_srgb_fast(vec3 srgb) {
+    #ifdef HDR_ENABLED
+        return sign(srgb) * pow(abs(srgb), vec3(1 / 2.2));
+    #else
+        return pow(srgb, vec3(1 / 2.2));
+    #endif
+}
+
 vec3 rgb_to_hsv(vec3 c) {
     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
     vec4 p = mix(vec4(c.bg, K.wz),

@@ -107,6 +107,13 @@
     uniform float betaRfact;
     uniform vec2 windDirection;
 
+    #if defined(HDR_MOD_INSTALLED) && defined(HDR_ENABLED)
+        uniform float HdrGamePeakBrightness;
+        uniform float HdrGamePaperWhiteBrightness;
+        uniform float HdrGameMinimumBrightness; 
+        uniform float HdrUIBrightness;
+    #endif
+
     uniform sampler2D waterNoise;
     uniform sampler2D cloudNoise;
     uniform sampler2D blueNoiseTexture;
@@ -239,12 +246,10 @@ const int colortex0Format = RGB16F;
 const int colortex1Format = RGBA16;
 const int colortex2Format = RGBA16;
 const int colortex3Format = RGBA16F;
-const int colortex4Format = RGBA8;
 const int colortex5Format = RGBA8;
 const int colortex6Format = RGBA16F;
 const int colortex7Format = RGBA16F;
 const int colortex8Format = RG16_SNORM;
-const int colortex9Format = RGBA8;
 const int colortex10Format = R11F_G11F_B10F;
 const int colortex11Format = RGBA16F;
 const int colortex12Format = RGBA16F;
@@ -256,3 +261,15 @@ const int colortex18Format = RGBA16;
 const int shadowcolor1Format = RG8;
 const int shadowcolor2Format = R8;
 */
+
+#ifndef HDR_ENABLED
+/*
+const int colortex4Format = RGBA8;
+const int colortex9Format = RGBA8;
+*/
+#else
+/*
+const int colortex4Format = RGBA16F;
+const int colortex9Format = RGBA16F;
+*/
+#endif

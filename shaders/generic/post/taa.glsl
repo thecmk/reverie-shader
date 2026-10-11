@@ -43,11 +43,15 @@ vec3 TAA(vec3 Color, ivec2 FragCoord, vec2 Texcoord) {
     vec3 ClosestSample = get_closest_depth(FragCoord, Texcoord, IsDH);
     vec2 PrevCoord = Texcoord + toPrevScreenPos(ClosestSample.xy, ClosestSample.z, IsDH, false).xy - ClosestSample.xy;
 
-    if (clamp(PrevCoord + resolutionInv, 0, 1) != PrevCoord + resolutionInv)
+    if(clamp(PrevCoord + resolutionInv, 0, 1) != PrevCoord + resolutionInv)
         return Color;
 
     vec3 PrevColor = texture_catmullrom_fast(colortex4, PrevCoord).rgb;
-    if (any(lessThanEqual(PrevColor, vec3(0))) || any(isnan(PrevColor))) return Color;
+    #ifndef HDR_ENABLED
+        if(any(lessThanEqual(PrevColor, vec3(0))) || any(isnan(PrevColor))) return Color;
+    #else
+        if(PrevColor == vec3(0) || any(isnan(PrevColor))) return Color;
+    #endif
 
     vec4 ClippingMaxColor;
     vec3 ClampedColor = neighbourhoodClipping(colortex0, vec4(Color, 1), vec4(PrevColor, 1), ClippingMaxColor, FragCoord).rgb;
@@ -82,7 +86,12 @@ vec3 T2x(vec3 Color, ivec2 FragCoord, vec2 Texcoord) {
     if (clamp(PrevCoord, 0, 1) != PrevCoord)
         return Color;
 
-    vec3 PrevColor = textureNicest(colortex9, PrevCoord).rgb;
+    #ifndef HDR_ENABLED
+        vec3 PrevColor = RGBMDecode(textureNicest(colortex9, PrevCoord));
+    #else
+        vec3 PrevColor = textureNicest(colortex9, PrevCoord).rgb;
+    #endif
+        
     if (PrevColor == vec3(0)) return Color;
 
     float DepthPrev = texture(colortex8, PrevCoord).r;

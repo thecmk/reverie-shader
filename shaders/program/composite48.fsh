@@ -10,7 +10,10 @@ void main() {
     Color = texture(colortex0, texcoord);
     
     #ifndef DEBUG_DISABLE_TEMPORAL
-    T2xData = RGBMEncode(Color.rgb);
-    Color.rgb = T2x(Color.rgb, ivec2(gl_FragCoord.xy), texcoord);
+        T2xData = Color;
+        #ifndef HDR_ENABLED
+            T2xData = RGBMEncode(T2xData.rgb);
+        #endif
+        Color.rgb = T2x(Color.rgb, ivec2(gl_FragCoord.xy), texcoord);
     #endif
 }

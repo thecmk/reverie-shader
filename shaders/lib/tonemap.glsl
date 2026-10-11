@@ -14,12 +14,17 @@ vec3 reinhard_inv(vec3 x) {
     return x / (1 - x);
 }
 
-float reinhard(float x) {
-    return x / (1 + x);
+float reinhard_odd(float x) {
+    return x > 0 ? x / (1 + x) : x / (1 - x);
 }
-
-float reinhard_inv(float x) {
-    return x / (1 - x);
+float reinhard_odd_inv(float x) {
+    return x > 0 ? x / (1 - x) : x / (1 + x);
+}
+vec3 reinhard_odd(vec3 x) {
+    return vec3(reinhard_odd(x.x), reinhard_odd(x.y), reinhard_odd(x.z));
+}   
+vec3 reinhard_odd_inv(vec3 x) {
+    return vec3(reinhard_odd_inv(x.x), reinhard_odd_inv(x.y), reinhard_odd_inv(x.z));
 }
 
 #include "tonemap/Reinhard_Jodie.glsl"

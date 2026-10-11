@@ -72,7 +72,11 @@
     "wetness",
     "hideGUI",
     "nightVision",
-    "alphaTestRef"
+    "alphaTestRef",
+    "HdrGamePeakBrightness",
+    "HdrGamePaperWhiteBrightness",
+    "HdrGameMinimumBrightness;",
+    "HdrUIBrightness"
   ],
 
   "samplers": {

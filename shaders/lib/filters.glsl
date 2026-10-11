@@ -14,16 +14,27 @@ vec3 texture_catmullrom_fast(sampler2D colorTex, vec2 texcoord) {
 
     vec2 w12 = w1 + w2;
     vec2 tc12 = (centerPosition + w2 / w12) * resolutionInv;
-    vec3 centerColor = texture_rgbm(colorTex, vec2(tc12.x, tc12.y)).rgb;
 
     vec2 tc0 = (centerPosition - 1.0) * resolutionInv;
     vec2 tc3 = (centerPosition + 2.0) * resolutionInv;
-    vec4 color = vec4(texture_rgbm(colorTex, vec2(tc12.x, tc0.y)).rgb, 1.0) * (w12.x * w0.y) +
-            vec4(texture_rgbm(colorTex, vec2(tc0.x, tc12.y)).rgb, 1.0) * (w0.x * w12.y) +
-            vec4(centerColor, 1.0) * (w12.x * w12.y) +
-            vec4(texture_rgbm(colorTex, vec2(tc3.x, tc12.y)).rgb, 1.0) * (w3.x * w12.y) +
-            vec4(texture_rgbm(colorTex, vec2(tc12.x, tc3.y)).rgb, 1.0) * (w12.x * w3.y);
-    return color.rgb / color.a;
+
+    #ifndef HDR_ENABLED
+        vec3 color = texture_rgbm(colorTex, vec2(tc12.x, tc0.y)) * (w12.x * w0.y) +
+                texture_rgbm(colorTex, vec2(tc0.x, tc12.y)) * (w0.x * w12.y) +
+                texture_rgbm(colorTex, vec2(tc12.x, tc12.y)) * (w12.x * w12.y) +
+                texture_rgbm(colorTex, vec2(tc3.x, tc12.y)) * (w3.x * w12.y) +
+                texture_rgbm(colorTex, vec2(tc12.x, tc3.y)) * (w12.x * w3.y);
+    #else
+        vec3 color = texture(colorTex, vec2(tc12.x, tc0.y)).rgb * (w12.x * w0.y) +
+                texture(colorTex, vec2(tc0.x, tc12.y)).rgb * (w0.x * w12.y) +
+                texture(colorTex, vec2(tc12.x, tc12.y)).rgb * (w12.x * w12.y) +
+                texture(colorTex, vec2(tc3.x, tc12.y)).rgb * (w3.x * w12.y) +
+                texture(colorTex, vec2(tc12.x, tc3.y)).rgb * (w12.x * w3.y);
+    #endif
+
+    float w = w12.x * w0.y + w0.x * w12.y + w12.x * w12.y + w3.x * w12.y + w12.x * w3.y;
+
+    return color / w;
 }
 
 // from http://www.java-gaming.org/index.php?topic=35123.0
@@ -85,7 +96,7 @@ vec4 textureNice(sampler2D sam, vec2 uv)
 }
 
 // From "Filmic SMAA - Sharp Morphological and Temporal Antialiasing"
-vec3 textureNicest(sampler2D sam, vec2 uv) {
+vec4 textureNicest(sampler2D sam, vec2 uv) {
     float textureResolution = float(textureSize(sam, 0).x);
     uv = uv * textureResolution + 0.5;
     vec2 iuv = floor(uv);
@@ -93,5 +104,5 @@ vec3 textureNicest(sampler2D sam, vec2 uv) {
     fuv = max(min((fuv - 0.2) / (1 - 0.4), 1), 0);
     uv = iuv + fuv * fuv * (3.0 - 2.0 * fuv);
     uv = (uv - 0.5) / textureResolution;
-    return texture_rgbm(sam, uv);
+    return texture(sam, uv);
 }

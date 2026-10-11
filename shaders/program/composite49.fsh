@@ -11,9 +11,11 @@ void main() {
     Color = texture(colortex0, texcoord);
 
     #ifndef DEBUG_DISABLE_TEMPORAL
-    TAAData.rgb = TAA(Color.rgb, ivec2(gl_FragCoord.xy), texcoord);
-    Color.rgb = TAAData.rgb;
-    TAAData = RGBMEncode(TAAData.rgb);
+        TAAData.rgb = TAA(Color.rgb, ivec2(gl_FragCoord.xy), texcoord);
+        Color.rgb = TAAData.rgb;
+        #ifndef HDR_ENABLED
+            TAAData = RGBMEncode(TAAData.rgb);
+        #endif
     #endif
 
     bool IsDH;
@@ -23,6 +25,6 @@ void main() {
 
 
     #if AA_MODE == 1
-        Color.rgb = pow(Color.rgb, vec3(1/2.2));
+        Color.rgb = linear_srgb_fast(Color.rgb);
     #endif
 }

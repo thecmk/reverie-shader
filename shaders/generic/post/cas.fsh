@@ -30,16 +30,28 @@ vec3 CAS(sampler2D Sampler, vec2 Coords, float SharpenStrength) {
     // Smooth minimum distance to signal limit divided by smooth max.
 
     vec3 rcpMxRGB = vec3(1) / mxRGB;
-    vec3 ampRGB = clamp((min(mnRGB, 2.0 - mxRGB) * rcpMxRGB), 0, 1);
+    vec3 ampRGB = (min(mnRGB, 2.0 - mxRGB) * rcpMxRGB);
+    #ifndef HDR_ENABLED
+        ampRGB = clamp(ampRGB, 0, 1);
+    #endif
 
     // Shaping amount of sharpening.
-    ampRGB = inversesqrt(ampRGB);
+    #ifdef HDR_ENABLED
+        ampRGB = sign(ampRGB) * inversesqrt(abs(ampRGB));
+    #else
+        ampRGB = inversesqrt(ampRGB);
+    #endif
     float peak = 8.0 - 3.0 * SharpenStrength;
     vec3 wRGB = -vec3(1) / (ampRGB * peak);
     vec3 rcpWeightRGB = vec3(1) / (1.0 + 4.0 * wRGB);
 
     vec3 window = (b + d) + (f + h);
-    vec3 outColor = clamp((window * wRGB + e) * rcpWeightRGB, 0, 1);
+    vec3 outColor = (window * wRGB + e) * rcpWeightRGB;
 
+    #ifdef HDR_ENABLED
+        if(any(isnan(outColor))) return e;
+    #else
+        outColor = clamp(outColor, 0, 1);
+    #endif
     return outColor;
 }
