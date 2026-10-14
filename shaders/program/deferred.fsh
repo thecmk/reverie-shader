@@ -38,7 +38,7 @@ void main() {
         vec3 Rsm = vec3(0);
         #ifdef RSM
             #if (defined DIMENSION_OVERWORLD) || (defined DIMENSION_END)
-                Rsm = rsm(Pos.Player, Mat.Normal, LightColorDirect);
+                Rsm = rsm(Pos.Player, Mat.Normal, LightColorDirect, Mat.Lightmap.y);
             #endif
         #endif
         

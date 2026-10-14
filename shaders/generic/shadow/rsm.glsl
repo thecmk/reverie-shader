@@ -1,5 +1,5 @@
-vec3 rsm(vec3 PlayerPos, vec3 Normal, vec3 LightColor) {
-    if (isOutdoorsSmooth < 0.001) return vec3(0);
+vec3 rsm(vec3 PlayerPos, vec3 Normal, vec3 LightColor, float Skylight) {
+    if (Skylight < 0.01) return vec3(0);
     if (isEyeInWater == 1) return vec3(0);
 
     float Fade = shadow_fade(PlayerPos, shadowDistanceDH);
@@ -49,7 +49,7 @@ vec3 rsm(vec3 PlayerPos, vec3 Normal, vec3 LightColor) {
         
         Sum += ShadowColor * Flux;
     }
-    vec3 Rsm = Sum * LightColor / RSM_SAMPLE_COUNT * isOutdoorsSmooth * CloudCoverage * (1 - Fade);
+    vec3 Rsm = Sum * LightColor / RSM_SAMPLE_COUNT * Skylight * CloudCoverage * (1 - Fade);
     
     return Rsm;
 }

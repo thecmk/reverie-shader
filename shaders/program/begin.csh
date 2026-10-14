@@ -14,31 +14,33 @@ const ivec3 workGroups = ivec3(64, 32, 64);
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
 void main() {
-    ivec3 Pos = ivec3(gl_GlobalInvocationID.xyz);
-    ivec3 PrevPos = Pos - ivec3(previousCameraPosition) + ivec3(cameraPosition);
+    #ifdef COLORED_LIGHTS
+        ivec3 Pos = ivec3(gl_GlobalInvocationID.xyz);
+        ivec3 PrevPos = Pos - ivec3(previousCameraPosition) + ivec3(cameraPosition);
 
-    vec3 Light = vec3(0);
-    if(frameCounter % 2 == 0) {
-        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, -1, 0)));
-        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, 1, 0)));
-        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(-1, 0, 0)));
-        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(1, 0, 0)));
-        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, 0, -1)));
-        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, 0, 1)));
-    } else {
-        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, -1, 0)));
-        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, 1, 0)));
-        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(-1, 0, 0)));
-        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(1, 0, 0)));
-        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, 0, -1)));
-        Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, 0, 1)));
-    }
+        vec3 Light = vec3(0);
+        if(frameCounter % 2 == 0) {
+            Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, -1, 0)));
+            Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, 1, 0)));
+            Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(-1, 0, 0)));
+            Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(1, 0, 0)));
+            Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, 0, -1)));
+            Light += RGBMDecode(texelFetchOffset(voxelImgSampler_a, PrevPos, 0, ivec3(0, 0, 1)));
+        } else {
+            Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, -1, 0)));
+            Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, 1, 0)));
+            Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(-1, 0, 0)));
+            Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(1, 0, 0)));
+            Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, 0, -1)));
+            Light += RGBMDecode(texelFetchOffset(voxelImgSampler_b, PrevPos, 0, ivec3(0, 0, 1)));
+        }
 
-    Light = max(vec3(0), Light / 6.1);
+        Light = max(vec3(0), Light / 6.1);
 
-    if(frameCounter % 2 == 1) {
-        imageStore(voxelImg_a, Pos, RGBMEncode(Light));
-    } else {
-        imageStore(voxelImg_b, Pos, RGBMEncode(Light));
-    }
+        if(frameCounter % 2 == 1) {
+            imageStore(voxelImg_a, Pos, RGBMEncode(Light));
+        } else {
+            imageStore(voxelImg_b, Pos, RGBMEncode(Light));
+        }
+    #endif
 }
