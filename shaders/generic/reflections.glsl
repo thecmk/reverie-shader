@@ -111,7 +111,7 @@ vec3 ssr(vec3 Normal, Positions Pos, bool IsDH, float LightmapSky, float Dither,
     Hit = raytrace(Pos.Screen, Pos.View, Dir, IsDH, Dither, RayPos);
     bool IsRayDH = IsDH;
     #ifdef DISTANT_HORIZONS
-        if(Hit == 0) {
+        if(Hit < 1e-6) {
             Hit = flipped_image_ref(Dir, Pos.View, IsDH, RayPos, IsRayDH);
         }
     #endif

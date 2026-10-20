@@ -72,11 +72,14 @@
     "wetness",
     "hideGUI",
     "nightVision",
-    "alphaTestRef",
+    "alphaTestRef"
+    #ifdef HDR_ENABLED
+    ,
     "HdrGamePeakBrightness",
     "HdrGamePaperWhiteBrightness",
     "HdrGameMinimumBrightness;",
     "HdrUIBrightness"
+    #endif
   ],
 
   "samplers": {

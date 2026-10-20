@@ -190,7 +190,7 @@ layout(location = 1) out vec4 buf2;
     Albedo.rgb = mix(Albedo.rgb, entityColor.rgb, entityColor.a);
     #endif
 
-    #ifdef IRIS_INLINE_GLINT
+    #if (defined IRIS_INLINE_GLINT) && !(defined VOXY_TERRAIN)
         if (mc_hasGlint()) {
             vec3 glint = mc_sampleGlint();
             GlintCol.rgb = glint * glint;
