@@ -83,7 +83,6 @@ vec3 rgb_to_xyz(vec3 rgb) {
 // https://graphicrants.blogspot.com/2009/04/rgbm-color-encoding.html
 vec4 RGBMEncode( vec3 color ) {
     vec4 rgbm;
-    color = color;
     color = sqrt(color);
     color *= 1.0 / 6.0;
     rgbm.a = clamp( max( max( color.r, color.g ), max( color.b, 1e-6 ) ), 0, 1 );

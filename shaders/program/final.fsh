@@ -99,6 +99,5 @@ void main() {
         Color.rgb += (dither(gl_FragCoord.xy, false) - 0.5) / 255;
     #endif
 
-    // vec3 Color = imageLoad(water_depth_min, ivec2(gl_FragCoord.xy)).rgb;
     imageStore(water_depth_min, ivec2(gl_FragCoord.xy), uvec4(floatBitsToUint(1e6))); // Clear
 }

@@ -9,6 +9,12 @@
 vec3 CAS(sampler2D Sampler, vec2 Coords, float SharpenStrength) {
     // fetch a 3x3 neighborhood around the pixel 'e',
     vec3 e = texture(Sampler, Coords).rgb;
+
+    #ifdef HDR_ENABLED
+        if(any(lessThan(e, vec3(0)))) {
+            return e;
+        }
+    #endif
     vec3 a = textureOffset(Sampler, Coords, ivec2(-1, -1)).rgb;
     vec3 b = textureOffset(Sampler, Coords, ivec2(0, -1)).rgb;
     vec3 c = textureOffset(Sampler, Coords, ivec2(1, -1)).rgb;
@@ -31,27 +37,18 @@ vec3 CAS(sampler2D Sampler, vec2 Coords, float SharpenStrength) {
 
     vec3 rcpMxRGB = vec3(1) / mxRGB;
     vec3 ampRGB = (min(mnRGB, 2.0 - mxRGB) * rcpMxRGB);
-    #ifndef HDR_ENABLED
-        ampRGB = clamp(ampRGB, 0, 1);
-    #endif
+    ampRGB = clamp(ampRGB, 0, 1);
 
     // Shaping amount of sharpening.
-    #ifdef HDR_ENABLED
-        ampRGB = sign(ampRGB) * inversesqrt(abs(ampRGB));
-    #else
-        ampRGB = inversesqrt(ampRGB);
-    #endif
+    ampRGB = inversesqrt(ampRGB);
     float peak = 8.0 - 3.0 * SharpenStrength;
     vec3 wRGB = -vec3(1) / (ampRGB * peak);
     vec3 rcpWeightRGB = vec3(1) / (1.0 + 4.0 * wRGB);
 
     vec3 window = (b + d) + (f + h);
     vec3 outColor = (window * wRGB + e) * rcpWeightRGB;
+    outColor = clamp(outColor, 0, 1);
 
-    #ifdef HDR_ENABLED
-        if(any(isnan(outColor))) return e;
-    #else
-        outColor = clamp(outColor, 0, 1);
-    #endif
+
     return outColor;
 }
