@@ -74,13 +74,20 @@ layout(location = 3) out vec4 Shadow;
         #endif
 
         #if (defined DH_NOISE) && (defined DH_TERRAIN)
-            Albedo.rgb = dh_noise(Pos.Player, Albedo.rgb);
+            Albedo.rgb = dh_noise(Pos.Player, Albedo.rgb); // TODO: THis shouldn't be here!
         #endif
     #endif
     
-    #ifndef GBUFFERS_BASIC
+    #ifndef GBUFFERS_BASIC // TODO: This if chain is quite unreadable
         #ifdef VOXY_TERRAIN
             Albedo = vec4(DataIn.glcolor.rgb, 1) * param.sampledColour;
+        #elif defined CLRWL
+            vec2 ClrwlLm;
+            float ClrwlAo;
+            vec4 overlayColor;
+
+            clrwl_computeFragment(texture(gtexture, DataIn.texcoord), Albedo, ClrwlLm, ClrwlAo, overlayColor);
+            Albedo.rgb = mix(Albedo.rgb, overlayColor.rgb, overlayColor.a);
         #else
             #ifdef GBUFFERS_WATER
                 Albedo = vec4(DataIn.glcolor.rgb, 1) * texture(gtexture, DataIn.texcoord);
@@ -92,9 +99,11 @@ layout(location = 3) out vec4 Shadow;
         Albedo = glcolor_flat;
     #endif
 
-    if(Albedo.a < alphaTestRef) {
-        discard;
-    }
+    #ifndef CLRWL
+        if(Albedo.a < alphaTestRef) {
+            discard;
+        }
+    #endif
 
     Albedo.rgb = srgb_rec2020(Albedo.rgb);
 
@@ -102,7 +111,7 @@ layout(location = 3) out vec4 Shadow;
         Albedo.rgb = mix(Albedo.rgb, entityColor.rgb, entityColor.a);
     #endif
 
-    #ifndef VOXY_TERRAIN
+    #if !(defined VOXY_TERRAIN) && !(defined CLRWL)
         if (DataIn.Id == MATERIAL_WATER) {
             Albedo = vec4(0);
 
@@ -131,7 +140,11 @@ layout(location = 3) out vec4 Shadow;
         Mat.chunkFade = 1;
     #endif
 
-    Mat.Lightmap = DataIn.lmcoord;
+    #ifdef CLRWL
+        Mat.Lightmap = ClrwlLm;
+    #else
+        Mat.Lightmap = DataIn.lmcoord;
+    #endif
     if(Mat.Lightmap.y > 1 / 255.0)
         Mat.Lightmap += bayer8(gl_FragCoord.xy) / 255.0;
 

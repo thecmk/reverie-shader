@@ -16,11 +16,14 @@ def add_dimension_files(paths, name):
     with open(paths[3], 'w') as file:
         file.write('#version 460 compatibility\n#define DIMENSION_NETHER\n\n#include \"/program/' + name + '\"')
 
+    with open(paths[4], 'w') as file:
+        file.write('#version 460 compatibility\n#define DIMENSION_GENERIC\n\n#include \"/program/' + name + '\"')
+
 
 def add_pass(args):
     name = args.name
     # Check if file exists and exit to prevent accidental overwrites
-    paths = ["shaders/program/" + name, "shaders/world0/" + name, "shaders/world1/" + name, "shaders/world-1/" + name]
+    paths = ["shaders/program/" + name, "shaders/world0/" + name, "shaders/world1/" + name, "shaders/world-1/" + name, "shaders/world_modded/" + name]
     for path in paths:
         if os.path.exists(path):
             print("This file already exists!")
@@ -35,7 +38,7 @@ def add_pass(args):
 
 def del_pass(args):
     name = args.name
-    paths = ["shaders/program/", "shaders/world0/", "shaders/world1/", "shaders/world-1/"]
+    paths = ["shaders/program/", "shaders/world0/", "shaders/world1/", "shaders/world-1/", "shaders/world_modded/"]
     for path in paths:
         f = path + name
         if os.path.exists(f):
@@ -45,7 +48,7 @@ def del_pass(args):
 def rename_pass(args):
     old_name = args.old_name
     new_name = args.new_name
-    paths = ["shaders/program/", "shaders/world0/", "shaders/world1/", "shaders/world-1/"]
+    paths = ["shaders/program/", "shaders/world0/", "shaders/world1/", "shaders/world-1/", "shaders/world_modded/"]
     for path in paths:
         new_path = path + new_name
         if os.path.exists(new_path):

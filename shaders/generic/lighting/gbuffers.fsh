@@ -134,12 +134,24 @@ layout(location = 1) out vec4 buf2;
     #else
         vec2 texcoord = DataIn.texcoord;
     #endif
-    vec4 glcolor = DataIn.glcolor;
+    #ifndef CLRWL
+        vec4 glcolor = DataIn.glcolor;
+    #else
+        vec4 glcolor = clrwl_vertexColor;
+    #endif
     #if (defined SEASONAL_COLORS) && (defined DIMENSION_OVERWORLD)
         glcolor = get_seasons_color(glcolor);
     #endif
     #ifdef VOXY_TERRAIN
         vec4 Albedo = glcolor * param.sampledColour;
+    #elif defined CLRWL
+        vec2 ClrwlLm;
+        float ClrwlAo;
+        vec4 overlayColor;
+        vec4 Albedo;
+
+        clrwl_computeFragment(texture(gtexture, texcoord), Albedo, ClrwlLm, ClrwlAo, overlayColor);
+        Albedo.rgb = mix(Albedo.rgb, overlayColor.rgb, overlayColor.a);
     #elif defined GBUFFERS_BEACONBEAM
         vec4 Albedo = glcolor * texture(gtexture, texcoord);
     #else
@@ -149,9 +161,11 @@ layout(location = 1) out vec4 buf2;
             vec4 Albedo = vec4(glcolor.rgb, 1) * texture(gtexture, texcoord);
         #endif
     #endif
-    if (Albedo.a < alphaTestRef) {
-        discard;
-    }
+    #ifndef CLRWL
+        if (Albedo.a < alphaTestRef) {
+            discard;
+        }
+    #endif
 
     #ifdef GBUFFERS_BEACONBEAM
         if (Albedo.a < 0.5) { // Translucent part of beacon beam causes me nothing but sorrow. So we get rid of it.
@@ -184,10 +198,15 @@ layout(location = 1) out vec4 buf2;
         #endif
     #endif
 
-    Albedo.rgb *= pow(glcolor.a, 1 / 2.2);
+    #ifdef CLRWL
+        float Ao = ClrwlAo;
+    #else
+        float Ao = glcolor.a;
+    #endif
+    Albedo.rgb *= pow(Ao, 1 / 2.2);
 
     #ifdef GBUFFERS_ENTITIES
-    Albedo.rgb = mix(Albedo.rgb, entityColor.rgb, entityColor.a);
+        Albedo.rgb = mix(Albedo.rgb, entityColor.rgb, entityColor.a);
     #endif
 
     #if (defined IRIS_INLINE_GLINT) && !(defined VOXY_TERRAIN)
@@ -216,7 +235,11 @@ layout(location = 1) out vec4 buf2;
     #ifdef GBUFFERS_DAMAGEDBLOCK
         Mat.Lightmap = vec2(0);
     #else
-        Mat.Lightmap = DataIn.lmcoord;
+        #ifdef CLRWL
+            Mat.Lightmap = ClrwlLm;
+        #else
+            Mat.Lightmap = DataIn.lmcoord;
+        #endif
         if(Mat.Lightmap.y > 1 / 255.0)
             Mat.Lightmap.y += bayer8(gl_FragCoord.xy) / 255.0;
     #endif
