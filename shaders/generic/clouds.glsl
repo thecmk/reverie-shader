@@ -218,18 +218,25 @@ vec4 get_clouds(vec3 PlayerPos, vec3 PlayerPosN, const int STEP_COUNT, vec3 Came
         Ld.MiePhaseMoon = calc_mie_phase(VdotL);
     }
 
-    float _DistToCloudFlat = DistToCloud;
-    vec4 CloudDataFlat = get_clouds_flat(PlayerPos, PlayerPosN, CameraPos, SunDir, Dither, Ld, Depth, _DistToCloudFlat);
 
     float _DistToCloudVol = DistToCloud;
-    vec4 CloudDataVol = get_clouds_volumetric(PlayerPos, PlayerPosN, STEP_COUNT, CameraPos, SunDir, Dither, Ld, Depth, _DistToCloudVol);
+    vec4 CloudData = get_clouds_volumetric(PlayerPos, PlayerPosN, STEP_COUNT, CameraPos, SunDir, Dither, Ld, Depth, _DistToCloudVol);
 
-    DistToCloud = min(_DistToCloudFlat, _DistToCloudVol); // Return dist to nearest cloud
+    if(CloudData.a > 0.01) {
+        float _DistToCloudFlat = DistToCloud;
+        vec4 CloudDataFlat = get_clouds_flat(PlayerPos, PlayerPosN, CameraPos, SunDir, Dither, Ld, Depth, _DistToCloudFlat);
+        DistToCloud = min(_DistToCloudFlat, _DistToCloudVol); // Return dist to nearest cloud
 
-    CloudDataFlat *= CloudDataVol.a;
-    CloudDataFlat.rgb += CloudDataVol.rgb;
+        // Apply volumetric clouds on top of flat clouds, then use the new values
+        CloudDataFlat *= CloudData.a;
+        CloudDataFlat.rgb += CloudData.rgb;
+        CloudData = CloudDataFlat;
+    } else {
+        DistToCloud = _DistToCloudVol;
+    }
+    
 
     float FogFactor = max(0, DistToCloud - 1000) / 10000; 
     FogFactor = exp(-3 * FogFactor);
-    return mix(vec4(0, 0, 0, 1), CloudDataFlat, FogFactor);
+    return mix(vec4(0, 0, 0, 1), CloudData, FogFactor);
 }
