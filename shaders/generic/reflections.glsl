@@ -27,22 +27,22 @@ vec3 SampleVndf_GGX(vec2 u, vec3 wi, vec2 alpha) {
     return wm;
 }
 
-float raytrace(vec3 ScreenPos, vec3 ViewPos, vec3 Dir, bool IsDH, float Dither, out vec3 RayPos) {
-    int Steps = SSR_STEPS;
+float raytrace(vec3 ScreenPos, vec3 ViewPos, vec3 Dir, bool IsDH, float Dither, float Smoothness, out vec3 RayPos) {
     vec3 Offset = normalize(view_screen(ViewPos + Dir, IsDH, true) - ScreenPos);
     vec3 Len = (step(0, Offset) - ScreenPos) / Offset;
-    float MinLen = min(Len.y, Len.z) / Steps;
-    Offset *= MinLen;
+    float MinLen = min(Len.y, Len.z);
+    float Steps = ceil(SSR_STEPS * min(1, min(Len.x, Len.y) * 2));
+    Offset *= MinLen / Steps;
 
     RayPos = ScreenPos + Offset * Dither;
-    for(int i = 1; i <= Steps; i++) {
+    for(float i = 1; i <= Steps; i++) {
         float RealDepth = get_depth_solid(RayPos.xy, IsDH);
         if (RealDepth < 0.56) {
             break;
         }
         if (RayPos.z > RealDepth && RayPos.z - RealDepth < abs(Offset.z) * 4) {
             // Binary refinement
-            for (int i = 1; i <= Steps / 12; i++) {
+            for (float i = 0; i < 4 * max(0, Smoothness * 2 - 1); i++) {
                 Offset /= 2;
                 vec3 EPos1 = RayPos - Offset;
                 float RDepth1 = get_depth_solid(EPos1.xy, IsDH);
@@ -104,11 +104,11 @@ bool sample_ref_capture(vec3 StartPos, vec3 Dir, bool IsDH, float Dither, out ve
     return false;
 }
 
-vec3 ssr(vec3 Normal, Positions Pos, bool IsDH, float LightmapSky, float Dither, inout float Hit) {
+vec3 ssr(vec3 Normal, Positions Pos, bool IsDH, float LightmapSky, float Dither, float Smoothness, inout float Hit) {
     vec3 Dir = reflect(Pos.ViewN, Normal);
 
     vec3 RayPos; 
-    Hit = raytrace(Pos.Screen, Pos.View, Dir, IsDH, Dither, RayPos);
+    Hit = raytrace(Pos.Screen, Pos.View, Dir, IsDH, Dither, Smoothness, RayPos);
     bool IsRayDH = IsDH;
     #ifdef DISTANT_HORIZONS
         if(Hit < 1e-6) {

@@ -169,9 +169,8 @@ void main() {
             }
         }
 
-        float _PuddleStrength = 0;
         #ifdef PUDDLES
-            Mat = get_puddles(Pos, Mat, Color.rgb, _PuddleStrength);
+            Mat = get_puddles(Pos, Mat, Color.rgb);
         #endif
 
         bool IsMetal, IsHardcodedMetal;
@@ -213,8 +212,8 @@ void main() {
                     ReflectionBlendFactor *= Mat.Albedo;
                 }
                 
-                Color.rgb += ssr(RefNormal, Pos, IsDH, Mat.Lightmap.y, Dither, _ReflectionHit) 
-                    * ReflectionBlendFactor * Mat.chunkFade * max(float(Mat.Id == MATERIAL_WATER), _PuddleStrength);
+                Color.rgb += ssr(RefNormal, Pos, IsDH, Mat.Lightmap.y, Dither, Smoothness, _ReflectionHit) 
+                    * ReflectionBlendFactor * Mat.chunkFade;
             }
         }
 
@@ -243,7 +242,7 @@ void main() {
                     Specular *= WaterColor;
                 }
                 
-                Color.rgb += Specular * LightColorDirect * Shadow * Mat.chunkFade * (1 - _ReflectionHit) * max(float(Mat.Id == MATERIAL_WATER), _PuddleStrength);
+                Color.rgb += Specular * LightColorDirect * Shadow * Mat.chunkFade * (1 - _ReflectionHit);
             }
         }
     }
@@ -260,6 +259,4 @@ void main() {
 
     // Clear
     TranslucentClear = vec4(0);
-    // imageStore(water_depth_max, ivec2(gl_FragCoord.xy), uvec4(0));
-    // imageStore(water_depth_min, ivec2(gl_FragCoord.xy), uvec4(1e9));
 }

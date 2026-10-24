@@ -105,8 +105,11 @@ vec3 get_water_parallax(vec3 WorldPos, vec3 PlayerPosN) {
     return CurrentPos;
 }
 
-MaterialProperties get_puddles(Positions Pos, MaterialProperties Mat, inout vec3 Color, inout float PuddleStrength) {
-    PuddleStrength = wetness; // Only after it's raining
+// TODO: Make these blend nicer
+// TODO: Make these work with PBR porosity
+MaterialProperties get_puddles(Positions Pos, MaterialProperties Mat, inout vec3 Color) {
+    if(Mat.Id == MATERIAL_WATER || Mat.F0 >= 230. / 255.0) return Mat; // No puddles on metals or water
+    float PuddleStrength = wetness; // Only after it's raining
     if(PuddleStrength < 0.01) return Mat;
 
     vec3 WorldPos = Pos.Player + cameraPosition;
