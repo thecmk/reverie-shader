@@ -83,6 +83,17 @@ Positions get_positions(vec2 texcoord, float Depth, bool IsDH, const bool Should
     return Pos;
 }
 
+Positions from_norm_len(vec3 PlayerPosN, float Len, bool IsDH, bool ShouldUnjitter) {
+    Positions Pos;
+    Pos.PlayerN = PlayerPosN;
+    Pos.Player = PlayerPosN * Len;
+    Pos.ViewN = player_view(Pos.PlayerN, IsDH);
+    Pos.View = player_view(Pos.Player, IsDH);
+    Pos.Screen = view_screen(Pos.View, IsDH, ShouldUnjitter);
+    Pos.World = Pos.Player + cameraPosition;
+    return Pos;
+}
+
 vec3 player_shadow(vec3 PlayerPos) {
     vec3 ShadowViewPos = rot_trans_mmul(shadowModelView, PlayerPos + gbufferModelViewInverse[3].xyz);
     vec3 ShadowPos = proj_mmul(shadowProjection, ShadowViewPos).xyz; //convert to shadow ndc space

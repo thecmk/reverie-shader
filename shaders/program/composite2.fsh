@@ -54,6 +54,85 @@ void blend_water(inout vec4 Color, mat2x3 WaterVlResult, float Dist, float Fade)
     }
 }
 
+// Performs specular & ssr
+vec3 all_reflections(MaterialProperties Mat, Positions Pos, float Dither, bool IsDH) {
+    bool IsMetal, IsHardcodedMetal;
+    vec3 OutCol = vec3(0);
+    mat2x3 Reflectance = get_reflectance(Mat.F0, Mat.Id, Mat.Albedo, IsMetal, IsHardcodedMetal);
+    float Smoothness = get_smoothness(Mat.Smoothness, Mat.Id);
+
+    float _ReflectionHit = 0.0;
+    if (Smoothness > 0.3 && isEyeInWater == 0) {
+        #ifdef ROUGH_REFLECTIONS
+        bool RoughReflections = Smoothness < 0.95 && Mat.Id != MATERIAL_WATER;
+        #else 
+        bool RoughReflections = false;
+        #endif
+
+        float RayCount = RoughReflections ? ROUGH_REFLECTIONS_STEPS : 1;
+        vec2 Noise = blue_noise(gl_FragCoord.xy, true).rg;
+        float Roughness = smoothness_to_roughness(Smoothness);
+        mat3 TBN = tbn_normal(Mat.Normal);
+        for(int i = 1; i <= RayCount; i++) {
+            vec3 RefNormal;
+            if(RoughReflections) {
+                float OffsetAng = (i + Noise.x) * TAU / RayCount;
+                vec2 Offset = Noise.y * vec2(cos(OffsetAng), sin(OffsetAng));
+                
+                RefNormal = TBN * SampleVndf_GGX(Offset * 0.5 + 0.5, -(TBN * Pos.ViewN), vec2(Roughness));
+            } else {
+                RefNormal = Mat.Normal;
+            }
+        
+            vec3 ReflectionBlendFactor = vec3(Smoothness / RayCount);
+
+            if (IsHardcodedMetal) {
+                ReflectionBlendFactor *= fresnel_metals(RefNormal, -Pos.ViewN, Reflectance);
+            } else {
+                ReflectionBlendFactor *= schlick(RefNormal, -Pos.ViewN, Reflectance[0]);
+            }
+
+            if(IsMetal) {
+                ReflectionBlendFactor *= Mat.Albedo;
+            }
+            
+            OutCol = ssr(RefNormal, Pos, IsDH, Mat.Lightmap.y, Dither, Smoothness, _ReflectionHit) 
+                * ReflectionBlendFactor * Mat.chunkFade;
+        }
+    }
+
+    // Specular
+    if(_ReflectionHit < 0.99) {
+        float Shadow = texture(colortex5, Pos.Screen.xy).r;
+        float NdotL = max(dot(sLightPosN, Mat.Normal), 0);
+        Shadow *= NdotL;
+        if (Shadow != 0) {
+            vec3 H = normalize(sLightPosN - Pos.ViewN); // Half-way vector
+            vec3 F;
+            if (IsHardcodedMetal) {
+                F = fresnel_metals(H, -Pos.ViewN, Reflectance);
+            }
+            else {
+                F = schlick(H, -Pos.ViewN, Reflectance[0]);
+            }
+
+            vec3 Specular = cook_torrance(-Pos.ViewN, sLightPosN, Mat.Normal, 1 - Smoothness, H, F);
+
+            if(IsMetal) {
+                Specular *= Mat.Albedo;
+            }
+
+            if(isEyeInWater == 1) {
+                Specular *= WaterColor;
+            }
+            
+            OutCol += Specular * LightColorDirect * Shadow * Mat.chunkFade * (1 - _ReflectionHit);
+        }
+    }
+
+    return OutCol;
+}
+
 
 void main() {
     bool IsDH;
@@ -106,6 +185,11 @@ void main() {
             Color = texture(colortex0, Pos.Screen.xy);
         }
 
+        // Reflections on solids
+        if(Depth == Depth1 || IsHand) {
+            Color.rgb += all_reflections(Mat, Pos, Dither, IsDH);
+        }
+
         // Enchant glint
         vec4 ArmorGlintData = texture(colortex10, texcoord);
         Color.rgb += ArmorGlintData.rgb * get_luminance_rec2020(Color.rgb) * 20;
@@ -125,15 +209,36 @@ void main() {
         // Translucents
         DistToTranslucents = length(Pos.Player) + 0.01; // bias fixes translucents underwater
         TranslucentData = texture(colortex12, texcoord);
-        if(Mat.Id != MATERIAL_WATER)
+        if(Mat.Id != MATERIAL_WATER && Depth != Depth1) { 
             TranslucentsVlResult = do_vl(Pos.Player, Pos1.Player, Pos1.PlayerN, Pos1.Screen, Dither, LightColorDirect, IsDH1, VL_SAMPLES, false, false);
-
+        }
         // Water
         if (isEyeInWater == 0) {
             float WaterDepthMin = uintBitsToFloat(texture(water_depth_minSampler, texcoord).r);
             if(WaterDepthMin < length(Pos1.Player)) {
                 DistToWater = WaterDepthMin - 0.1;
                 WaterVlResult = do_water_vl(Pos.PlayerN * WaterDepthMin, Pos1.Player, Pos.PlayerN, Dither, LightColorDirect, vec3(Pos.Screen.xy, Depth1), IsDH1, 4, VL_WATER_RT);
+                
+                // Water reflections
+                Positions WaterPos = from_norm_len(Pos.PlayerN, WaterDepthMin, IsDH, true);
+                MaterialProperties WaterMat = Mat;
+
+                if(Mat.Id != MATERIAL_WATER) { // If there's something else in front of the water
+                    WaterMat.Id = MATERIAL_WATER; 
+
+                    // Reconstruct water normal
+                    vec3 ndx = dFdx(WaterPos.PlayerN * WaterDepthMin);
+                    vec3 ndy = dFdy(WaterPos.PlayerN * WaterDepthMin);
+                    vec3 WaterNormal = normalize(cross(ndx, ndy));
+                    WaterMat.Normal = WaterNormal;
+                    mat3 TBN = tbn_normal(WaterMat.Normal);
+                    vec3 WaterParallaxPos = get_water_parallax(WaterPos.World, WaterPos.PlayerN);
+                    WaterMat.Normal = TBN * get_water_normal(WaterParallaxPos, WaterMat.Normal);
+                    WaterMat.Normal = any(isnan(WaterMat.Normal)) ? vec3(1e-6, 1, 1e-6) : WaterMat.Normal;
+                    WaterMat.Normal = player_view(WaterMat.Normal, IsDH);
+                }
+
+                WaterVlResult[0] += all_reflections(WaterMat, WaterPos, Dither, IsDH);
             }
         }
 
@@ -170,81 +275,12 @@ void main() {
         }
 
         #ifdef PUDDLES
-            Mat = get_puddles(Pos, Mat, Color.rgb);
-        #endif
-
-        bool IsMetal, IsHardcodedMetal;
-        mat2x3 Reflectance = get_reflectance(Mat.F0, Mat.Id, Mat.Albedo, IsMetal, IsHardcodedMetal);
-        float Smoothness = get_smoothness(Mat.Smoothness, Mat.Id);
-        // Reflections
-        float _ReflectionHit = 0.0;
-        if (Smoothness > 0.3 && isEyeInWater == 0) {
-            #ifdef ROUGH_REFLECTIONS
-            bool RoughReflections = Smoothness < 0.95 && Mat.Id != MATERIAL_WATER;
-            #else 
-            bool RoughReflections = false;
-            #endif
-
-            float RayCount = RoughReflections ? ROUGH_REFLECTIONS_STEPS : 1;
-            vec2 Noise = blue_noise(gl_FragCoord.xy, true).rg;
-            float Roughness = smoothness_to_roughness(Smoothness);
-            mat3 TBN = tbn_normal(Mat.Normal);
-            for(int i = 1; i <= RayCount; i++) {
-                vec3 RefNormal;
-                if(RoughReflections) {
-                    float OffsetAng = (i + Noise.x) * TAU / RayCount;
-                    vec2 Offset = Noise.y * vec2(cos(OffsetAng), sin(OffsetAng));
-                    
-                    RefNormal = TBN * SampleVndf_GGX(Offset * 0.5 + 0.5, -(TBN * Pos.ViewN), vec2(Roughness));
-                } else {
-                    RefNormal = Mat.Normal;
-                }
-            
-                vec3 ReflectionBlendFactor = vec3(Smoothness / RayCount);
-
-                if (IsHardcodedMetal) {
-                    ReflectionBlendFactor *= fresnel_metals(RefNormal, -Pos.ViewN, Reflectance);
-                } else {
-                    ReflectionBlendFactor *= schlick(RefNormal, -Pos.ViewN, Reflectance[0]);
-                }
-
-                if(IsMetal) {
-                    ReflectionBlendFactor *= Mat.Albedo;
-                }
-                
-                Color.rgb += ssr(RefNormal, Pos, IsDH, Mat.Lightmap.y, Dither, Smoothness, _ReflectionHit) 
-                    * ReflectionBlendFactor * Mat.chunkFade;
+            float _PuddleStrength = 0;
+            MaterialProperties PuddleMat = get_puddles(Pos, Mat, Color.rgb, _PuddleStrength);
+            if(_PuddleStrength > 0.01) {
+                Color.rgb += all_reflections(PuddleMat, Pos, Dither, IsDH) * _PuddleStrength;
             }
-        }
-
-        // Specular
-        if(_ReflectionHit < 1) {
-            float Shadow = texture(colortex5, Pos.Screen.xy).r;
-            float NdotL = max(dot(sLightPosN, Mat.Normal), 0);
-            Shadow *= NdotL;
-            if (Shadow != 0) {
-                vec3 H = normalize(sLightPosN - Pos.ViewN); // Half-way vector
-                vec3 F;
-                if (IsHardcodedMetal) {
-                    F = fresnel_metals(H, -Pos.ViewN, Reflectance);
-                }
-                else {
-                    F = schlick(H, -Pos.ViewN, Reflectance[0]);
-                }
-
-                vec3 Specular = cook_torrance(-Pos.ViewN, sLightPosN, Mat.Normal, 1 - Smoothness, H, F);
-
-                if(IsMetal) {
-                    Specular *= Mat.Albedo;
-                }
-
-                if(isEyeInWater == 1) {
-                    Specular *= WaterColor;
-                }
-                
-                Color.rgb += Specular * LightColorDirect * Shadow * Mat.chunkFade * (1 - _ReflectionHit);
-            }
-        }
+        #endif        
     }
     else {
         // If Depth is 1 then we just do clouds & sky
