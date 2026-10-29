@@ -185,10 +185,8 @@ void main() {
             Color = texture(colortex0, Pos.Screen.xy);
         }
 
-        // Reflections on solids
-        if(Depth == Depth1 || IsHand) {
-            Color.rgb += all_reflections(Mat, Pos, Dither, IsDH);
-        }
+        // Reflections on the material closest to the camera
+        Color.rgb += all_reflections(Mat, Pos, Dither, IsDH);
 
         // Enchant glint
         vec4 ArmorGlintData = texture(colortex10, texcoord);

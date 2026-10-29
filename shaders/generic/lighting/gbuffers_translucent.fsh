@@ -111,15 +111,14 @@ layout(location = 3) out vec4 Shadow;
         Albedo.rgb = mix(Albedo.rgb, entityColor.rgb, entityColor.a);
     #endif
 
-    #if !(defined VOXY_TERRAIN) && !(defined CLRWL)
         if (DataIn.Id == MATERIAL_WATER) {
             Albedo = vec4(0);
 
-            // Water min depth
-            uint Len = floatBitsToUint(length(DataIn.ViewPos));
-            imageAtomicMin(water_depth_min, ivec2(gl_FragCoord.xy), Len);
+            #if !(defined VOXY_TERRAIN) && !(defined CLRWL)
+                uint Len = floatBitsToUint(length(DataIn.ViewPos));
+                imageAtomicMin(water_depth_min, ivec2(gl_FragCoord.xy), Len);
+            #endif
         }
-    #endif
 
     MaterialProperties Mat;
     Mat.Albedo = Albedo.rgb;
